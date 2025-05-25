@@ -104,13 +104,22 @@ function buyBait() {
 }
 
 function buyRod() {
-  if (gold >= 30) {
+  if (currentRodIndex < rods.length - 1) {
+    if (gold >= 30) {
     gold -= 30;
     currentRodIndex++;
     goldText.innerText = gold;
     let newRod = rods[currentRodIndex].name;
     text.innerText = "You now have a " + newRod + ".";
     inventory.push(newRod);
+    text.innerText += " In your inventory you have: " + inventory;
+  } else {
+    text.innerText = "You do not have enough gold to buy a rod."
+    }
+  } else {
+    text.innerText = "You already have the best rod!"
+    button2.innerText = "Sell rod for 15 gold";
+    button2.onclick = sellRod;
   }
 }
 
