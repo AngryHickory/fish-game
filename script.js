@@ -110,6 +110,7 @@ function buyRod() {
     goldText.innerText = gold;
     let newRod = rods[currentRodIndex].name;
     text.innerText = "You now have a " + newRod + ".";
+    inventory.push(newRod);
   }
 }
 
