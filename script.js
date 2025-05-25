@@ -17,6 +17,21 @@ const fishStats = document.querySelector("#fishStats");
 const fishName = document.querySelector("#fishName");
 const fishHealthText = document.querySelector("#fishHealth");
 
+const locations = [
+  {
+    name: "town square",
+    "button text": ["Go to store", "Go to cave", "Fight dragon"],
+    "button functions": [goStore, goCave, fightDragon],
+    text: "You are in the town square. You see a sign that says \"Store\"."
+  },
+  {
+    name: "store",
+    "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Go to Town Square"],
+    "button functions": [buyBait, buyRod, goTown],
+    text: "You enter the store."
+  }
+];
+
 
 // initialize buttons
 
@@ -24,24 +39,22 @@ button1.onclick = goStore;
 button2.onclick = goFish;
 button3.onclick = openSeas;
 
+function update(location) {
+  button1.innerText = location["button text"][0];
+  button2.innerText = location["button text"][1];
+  button3.innerText = location["button text"][2];
+  button1.onclick = location["button functions"][0];
+  button2.onclick = location["button functions"][1];
+  button3.onclick = location["button functions"][2];
+  text.innerText = location.text;
+}
+
 function goTown() {
-  button1.innerText = "Go to Store";
-  button2.innerText = "Go Fishing";
-  button3.innerText = "Open Seas";
-  button1.onclick = goStore;
-  button2.onclick = goFish;
-  button3.onclick = openSeas;
-  text.innerText = "You are in the town square. You see a sign that says Store."
+  update(locations[0]);
 }
 
 function goStore() {
-  button1.innerText = "Buy 10 Bait (10 Gold)";
-  button2.innerText = "Buy New Rod (30 Gold)";
-  button3.innerText = "Go to Town Square";
-  button1.onclick = buyBait;
-  button2.onclick = buyRod;
-  button3.onclick = goTown;
-  text.innerText = "You enter the store."
+  update(locations[1]);
 
 }
 
