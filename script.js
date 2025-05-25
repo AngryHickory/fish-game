@@ -17,6 +17,25 @@ const fishStats = document.querySelector("#fishStats");
 const fishName = document.querySelector("#fishName");
 const fishHealthText = document.querySelector("#fishHealth");
 
+const rods = [
+  {
+    name: "stick", 
+    power: 5
+  },
+  {
+    name: "wooden rod",
+    power: 30
+  },
+  {
+    name: "aluminum rod",
+    power: 50
+  },
+  {
+    name: "professional rod",
+    power: 100
+  }
+];
+
 const locations = [
   {
     name: "town square",
