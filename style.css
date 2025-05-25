@@ -8,6 +8,10 @@ body {
   padding: 10px;
 }
 
+#textSpan {
+  color: rgb(170, 10, 10);
+}
+
 #game {
   max-width: 500px;
   max-height: 400px;
