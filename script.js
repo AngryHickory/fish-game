@@ -104,7 +104,13 @@ function buyBait() {
 }
 
 function buyRod() {
-
+  if (gold >= 30) {
+    gold -= 30;
+    currentRodIndex++;
+    goldText.innerText = gold;
+    let newRod = rods[currentRodIndex].name;
+    text.innerText = "You now have a " + newRod + ".";
+  }
 }
 
 function fishBluegill() {
