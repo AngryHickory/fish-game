@@ -127,6 +127,11 @@ function sellRod() {
   if (inventory.length > 1) {
     gold += 15;
     goldText.innerText = gold;
+    let currentRod = inventory.shift();
+    text.innerText = "You sold a " + currentRod + ".";
+    text.innerText += " In your inventory you have: " + inventory;
+  } else {
+    text.innerText = "Don't sell your only rod!";
   }
 }
 
