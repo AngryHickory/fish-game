@@ -18,22 +18,10 @@ const fishName = document.querySelector("#fishName");
 const fishHealthText = document.querySelector("#fishHealth");
 
 const rods = [
-  {
-    name: "stick", 
-    power: 5
-  },
-  {
-    name: "wooden rod",
-    power: 30
-  },
-  {
-    name: "aluminum rod",
-    power: 50
-  },
-  {
-    name: "professional rod",
-    power: 100
-  }
+  { name: "stick", power: 5 },
+  { name: "wooden rod", power: 30 },
+  { name: "aluminum rod", power: 50 },
+  { name: "professional rod", power: 100 }
 ];
 
 const fish = [
@@ -46,7 +34,7 @@ const locations = [
   {
     name: "town square",
     "button text": ["Go to store", "Go Fishing", "Open Seas"],
-    "button functions": [goStore, goFish, openSeas],
+    "button functions": [goStore, goFishing, openSeas],
     text: "You are in the town square. You see a sign that says \"Store\"."
   },
   {
@@ -56,7 +44,7 @@ const locations = [
     text: "You enter the store."
   },
   {
-  name: "goFish",
+  name: "goFishing",
   "button text": ["Fish Bluegill", "Fish Pickerel", "Go to town square"],
   "button functions": [fishBluegill, fishPickerel, goTown],
   text: "You're at the water's edge. You cast your rod."
@@ -67,7 +55,7 @@ const locations = [
 // initialize buttons
 
 button1.onclick = goStore;
-button2.onclick = goFish;
+button2.onclick = goFishing;
 button3.onclick = openSeas;
 
 function update(location) {
@@ -90,13 +78,10 @@ function goStore() {
 }
 
 
-function goFish() {
+function goFishing() {
   update(locations[2]);
 }
 
-function openSeas() {
-  console.log("Sailing the sea.");
-}
 
 function buyBait() {
   if (gold >= 10) {
@@ -142,9 +127,29 @@ function sellRod() {
 }
 
 function fishBluegill() {
-
+  fishing = 0;
+  goFish();
 }
 
 function fishPickerel() {
+  fishing = 1;
+  goFish();
+}
+
+function openSeas() {
+  fishing = 2;
+  goFish();
+}
+
+function goFish() {
+
+}
+
+
+function reel() {
+
+}
+
+function brace() {
   
 }
