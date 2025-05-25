@@ -26,8 +26,8 @@ const rods = [
 
 const fish = [
   { name: "bluegill", level: 2, health: 15 },
-  { name: 'pickerel', level: 8, health: 60 },
-  { name: 'open seas', level: 20, health: 300 }
+  { name: "pickerel", level: 8, health: 60 },
+  { name: "open seas", level: 20, health: 300 }
 ];
 
 const locations = [
