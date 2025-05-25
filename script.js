@@ -74,7 +74,14 @@ function openSeas() {
 }
 
 function buyBait() {
-
+  if (gold >= 10) {
+    gold -= 10;
+    bait += 10;
+    goldText.innerText = gold;
+    baitText.innerText = bait;
+  } else {
+    text.innerText = "Not enough gold to buy more bait."
+  }
 }
 
 function buyRod() {
