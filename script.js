@@ -29,7 +29,13 @@ const locations = [
     "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Go to Town Square"],
     "button functions": [buyBait, buyRod, goTown],
     text: "You enter the store."
-  }
+  },
+  {
+  name: "goFish",
+  "button text": ["Fish Bluegill", "Fish Pickerel", "Go to town square"],
+  "button functions": [fishBluegill, fishPickerel, goTown],
+  text: "You're at the water's edge. You cast your rod."
+}
 ];
 
 
@@ -60,7 +66,7 @@ function goStore() {
 
 
 function goFish() {
-  console.log("Going fishing.");
+  update(locations[2]);
 }
 
 function openSeas() {
@@ -73,4 +79,12 @@ function buyBait() {
 
 function buyRod() {
 
+}
+
+function fishBluegill() {
+
+}
+
+function fishPickerel() {
+  
 }
