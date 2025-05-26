@@ -48,6 +48,12 @@ const locations = [
   "button text": ["Fish Bluegill", "Fish Pickerel", "Go to town square"],
   "button functions": [fishBluegill, fishPickerel, goTown],
   text: "You're at the water's edge. You cast your rod."
+},
+{
+  name: "battle",
+  "button text": ["Reel", "Brace", "Cut Line"],
+  "button functions": [reel, brace, goTown],
+  text: "You have a fish on the line."
 }
 ];
 
@@ -142,7 +148,11 @@ function openSeas() {
 }
 
 function goFish() {
-
+  update(locations[3]);
+  fishHealth = fish[fishing].health;
+  fishStats.style.display = "block";
+  fishName.innerText = fish[fishing].name;
+  fishHealthText.innerText = fishHealth;
 }
 
 
