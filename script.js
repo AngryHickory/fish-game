@@ -172,8 +172,12 @@ function goFish() {
 function reel() {
   text.innerText = "A " + fish[fishing].name + " is thrashing on the line!";
   text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
-  bait -= fish[fishing].level;
-  fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
+  bait -= getFishAttackValue(fish[fishing].level);
+  if (isFishHit()) {
+    fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
+  } else {
+    text.innerText += " The fish is getting away!"
+  }
   baitText.innerText = bait;
   fishHealthText.innerText = fishHealth;
   if (bait <= 0) {
@@ -181,6 +185,19 @@ function reel() {
   } else if (fishHealth <= 0) {
     catchFish()
   }
+  if (Math.random() <= .1 && inventory.length !== 1) {
+    text.innerText += " Your " + inventory.pop() + " breaks.";
+    currentRodIndex--;
+  }
+}
+
+function getFishAttackValue(level) {
+  const hit = (level * 5) - (Math.floor(Math.random() * xp));
+  return hit > 0 ? hit : 0;
+}
+
+function isFishHit() {
+  return Math.random() > .2 || bait < 20;
 }
 
 function brace() {
