@@ -33,7 +33,7 @@ const fish = [
 const locations = [
   {
     name: "town square",
-    "button text": ["Go to store", "Go Fishing", "Open Seas"],
+    "button text": ["Go to Store", "Go Fishing", "Open Seas"],
     "button functions": [goStore, goFishing, openSeas],
     text: "You are in the town square. You see a sign that says \"Store\"."
   },
