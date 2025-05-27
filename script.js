@@ -26,8 +26,18 @@ const rods = [
 
 const fish = [
   { name: "bluegill", level: 2, health: 15 },
+  { name: "bullhead catfish", level: 4, health: 30 },
   { name: "pickerel", level: 8, health: 60 },
-  { name: "open seas", level: 20, health: 300 }
+  { name: "perch", level: 12, health: 90 },
+  { name: "smallmouth bass", level: 14, health: 110 },
+  { name: "rainbow trout", level: 14, health: 110 },
+  { name: "sockeye salmon", level: 15, health: 130 },
+  { name: "largemouth bass", level: 17, health: 160 },
+  { name: "muskie", level: 18, health: 170 },
+  { name: "longnose gar", level: 22, health: 220 },
+  { name: "channel catfish", level: 25, health: 250 },
+  { name: "lake sturgeon", level: 40, health: 400 },
+   //{ name: "open seas", level: 20, health: 300 },
 ];
 
 const locations = [
@@ -45,8 +55,8 @@ const locations = [
   },
   {
   name: "goFishing",
-  "button text": ["Fish Bluegill", "Fish Pickerel", "Go to town square"],
-  "button functions": [fishBluegill, fishPickerel, goTown],
+  "button text": ["Cast Rod", "Cast Rod", "Go to town square"],
+  "button functions": [castRod, castRod, goTown],
   text: "You're at the water's edge. You cast your rod."
 },
 {
@@ -65,7 +75,7 @@ const locations = [
   name: "lose",
   "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
   "button functions": [restart, restart, restart],
-  text: "Out of bait..."
+  text: "Out of bait... GAME OVER;"
 }
 ];
 
@@ -101,6 +111,11 @@ function goFishing() {
   update(locations[2]);
 }
 
+function castRod() {
+    const randomIndex = Math.floor(Math.random() * fish.length);
+    fishing = randomIndex;
+    goFish();
+}
 
 function buyBait() {
   if (gold >= 10) {
@@ -172,27 +187,20 @@ function goFish() {
 function reel() {
   text.innerText = "A " + fish[fishing].name + " is thrashing on the line!";
   text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
-  if (fishHealth > 0) {
-    bait -= getFishAttackValue(fish[fishing].level);
-    
-    if (isFishHit()) {
-      fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
-    } else {
-      text.innerText += " The fish is getting away!";
-    }
+  bait -= getFishAttackValue(fish[fishing].level);
+  if (isFishHit()) {
+    fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
   } else {
-    text.innerText += " The fish is exhausted! You reel it in easily.";
+    text.innerText += " The fish is getting away!"
   }
-
   baitText.innerText = bait;
   fishHealthText.innerText = fishHealth;
-
   if (bait <= 0) {
     lose();
   } else if (fishHealth <= 0) {
-    catchFish();
+    catchFish()
   }
-  if (bait > 0 && Math.random() <= .1 && inventory.length !== 1) {
+  if (Math.random() <= .1 && inventory.length !== 1) {
     text.innerText += " Your " + inventory.pop() + " breaks.";
     currentRodIndex--;
   }
@@ -211,19 +219,19 @@ function brace() {
   text.innerText = "You brace the rod against the " + fish[fishing].name + "'s onslaught!"
   const fishAttackValue = getFishAttackValue(fish[fishing].level);
   if (Math.random() <= 0.3) {
-    text.innerText += " You brace the rod and " + fish[fishing].name + " begins to wear itself out!";
-    const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.7);
-    fishHealth = newFishHealth > 0 ? newFishHealth : 0;
+    text.innerText += "You brace the rod and " + fish[fishing].name + " begins to wear itself out!";
+    fishHealth -= fishAttackValue * 0.7;
   } else {
-    text.innerText += " You're unable to brace, the " + fish[fishing].name + " is too strong!";
-    bait -= Math.round(fishAttackValue * 0.2);
+    text.innerText += "You're unable to brace, the " + fish[fishing].name + " is too strong!";
+    bait -= fishAttackValue * 0.2;
   }
   baitText.innerText = bait;
   fishHealthText.innerText = fishHealth;
   if (bait <= 0) {
     lose();
   } else if (fishHealth <= 0) {
-    text.innerText = " The " + fish[fishing].name + " is exhausted. Time to reel it in!";
+    fishHealth = 0;
+    text.innerText += "The " +fish[fishing].name + " is exhausted. Time to reel it in!";
   }
 }
 
