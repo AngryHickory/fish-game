@@ -157,9 +157,27 @@ function goFish() {
 
 
 function reel() {
-
+  text.innerText = "A " + fish[fishing].name + " is thrashing on the line!";
+  text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
+  bait -= fish[fishing].level;
+  fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
+  healthText.innerText = health;
+  fishHealthText.innerText = fishHealth;
+  if (health <= 0) {
+    lose();
+  } else if (fishHealth <= 0) {
+    catchFish()
+  }
 }
 
 function brace() {
+  
+}
+
+function catchFish() {
+
+}
+
+function lose() {
   
 }
