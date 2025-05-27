@@ -8,6 +8,6 @@ To do:
 - Go Fishing will spawn random fish encounters
 - Instead of a final boss, there will be multiple bosses that scale in difficulty
 - more rods
-- brace move will have a chance to reflect damage
+- brace move will have a chance to reflect damage [X]
 - scroll animation for text?
 - save funtion, autosave?
