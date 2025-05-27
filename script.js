@@ -4,7 +4,7 @@ let gold = 50;
 let currentRodIndex = 0;
 let fishing;
 let fishHealth;
-let inventory = ["stick"];
+let inventory = ["Stick"];
 let currentLocationIndex = 0;
 
 const button1 = document.querySelector("#button1");
@@ -45,13 +45,13 @@ const fish = [
 ];
 
 const seaFish = [
-  { name: "Cod", level: 30, health: 300 },
-  { name: "Sailfish", level: 35, health: 350 },
-  { name: "Swordfish", level: 40, health: 400 },
-  { name: "Halibut", level: 50, health: 500 },
-  { name: "Tuna", level: 55, health: 550 },
-  { name: "Blue Marlin", level: 70, health: 700 },
-  { name: "Great White Shark", level: 90, health: 900 }
+  { name: "Cod", level: 30, health: 500 },
+  { name: "Sailfish", level: 35, health: 650 },
+  { name: "Swordfish", level: 40, health: 800 },
+  { name: "Halibut", level: 50, health: 1000 },
+  { name: "Tuna", level: 55, health: 1200 },
+  { name: "Blue Marlin", level: 70, health: 2000 },
+  { name: "Great White Shark", level: 90, health: 2500 }
 ];
 
 const locations = [
@@ -215,7 +215,7 @@ function sellRod() {
     goldText.innerText = gold;
     let currentRod = inventory.shift();
     text.innerText = "You sold a " + currentRod + ".";
-    text.innerText += " In your inventory you have: " + inventory;
+    text.innerText += " In your inventory you have: " + inventory + ".";
   } else {
     text.innerText = "Don't sell your only rod!";
   }
@@ -254,6 +254,10 @@ function reel() {
             fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
         } else {
             text.innerText += " The fish is getting away!";
+            if (Math.random() <= .1 && inventory.length !== 1) {
+            text.innerText += " Your " + inventory.pop() + " breaks.";
+            currentRodIndex--;
+          }
         }
     } else {
         text.innerText += " The fish is exhausted! You reel it in easily.";
@@ -280,7 +284,7 @@ function isFishHit() {
 
 function brace() {
     const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
-    text.innerText = "You brace the rod against the onslaught!";
+    text.innerText = "You brace the rod against the sudden movements!";
     const fishAttackValue = getFishAttackValue(currentFishArray[fishing].level);
     if (Math.random() <= 0.3) {
         text.innerText += " The fish begins to wear itself out!";
@@ -289,6 +293,10 @@ function brace() {
     } else {
         text.innerText += " You're unable to brace!";
         bait -= Math.round(fishAttackValue * 0.2);
+        if (Math.random() <= .1 && inventory.length !== 1) {
+        text.innerText += " Your " + inventory.pop() + " breaks.";
+        currentRodIndex--;
+      }
     }
     baitText.innerText = bait;
     fishHealthText.innerText = fishHealth;
@@ -318,7 +326,7 @@ function restart() {
   bait = 100;
   gold = 50;
   currentRodIndex = 0;
-  inventory = ["stick"];
+  inventory = ["Stick"];
   goldText.innerText = gold;
   baitText.innerText = bait;
   xpText.innerText = xp;
