@@ -45,9 +45,13 @@ const fish = [
 ];
 
 const seaFish = [
-  { name: "tuna", level: 15, health: 100 },
-  { name: "shark", level: 25, health: 300 },
-  { name: "marlin", level: 30, health: 250 }
+  { name: "cod", level: 30, health: 300 },
+  { name: "sailfish", level: 35, health: 350 },
+  { name: "swordfish", level: 40, health: 400 },
+  { name: "halibut", level: 50, health: 500 },
+  { name: "tuna", level: 55, health: 550 },
+  { name: "marlin", level: 70, health: 700 },
+  { name: "great white shark", level: 90, health: 900 }
 ];
 
 const locations = [
@@ -96,14 +100,17 @@ locations.push({
     text: "You've ventured into the open seas. Cast your rod!"
 });
 
+locations.push({
+    name: "sea battle",
+    "button text": ["Reel", "Brace", "Cut Line"],
+    "button functions": [reel, brace, goTown],
+    text: "You have a fish on the line!"
+});
+
 const fishArrayMap = {
-    "open seas": seaFish,
+    "open seas": seaFish, // Ensure this correctly points to seaFish
     "goFishing": fish,
 };
-
-function getCurrentFishArray() {
-    return fishArrayMap[locations[currentLocationIndex].name] || fish; // Default to regular fish
-}
 
 
 // initialize buttons
@@ -139,6 +146,24 @@ function goFishing() {
   update(locations[2]);
 }
 
+function seaBattle() {
+    const currentFishArray = seaFish; // Directly use the seaFish array
+    console.log("Current Fish Array:", currentFishArray); // Log the current fish array
+    console.log("Fishing Index:", fishing); // Log the fishing index
+
+    // Ensure the fishing index is valid for the selected array
+    if (fishing < currentFishArray.length) {
+        fishHealth = currentFishArray[fishing].health; 
+        fishStats.style.display = "block"; 
+        fishName.innerText = currentFishArray[fishing].name; 
+        fishHealthText.innerText = fishHealth;
+
+        console.log("Selected Fish:", currentFishArray[fishing].name); 
+    } else {
+        console.error("Fishing index out of bounds:", fishing);
+    }
+}
+
 function castRod() {
     const currentLocation = locations[currentLocationIndex].name; 
     console.log("Current Location:", currentLocation); 
@@ -146,13 +171,18 @@ function castRod() {
     if (currentLocation === "open seas") {
         fishing = Math.floor(Math.random() * seaFish.length); 
         console.log("Fishing Index (Sea Fish):", fishing);
+        
+        // Update to the new sea battle location
+        update(locations[7]); // Reference the newly added sea battle location
+        seaBattle(); // Call seaBattle to initialize the battle
     } else {
         fishing = Math.floor(Math.random() * fish.length); 
         console.log("Fishing Index (Regular Fish):", fishing);
+        
+        // Update UI to show battle location
+        update(locations[3]); // Update to battle location
+        goFish(); // Call goFish for other locations
     }
-
-    update(locations[3]);
-    goFish();
 }
 
 function buyBait() {
@@ -203,21 +233,27 @@ function openSeas() {
 }
 
 function goFish() {
-    const currentFishArray = getCurrentFishArray(); // Use the new function here
-    console.log("Current Fish Array:", currentFishArray);
-    console.log("Fishing Index:", fishing);
+    const locationName = locations[currentLocationIndex].name; 
+    const currentFishArray = fishArrayMap[locationName] || fish; // Fetch fish array based on current location
+    console.log("Current Location Index:", currentLocationIndex); // Log current location index
+    console.log("Current Fish Array:", currentFishArray); // Log the current fish array
+    console.log("Fishing Index:", fishing); // Log the fishing index
 
-    fishHealth = currentFishArray[fishing].health; 
-    fishStats.style.display = "block"; 
-    fishName.innerText = currentFishArray[fishing].name; 
-    fishHealthText.innerText = fishHealth;
+    // Ensure the fishing index is valid for the selected array
+    if (fishing < currentFishArray.length) {
+        fishHealth = currentFishArray[fishing].health; 
+        fishStats.style.display = "block"; 
+        fishName.innerText = currentFishArray[fishing].name; 
+        fishHealthText.innerText = fishHealth;
 
-    console.log("Selected Fish:", currentFishArray[fishing].name); 
+        console.log("Selected Fish:", currentFishArray[fishing].name); 
+    } else {
+        console.error("Fishing index out of bounds:", fishing);
+    }
 }
 
-
 function reel() {
-    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; // Determine the correct fish array
+    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; // Determine correct fish array
     text.innerText = "A " + currentFishArray[fishing].name + " is thrashing on the line!";
     text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
 
@@ -253,32 +289,34 @@ function isFishHit() {
 }
 
 function brace() {
-  text.innerText = "You brace the rod against the " + fish[fishing].name + "'s onslaught!"
-  const fishAttackValue = getFishAttackValue(fish[fishing].level);
-  if (Math.random() <= 0.3) {
-    text.innerText += "You brace the rod and " + fish[fishing].name + " begins to wear itself out!";
-    const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.7);
-    fishHealth = newFishHealth > 0 ? newFishHealth : 0;
-  } else {
-    text.innerText += "You're unable to brace, the " + fish[fishing].name + " is too strong!";
-    bait -= Math.round(fishAttackValue * 0.2);
-  }
-  baitText.innerText = bait;
-  fishHealthText.innerText = fishHealth;
-  if (bait <= 0) {
-    lose();
-  } else if (fishHealth <= 0) {
-    fishHealth = 0;
-    text.innerText = "The " +fish[fishing].name + " is exhausted. Time to reel it in!";
-  }
+    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; // Determine correct fish array
+    text.innerText = "You brace the rod against the onslaught!";
+    const fishAttackValue = getFishAttackValue(currentFishArray[fishing].level);
+    if (Math.random() <= 0.3) {
+        text.innerText += " The fish begins to wear itself out!";
+        const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.7);
+        fishHealth = newFishHealth > 0 ? newFishHealth : 0;
+    } else {
+        text.innerText += " You're unable to brace!";
+        bait -= Math.round(fishAttackValue * 0.2);
+    }
+    baitText.innerText = bait;
+    fishHealthText.innerText = fishHealth;
+    if (bait <= 0) {
+        lose();
+    } else if (fishHealth <= 0) {
+        fishHealth = 0;
+        text.innerText = "The " + currentFishArray[fishing].name + " is exhausted. Time to reel it in!";
+    }
 }
 
 function catchFish() {
-  gold += Math.floor(fish[fishing].level * 6.7) + 1;
-  xp += fish[fishing].level;
-  goldText.innerText = gold;
-  xpText.innerText = xp;
-  update(locations[4]);
+    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; // Determine correct fish array
+    gold += Math.floor(currentFishArray[fishing].level * 6.7) + 1; // Use correct fish array
+    xp += currentFishArray[fishing].level; // Use correct fish array
+    goldText.innerText = gold;
+    xpText.innerText = xp;
+    update(locations[4]); // Update to fish caught location
 }
 
 function lose() {
