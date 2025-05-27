@@ -19,39 +19,39 @@ const fishName = document.querySelector("#fishName");
 const fishHealthText = document.querySelector("#fishHealth");
 
 const rods = [
-  { name: "stick", power: 5 },
-  { name: "wooden rod", power: 30 },
-  { name: "aluminum rod", power: 50 },
-  { name: "professional rod", power: 100 }
+  { name: "Stick", power: 5 },
+  { name: "Wooden Rod", power: 30 },
+  { name: "Aluminum Rod", power: 50 },
+  { name: "Professional Rod", power: 100 }
 ];
 
 const fish = [
-  { name: "bluegill", level: 2, health: 15 },
-  { name: "bluegill", level: 2, health: 15 },
-  { name: "bullhead catfish", level: 4, health: 30 },
-  { name: "bullhead catfish", level: 4, health: 30 },
-  { name: "bullhead catfish", level: 4, health: 30 },
-  { name: "pickerel", level: 8, health: 60 },
-  { name: "pickerel", level: 8, health: 60 },
-  { name: "perch", level: 12, health: 90 },
-  { name: "smallmouth bass", level: 14, health: 110 },
-  { name: "rainbow trout", level: 14, health: 110 },
-  { name: "sockeye salmon", level: 15, health: 130 },
-  { name: "largemouth bass", level: 17, health: 160 },
-  { name: "muskie", level: 18, health: 170 },
-  { name: "longnose gar", level: 22, health: 220 },
-  { name: "channel catfish", level: 25, health: 250 },
-  { name: "lake sturgeon", level: 40, health: 400 },
+  { name: "Bluegill", level: 2, health: 15 },
+  { name: "Bluegill", level: 2, health: 15 },
+  { name: "Bullhead Catfish", level: 4, health: 30 },
+  { name: "Bullhead Catfish", level: 4, health: 30 },
+  { name: "Bullhead Catfish", level: 4, health: 30 },
+  { name: "Pickerel", level: 8, health: 60 },
+  { name: "Pickerel", level: 8, health: 60 },
+  { name: "Perch", level: 12, health: 90 },
+  { name: "Smallmouth Bass", level: 14, health: 110 },
+  { name: "Rainbow Trout", level: 14, health: 110 },
+  { name: "Sockeye Salmon", level: 15, health: 130 },
+  { name: "Largemouth Bass", level: 17, health: 160 },
+  { name: "Muskie", level: 18, health: 170 },
+  { name: "Longnose Gar", level: 22, health: 220 },
+  { name: "Channel Catfish", level: 25, health: 250 },
+  { name: "Lake Sturgeon", level: 40, health: 400 },
 ];
 
 const seaFish = [
-  { name: "cod", level: 30, health: 300 },
-  { name: "sailfish", level: 35, health: 350 },
-  { name: "swordfish", level: 40, health: 400 },
-  { name: "halibut", level: 50, health: 500 },
-  { name: "tuna", level: 55, health: 550 },
-  { name: "marlin", level: 70, health: 700 },
-  { name: "great white shark", level: 90, health: 900 }
+  { name: "Cod", level: 30, health: 300 },
+  { name: "Sailfish", level: 35, health: 350 },
+  { name: "Swordfish", level: 40, health: 400 },
+  { name: "Halibut", level: 50, health: 500 },
+  { name: "Tuna", level: 55, health: 550 },
+  { name: "Blue Marlin", level: 70, health: 700 },
+  { name: "Great White Shark", level: 90, health: 900 }
 ];
 
 const locations = [
