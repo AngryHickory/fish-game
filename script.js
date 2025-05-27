@@ -5,7 +5,7 @@ let currentRodIndex = 0;
 let fishing;
 let fishHealth;
 let inventory = ["stick"];
-let currentLocationIndex = 0; // Initialize to the first location (town square)
+let currentLocationIndex = 0;
 
 const button1 = document.querySelector("#button1");
 const button2 = document.querySelector("#button2");
@@ -108,7 +108,7 @@ locations.push({
 });
 
 const fishArrayMap = {
-    "open seas": seaFish, // Ensure this correctly points to seaFish
+    "open seas": seaFish,
     "goFishing": fish,
 };
 
@@ -147,11 +147,8 @@ function goFishing() {
 }
 
 function seaBattle() {
-    const currentFishArray = seaFish; // Directly use the seaFish array
-    console.log("Current Fish Array:", currentFishArray); // Log the current fish array
-    console.log("Fishing Index:", fishing); // Log the fishing index
+    const currentFishArray = seaFish; 
 
-    // Ensure the fishing index is valid for the selected array
     if (fishing < currentFishArray.length) {
         fishHealth = currentFishArray[fishing].health; 
         fishStats.style.display = "block"; 
@@ -166,22 +163,18 @@ function seaBattle() {
 
 function castRod() {
     const currentLocation = locations[currentLocationIndex].name; 
-    console.log("Current Location:", currentLocation); 
 
     if (currentLocation === "open seas") {
         fishing = Math.floor(Math.random() * seaFish.length); 
-        console.log("Fishing Index (Sea Fish):", fishing);
         
-        // Update to the new sea battle location
-        update(locations[7]); // Reference the newly added sea battle location
-        seaBattle(); // Call seaBattle to initialize the battle
+        update(locations[7]);
+        seaBattle(); 
     } else {
         fishing = Math.floor(Math.random() * fish.length); 
-        console.log("Fishing Index (Regular Fish):", fishing);
         
-        // Update UI to show battle location
-        update(locations[3]); // Update to battle location
-        goFish(); // Call goFish for other locations
+        
+        update(locations[3]); 
+        goFish(); 
     }
 }
 
@@ -229,17 +222,14 @@ function sellRod() {
 }
 
 function openSeas() {
-    update(locations[6]); // Reference the "open seas" location correctly
+    update(locations[6]); 
 }
 
 function goFish() {
     const locationName = locations[currentLocationIndex].name; 
-    const currentFishArray = fishArrayMap[locationName] || fish; // Fetch fish array based on current location
-    console.log("Current Location Index:", currentLocationIndex); // Log current location index
-    console.log("Current Fish Array:", currentFishArray); // Log the current fish array
-    console.log("Fishing Index:", fishing); // Log the fishing index
+    const currentFishArray = fishArrayMap[locationName] || fish;  
 
-    // Ensure the fishing index is valid for the selected array
+   
     if (fishing < currentFishArray.length) {
         fishHealth = currentFishArray[fishing].health; 
         fishStats.style.display = "block"; 
@@ -253,7 +243,7 @@ function goFish() {
 }
 
 function reel() {
-    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; // Determine correct fish array
+    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
     text.innerText = "A " + currentFishArray[fishing].name + " is thrashing on the line!";
     text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
 
@@ -289,7 +279,7 @@ function isFishHit() {
 }
 
 function brace() {
-    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; // Determine correct fish array
+    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
     text.innerText = "You brace the rod against the onslaught!";
     const fishAttackValue = getFishAttackValue(currentFishArray[fishing].level);
     if (Math.random() <= 0.3) {
@@ -311,12 +301,12 @@ function brace() {
 }
 
 function catchFish() {
-    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; // Determine correct fish array
-    gold += Math.floor(currentFishArray[fishing].level * 6.7) + 1; // Use correct fish array
-    xp += currentFishArray[fishing].level; // Use correct fish array
+    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
+    gold += Math.floor(currentFishArray[fishing].level * 6.7) + 1; 
+    xp += currentFishArray[fishing].level; 
     goldText.innerText = gold;
     xpText.innerText = xp;
-    update(locations[4]); // Update to fish caught location
+    update(locations[4]); 
 }
 
 function lose() {
