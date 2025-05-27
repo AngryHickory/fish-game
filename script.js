@@ -63,13 +63,13 @@ const locations = [
   },
   {
     name: "store",
-    "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Go to Town Square"],
+    "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Town Square"],
     "button functions": [buyBait, buyRod, goTown],
     text: "You enter the store."
   },
   {
   name: "goFishing",
-  "button text": ["Cast Rod", "Cast Rod", "Go to town square"],
+  "button text": ["Cast Rod", "Cast Rod", "Town Square"],
   "button functions": [castRod, castRod, goTown],
   text: "You're at the water's edge. You cast your rod."
 },
@@ -81,7 +81,7 @@ const locations = [
 },
 {
   name: "fish caught",
-  "button text": ["Go to town square", "Go to town square", "Go to town square"],
+  "button text": ["Town Square", "Town Square", "Town Square"],
   "button functions": [goTown, goTown, goTown],
   text: "You caught the fish! You gained gold and XP!"
 },
@@ -244,7 +244,7 @@ function goFish() {
 
 function reel() {
     const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
-    text.innerText = "A " + currentFishArray[fishing].name + " is thrashing on the line!";
+    text.innerText = "A fish is thrashing on the line!";
     text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
 
     if (fishHealth > 0) {

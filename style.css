@@ -1,11 +1,13 @@
 body {
-  background-color: #0a0a23;
+  background-color: #2de5ff;
 }
 
 #text {
-  background-color: #0a0a23;
-  color: #ffffff;
+  background-color: #2de5ff;
+  color: #20749b;
   padding: 10px;
+  font-weight: bold;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 #textSpan {
@@ -15,16 +17,18 @@ body {
 #game {
   max-width: 500px;
   max-height: 400px;
-  background-color: #ffffff;
+  background-color: #0e95ad;
+  border-radius: 5px;
   color: #ffffff;
   margin: 30px auto 0px;
   padding: 10px;
 }
 
 #controls, #stats {
-  border: 1px solid #0a0a23;
+  border: 1px solid #0e95ad;
   padding: 5px;
-  color: #0a0a23;
+  color: #123450;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 #fishStats {
@@ -32,7 +36,7 @@ body {
   border: 1px solid #0a0a23;
   padding: 5px;
   color: #ffffff;
-  background-color: #c70d0d;
+  background-color: #159369;
 }
 
 
@@ -42,8 +46,28 @@ body {
 
 button {
   cursor: pointer;
-  color: #0a0a23;
-  background-color: #feac32;
-  background-image: linear-gradient(#fecc4c, #ffac33);
-  border: 3px solid #feac32;
+  color: #147e7e;
+  background-color: #99BE1B;
+  background-image: linear-gradient(to bottom, #99BE1B, #C4E26A);
+  border: 1px solid #7FA617;
+  border-radius: 4px;
+  padding: 4px 8px;
+  transition: all 0.2s ease-in-out;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-weight: bolder;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+@media (hover: hover) {
+  button:hover {
+    background-image: linear-gradient(to bottom, #C4E26A, #99BE1B);
+    box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
