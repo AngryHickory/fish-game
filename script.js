@@ -54,6 +54,18 @@ const locations = [
   "button text": ["Reel", "Brace", "Cut Line"],
   "button functions": [reel, brace, goTown],
   text: "You have a fish on the line."
+},
+{
+  name: "fish caught",
+  "button text": ["Go to town square", "Go to town square", "Go to town square"],
+  "button functions": [goTown, goTown, goTown],
+  text: "You caught the fish! You gained gold and XP!"
+},
+{
+  name: "lose",
+  "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+  "button functions": [restart, restart, restart],
+  text: "Out of bait... &#x2620;"
 }
 ];
 
@@ -65,6 +77,7 @@ button2.onclick = goFishing;
 button3.onclick = openSeas;
 
 function update(location) {
+  fishStats.style.display = "none";
   button1.innerText = location["button text"][0];
   button2.innerText = location["button text"][1];
   button3.innerText = location["button text"][2];
@@ -161,9 +174,9 @@ function reel() {
   text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
   bait -= fish[fishing].level;
   fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
-  healthText.innerText = health;
+  baitText.innerText = bait;
   fishHealthText.innerText = fishHealth;
-  if (health <= 0) {
+  if (bait <= 0) {
     lose();
   } else if (fishHealth <= 0) {
     catchFish()
@@ -171,13 +184,29 @@ function reel() {
 }
 
 function brace() {
-  
+  text.innerText = "You brace the rod against the " + fish[fishing].name + "'s onslaught!"
 }
 
 function catchFish() {
-
+  gold += Math.floor(fish[fishing].level * 6.7) + 1;
+  xp += fish[fishing].level;
+  goldText.innerText = gold;
+  xpText.innerText = xp;
+  update(locations[4]);
 }
 
 function lose() {
-  
+  update(locations[5]);
+}
+
+function restart() {
+  xp = 0;
+  bait = 100;
+  gold = 50;
+  currentRodIndex = 0;
+  inventory = ["stick"];
+  goldText.innerText = gold;
+  baitText.innerText = bait;
+  xpText.innerText = xp;
+  goTown();
 }
