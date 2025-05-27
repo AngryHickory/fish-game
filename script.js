@@ -20,9 +20,11 @@ const fishHealthText = document.querySelector("#fishHealth");
 
 const rods = [
   { name: "Stick", power: 5 },
-  { name: "Wooden Rod", power: 30 },
-  { name: "Aluminum Rod", power: 50 },
-  { name: "Professional Rod", power: 100 }
+  { name: "Wooden Rod", power: 25 },
+  { name: "Aluminum Rod", power: 40 },
+  { name: "Professional Rod", power: 60 },
+  { name: "Master Rod", power: 80 },
+  { name: "Experimental Rod", power: 100 },
 ];
 
 const fish = [
@@ -89,7 +91,7 @@ const locations = [
   name: "lose",
   "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
   "button functions": [restart, restart, restart],
-  text: "Out of bait... GAME OVER;"
+  text: "Out of bait... GAME OVER"
 }
 ];
 
