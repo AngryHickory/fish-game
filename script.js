@@ -27,18 +27,13 @@ const rods = [
 const fish = [
   { name: "bluegill", level: 2, health: 15 },
   { name: "bluegill", level: 2, health: 15 },
-  { name: "bluegill", level: 2, health: 15 },
   { name: "bullhead catfish", level: 4, health: 30 },
   { name: "bullhead catfish", level: 4, health: 30 },
   { name: "bullhead catfish", level: 4, health: 30 },
-  { name: "pickerel", level: 8, health: 60 },
   { name: "pickerel", level: 8, health: 60 },
   { name: "pickerel", level: 8, health: 60 },
   { name: "perch", level: 12, health: 90 },
-  { name: "perch", level: 12, health: 90 },
   { name: "smallmouth bass", level: 14, health: 110 },
-  { name: "smallmouth bass", level: 14, health: 110 },
-  { name: "rainbow trout", level: 14, health: 110 },
   { name: "rainbow trout", level: 14, health: 110 },
   { name: "sockeye salmon", level: 15, health: 130 },
   { name: "largemouth bass", level: 17, health: 160 },
@@ -167,16 +162,6 @@ function sellRod() {
   } else {
     text.innerText = "Don't sell your only rod!";
   }
-}
-
-function fishBluegill() {
-  fishing = 0;
-  goFish();
-}
-
-function fishPickerel() {
-  fishing = 1;
-  goFish();
 }
 
 function openSeas() {
