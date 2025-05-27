@@ -26,10 +26,19 @@ const rods = [
 
 const fish = [
   { name: "bluegill", level: 2, health: 15 },
+  { name: "bluegill", level: 2, health: 15 },
+  { name: "bluegill", level: 2, health: 15 },
+  { name: "bullhead catfish", level: 4, health: 30 },
+  { name: "bullhead catfish", level: 4, health: 30 },
   { name: "bullhead catfish", level: 4, health: 30 },
   { name: "pickerel", level: 8, health: 60 },
+  { name: "pickerel", level: 8, health: 60 },
+  { name: "pickerel", level: 8, health: 60 },
+  { name: "perch", level: 12, health: 90 },
   { name: "perch", level: 12, health: 90 },
   { name: "smallmouth bass", level: 14, health: 110 },
+  { name: "smallmouth bass", level: 14, health: 110 },
+  { name: "rainbow trout", level: 14, health: 110 },
   { name: "rainbow trout", level: 14, health: 110 },
   { name: "sockeye salmon", level: 15, health: 130 },
   { name: "largemouth bass", level: 17, health: 160 },
@@ -187,20 +196,28 @@ function goFish() {
 function reel() {
   text.innerText = "A " + fish[fishing].name + " is thrashing on the line!";
   text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
-  bait -= getFishAttackValue(fish[fishing].level);
-  if (isFishHit()) {
-    fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
+
+  if (fishHealth > 0) {
+    bait -= getFishAttackValue(fish[fishing].level);
+    
+    if (isFishHit()) {
+      fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
+    } else {
+      text.innerText += " The fish is getting away!";
+    }
   } else {
-    text.innerText += " The fish is getting away!"
+    text.innerText += " The fish is exhausted! You reel it in easily.";
   }
+
   baitText.innerText = bait;
   fishHealthText.innerText = fishHealth;
+
   if (bait <= 0) {
     lose();
   } else if (fishHealth <= 0) {
     catchFish()
   }
-  if (Math.random() <= .1 && inventory.length !== 1) {
+  if (bait > 0 && Math.random() <= .1 && inventory.length !== 1) {
     text.innerText += " Your " + inventory.pop() + " breaks.";
     currentRodIndex--;
   }
@@ -220,10 +237,11 @@ function brace() {
   const fishAttackValue = getFishAttackValue(fish[fishing].level);
   if (Math.random() <= 0.3) {
     text.innerText += "You brace the rod and " + fish[fishing].name + " begins to wear itself out!";
-    fishHealth -= fishAttackValue * 0.7;
+    const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.7);
+    fishHealth = newFishHealth > 0 ? newFishHealth : 0;
   } else {
     text.innerText += "You're unable to brace, the " + fish[fishing].name + " is too strong!";
-    bait -= fishAttackValue * 0.2;
+    bait -= Math.round(fishAttackValue * 0.2);
   }
   baitText.innerText = bait;
   fishHealthText.innerText = fishHealth;
@@ -231,7 +249,7 @@ function brace() {
     lose();
   } else if (fishHealth <= 0) {
     fishHealth = 0;
-    text.innerText += "The " +fish[fishing].name + " is exhausted. Time to reel it in!";
+    text.innerText = "The " +fish[fishing].name + " is exhausted. Time to reel it in!";
   }
 }
 
