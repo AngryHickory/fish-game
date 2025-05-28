@@ -131,35 +131,41 @@ button2.onclick = goFishing;
 button3.onclick = openSeas;
 
 function update(location) {
-  fishStats.style.display = "none";
-  button1.innerText = location["button text"][0];
-  button2.innerText = location["button text"][1];
-  button3.innerText = location["button text"][2];
+    fishStats.style.display = "none";
+    button1.innerText = location["button text"][0];
+    button2.innerText = location["button text"][1];
+    button3.innerText = location["button text"][2];
 
-  if (location.name === "store") {
-      button1.onmousedown = () => {
-          buyingBait = true;
-          buyBait(); 
-          baitInterval = setInterval(buyBait, 150);
-      };
-      button1.onmouseup = () => {
-          buyingBait = false;
-          clearInterval(baitInterval); 
-      };
-      button1.onmouseleave = () => {
-          buyingBait = false;
-          clearInterval(baitInterval);
-      };
-  } else {
-      button1.onclick = location["button functions"][0];
-  }
-
-  button2.onclick = location["button functions"][1];
-  button3.onclick = location["button functions"][2];
-  text.innerText = location.text;
-
-  currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
+   
+    if (location.name === "store") {
+        button1.onmousedown = () => {
+            buyingBait = true;
+            buyBait(); 
+            baitInterval = setInterval(buyBait, 500); 
+        };
+        button1.onmouseup = () => {
+            buyingBait = false;
+            clearInterval(baitInterval); 
+        };
+        button1.onmouseleave = () => {
+            buyingBait = false;
+            clearInterval(baitInterval); 
+        };      
+        button1.onclick = null; 
+    } else {
+        button1.onclick = location["button functions"][0];
+        button1.onmousedown = null;
+        button1.onmouseup = null;
+        button1.onmouseleave = null;
+    }
+    button2.onclick = location["button functions"][1];
+    button3.onclick = location["button functions"][2];
+    text.innerText = location.text;
+    currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
 }
+
+// Original button initialization for going to store
+button1.onclick = goStore;
 
 function goTown() {
   update(locations[0]);
