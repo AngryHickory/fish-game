@@ -168,6 +168,14 @@ function generateFish(isSeaFish = false) {
     };
 }
 
+function generateRod() {
+  const basePower = Math.floor(Math.random() * 50) + 5;
+  return {
+    name: "Blue Rod",
+    power: basePower
+  };
+}
+
 function fishAbility(fish, isSeaFish) {
     if (isSeaFish) {
         return Math.random() < 0.2;
