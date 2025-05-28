@@ -1,10 +1,11 @@
 let xp = 0;
-let bait = 100;
-let gold = 500;
-let currentRodIndex = 0;
+let bait = 120;
+let gold = 0;
+let currentRod = null;
 let fishing;
 let fishHealth;
 let inventory = ["Stick"];
+
 let currentLocationIndex = 0;
 
 const button1 = document.querySelector("#button1");
@@ -21,6 +22,10 @@ const fishHealthText = document.querySelector("#fishHealth");
 const rods = [
   { name: "Stick", power: 5 },
   { name: "Wooden Rod", power: 25 },
+  { name: "Blue Rod", power: 35 },
+  { name: "Red Rod", power: 35 },
+  { name: "Green Rod", power: 35 },
+  { name: "Yellow Rod", power: 35 },
   { name: "Aluminum Rod", power: 40 },
   { name: "Professional Rod", power: 60 },
   { name: "Master Rod", power: 80 },
@@ -169,9 +174,11 @@ function generateFish(isSeaFish = false) {
 }
 
 function generateRod() {
-  const basePower = Math.floor(Math.random() * 50) + 5;
+  const randomIndex = Math.floor(Math.random() * rods.length);
+  const basePower = Math.floor(Math.random() * 70) + 5;
+  const selectedRod = rods[randomIndex];
   return {
-    name: "Blue Rod",
+    name: selectedRod.name,
     power: basePower
   };
 }
@@ -224,19 +231,22 @@ function buyBait() {
 }
 
 function buyRod() {
-  if (currentRodIndex < rods.length - 1) {
-    if (gold >= 30) {
+  if (gold >= 30) {
     gold -= 30;
     const newRod = generateRod();
-    currentRodIndex = rods.length;
     rods.push(newRod);
     goldText.innerText = gold;
     text.innerText = "You now have a " + newRod.name + " with power " + newRod.power + ".";
-    inventory.push(newRod.name);
-    text.innerText += " In your inventory you have: " + inventory;
-  } else {
-    text.innerText = "You do not have enough gold to buy a rod."
+    if (currentRod) {
+      text.innerText += " Your " + currentRod.name + " has been replaced.";
     }
+    
+    currentRod = newRod;
+    inventory[1] = currentRod.name;
+
+    text.innerText += " In your inventory you have: " + inventory.join(", ");
+  } else {
+    text.innerText = "You do not have enough gold to buy a rod.";
   }
 }
 
@@ -262,36 +272,42 @@ function goFish() {
 }
 
 function reel() {
+    if (!currentRod) {
+        text.innerText = "You can't reel in with the Stick; it's just a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
+        return;
+    }
+
     const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
     text.innerText = "A fish is thrashing on the line!";
-    text.innerText += " You try to reel it in with your " + rods[currentRodIndex].name + ".";
+    text.innerText += " You try to reel it in with your " + currentRod.name + ".";
 
     if (fishHealth > 0) {
         bait -= getFishAttackValue(currentFishArray[fishing].level);
-        
         if (isFishHit()) {
-            fishHealth -= rods[currentRodIndex].power + Math.floor(Math.random() * xp) + 1;
+            fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
+            text.innerText += " You successfully reel it in!";
         } else {
             text.innerText += " The fish is getting away!";
-            if (Math.random() <= .1 && inventory.length !== 1) {
-            text.innerText += " Your " + inventory.pop() + " breaks.";
-            currentRodIndex--;
-          }
+            if (Math.random() <= .1 && inventory.length > 1) {
+                text.innerText += " Your " + currentRod.name + " breaks.";
+                currentRod = null;
+            }
         }
     } else {
         text.innerText += " The fish is exhausted! You reel it in easily.";
     }
 
-    baitText.innerText = bait;
+    // Update displays
+    baitText.innerText = bait; 
     fishHealthText.innerText = fishHealth;
 
+    // Check for losing conditions
     if (bait <= 0) {
-        lose();
+        lose(); 
     } else if (fishHealth <= 0) {
         catchFish();
     }
 }
-
 function getFishAttackValue(level) {
   const hit = (level * 5) - (Math.floor(Math.random() * xp));
   return hit > 0 ? hit : 0;
@@ -314,7 +330,7 @@ function brace() {
         bait -= Math.round(fishAttackValue * 0.2);
         if (Math.random() <= .1 && inventory.length !== 1) {
         text.innerText += " Your " + inventory.pop() + " breaks.";
-        currentRodIndex--;
+        currentRod = null;
       }
     }
     baitText.innerText = bait;
@@ -342,9 +358,9 @@ function lose() {
 
 function restart() {
   xp = 0;
-  bait = 100;
-  gold = 50;
-  currentRodIndex = 0;
+  bait = 120;
+  gold = 0;
+  currentRod = null;
   inventory = ["Stick"];
   goldText.innerText = gold;
   baitText.innerText = bait;
