@@ -193,12 +193,12 @@ function castRod() {
 
     if (currentLocation === "open seas") {
         fishing = Math.floor(Math.random() * seaFish.length); 
-        seaFish[fishing] = generateFish(true); // Replace with a new sea fish
+        seaFish[fishing] = generateFish(true);
         update(locations[7]);
         seaBattle(); 
     } else {
         fishing = Math.floor(Math.random() * fish.length); 
-        fish[fishing] = generateFish(false); // Replace with a new fish
+        fish[fishing] = generateFish(false);
         update(locations[3]); 
         goFish(); 
     }
