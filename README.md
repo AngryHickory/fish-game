@@ -11,3 +11,8 @@ To do:
 - More rods [X]
 - Brace move will have a chance to reflect damage [X]
 - Save function, autosave?
+- Make buy bait button holdable [X]
+- Randomly generated rods [X]
+- More attributes for rods?
+- More attributes for fish?
+- Secret location?

@@ -1,5 +1,5 @@
 let xp = 0;
-let gold = 20;
+let gold = 200;
 let bait = 120;
 let buyingBait = false;
 let baitInterval;
@@ -303,10 +303,11 @@ function goFish() {
 function reel() {
     if (fishHealth <= 0) {
         text.innerText = "The fish is exhausted! You reel it in easily.";
-        catchFish();
-        return;
+        catchFish(); 
+        return; 
     }
 
+ 
     if (!currentRod) {
         text.innerText = "You can't reel in with the Stick; it's just a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
         return;
@@ -319,7 +320,14 @@ function reel() {
     bait -= getFishAttackValue(currentFishArray[fishing].level);
     if (isFishHit()) {
         fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
-        text.innerText += " You successfully reel it in!";
+
+        if (fishHealth <= 0) {
+            text.innerText += " You successfully reel it in!";
+            catchFish(); 
+            return; 
+        } else {
+            text.innerText += " You successfully reel it in, but the fish is still alive!";
+        }
     } else {
         text.innerText += " The fish is getting away!";
         if (Math.random() <= .1 && inventory.length > 1) {
@@ -327,10 +335,8 @@ function reel() {
             currentRod = null;
         }
     }
-
     baitText.innerText = bait; 
     fishHealthText.innerText = fishHealth;
-
     if (bait <= 0) {
         lose(); 
     }
