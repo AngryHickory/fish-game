@@ -1,5 +1,5 @@
 let xp = 0;
-let gold = 0;
+let gold = 20;
 let bait = 120;
 let buyingBait = false;
 let baitInterval;
@@ -88,7 +88,7 @@ const locations = [
   name: "battle",
   "button text": ["Reel", "Brace", "Cut Line"],
   "button functions": [reel, brace, goTown],
-  text: "You have a fish on the line."
+  text: "You have a fish on the line!"
 },
 {
   name: "fish caught",
@@ -139,19 +139,19 @@ function update(location) {
   if (location.name === "store") {
       button1.onmousedown = () => {
           buyingBait = true;
-          buyBait(); // Initial purchase
-          baitInterval = setInterval(buyBait, 150); // Purchase every 500 ms while held
+          buyBait(); 
+          baitInterval = setInterval(buyBait, 150);
       };
       button1.onmouseup = () => {
           buyingBait = false;
-          clearInterval(baitInterval); // Stop purchasing
+          clearInterval(baitInterval); 
       };
       button1.onmouseleave = () => {
           buyingBait = false;
-          clearInterval(baitInterval); // Stop purchasing if mouse leaves button
+          clearInterval(baitInterval);
       };
   } else {
-      button1.onclick = location["button functions"][0]; // Regular function if not in store
+      button1.onclick = location["button functions"][0];
   }
 
   button2.onclick = location["button functions"][1];
@@ -295,14 +295,12 @@ function goFish() {
 }
 
 function reel() {
-    // Check if the fish is exhausted first
     if (fishHealth <= 0) {
         text.innerText = "The fish is exhausted! You reel it in easily.";
-        catchFish(); // Call the function to handle catching the fish
-        return; // Exit the function
+        catchFish();
+        return;
     }
 
-    // Check if the player has a rod equipped
     if (!currentRod) {
         text.innerText = "You can't reel in with the Stick; it's just a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
         return;
@@ -312,7 +310,6 @@ function reel() {
     text.innerText = "A fish is thrashing on the line!";
     text.innerText += " You try to reel it in with your " + currentRod.name + ".";
 
-    // Normal reeling process
     bait -= getFishAttackValue(currentFishArray[fishing].level);
     if (isFishHit()) {
         fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
@@ -325,11 +322,9 @@ function reel() {
         }
     }
 
-    // Update displays
     baitText.innerText = bait; 
     fishHealthText.innerText = fishHealth;
 
-    // Check for losing conditions
     if (bait <= 0) {
         lose(); 
     }
