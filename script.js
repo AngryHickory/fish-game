@@ -1,6 +1,6 @@
 let xp = 0;
 let bait = 100;
-let gold = 50;
+let gold = 500;
 let currentRodIndex = 0;
 let fishing;
 let fishHealth;
@@ -227,31 +227,16 @@ function buyRod() {
   if (currentRodIndex < rods.length - 1) {
     if (gold >= 30) {
     gold -= 30;
-    currentRodIndex++;
+    const newRod = generateRod();
+    currentRodIndex = rods.length;
+    rods.push(newRod);
     goldText.innerText = gold;
-    let newRod = rods[currentRodIndex].name;
-    text.innerText = "You now have a " + newRod + ".";
-    inventory.push(newRod);
+    text.innerText = "You now have a " + newRod.name + " with power " + newRod.power + ".";
+    inventory.push(newRod.name);
     text.innerText += " In your inventory you have: " + inventory;
   } else {
     text.innerText = "You do not have enough gold to buy a rod."
     }
-  } else {
-    text.innerText = "You already have the best rod!"
-    button2.innerText = "Sell rod for 15 gold";
-    button2.onclick = sellRod;
-  }
-}
-
-function sellRod() {
-  if (inventory.length > 1) {
-    gold += 15;
-    goldText.innerText = gold;
-    let currentRod = inventory.shift();
-    text.innerText = "You sold a " + currentRod + ".";
-    text.innerText += " In your inventory you have: " + inventory + ".";
-  } else {
-    text.innerText = "Don't sell your only rod!";
   }
 }
 
