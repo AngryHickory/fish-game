@@ -148,6 +148,33 @@ function goFishing() {
   update(locations[2]);
 }
 
+function getRandomFishName(isSeaFish) {
+    const fishArray = isSeaFish ? seaFish : fish;
+    const randomIndex = Math.floor(Math.random() * fishArray.length);
+    return fishArray[randomIndex].name;
+}
+
+function generateFish(isSeaFish = false) {
+    const baseLevel = isSeaFish ? Math.floor(Math.random() * 20) + 10 : Math.floor(Math.random() * 10) + 1;
+    const level = baseLevel + Math.floor(xp / 20);
+    const health = level * (isSeaFish ? 15 : 10);
+
+    const name = getRandomFishName(isSeaFish);
+
+    return {
+        name: name,
+        level: level,
+        health: health
+    };
+}
+
+function fishAbility(fish, isSeaFish) {
+    if (isSeaFish) {
+        return Math.random() < 0.2;
+    }
+    return false;
+}
+
 function seaBattle() {
     const currentFishArray = seaFish; 
 
@@ -158,8 +185,6 @@ function seaBattle() {
         fishHealthText.innerText = fishHealth;
 
         console.log("Selected Fish:", currentFishArray[fishing].name); 
-    } else {
-        console.error("Fishing index out of bounds:", fishing);
     }
 }
 
@@ -168,13 +193,12 @@ function castRod() {
 
     if (currentLocation === "open seas") {
         fishing = Math.floor(Math.random() * seaFish.length); 
-        
+        seaFish[fishing] = generateFish(true); // Replace with a new sea fish
         update(locations[7]);
         seaBattle(); 
     } else {
         fishing = Math.floor(Math.random() * fish.length); 
-        
-        
+        fish[fishing] = generateFish(false); // Replace with a new fish
         update(locations[3]); 
         goFish(); 
     }
