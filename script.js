@@ -136,7 +136,7 @@ function update(location) {
     button2.innerText = location["button text"][1];
     button3.innerText = location["button text"][2];
 
-   
+    // Set button actions based on location
     if (location.name === "store") {
         button1.onmousedown = () => {
             buyingBait = true;
@@ -149,23 +149,42 @@ function update(location) {
         };
         button1.onmouseleave = () => {
             buyingBait = false;
+            clearInterval(baitInterval);
+        };
+
+        // Touch events for mobile devices
+        button1.ontouchstart = (event) => {
+            event.preventDefault();
+            buyingBait = true;
+            buyBait(); 
+            baitInterval = setInterval(buyBait, 250); 
+        };
+        button1.ontouchend = () => {
+            buyingBait = false;
             clearInterval(baitInterval); 
-        };      
+        };
+        button1.ontouchcancel = () => {
+            buyingBait = false;
+            clearInterval(baitInterval);
+        };
+
         button1.onclick = null; 
     } else {
         button1.onclick = location["button functions"][0];
         button1.onmousedown = null;
         button1.onmouseup = null;
         button1.onmouseleave = null;
+        button1.ontouchstart = null;
+        button1.ontouchend = null;
+        button1.ontouchcancel = null;
     }
+
     button2.onclick = location["button functions"][1];
     button3.onclick = location["button functions"][2];
     text.innerText = location.text;
+
     currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
 }
-
-// Original button initialization for going to store
-button1.onclick = goStore;
 
 function goTown() {
   update(locations[0]);
@@ -307,7 +326,6 @@ function reel() {
         return; 
     }
 
- 
     if (!currentRod) {
         text.innerText = "You can't reel in with the Stick; it's just a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
         return;
@@ -320,7 +338,14 @@ function reel() {
     bait -= getFishAttackValue(currentFishArray[fishing].level);
     if (isFishHit()) {
         fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
-
+        
+        // Check if the fish can heal
+        if (fishAbility(currentFishArray[fishing], true)) {
+            text.innerText += " The sea fish recovered 100 health!";
+            fishHealth += 100; // Heal the fish
+        } 
+        
+        // Check if the fish's health is now zero or below
         if (fishHealth <= 0) {
             text.innerText += " You successfully reel it in!";
             catchFish(); 
@@ -330,13 +355,17 @@ function reel() {
         }
     } else {
         text.innerText += " The fish is getting away!";
-        if (Math.random() <= .1 && inventory.length > 1) {
+        if (Math.random() <= 0.1 && inventory.length > 1) {
             text.innerText += " Your " + currentRod.name + " breaks.";
             currentRod = null;
         }
     }
+
+    // Update UI elements
     baitText.innerText = bait; 
     fishHealthText.innerText = fishHealth;
+
+    // Check for losing condition
     if (bait <= 0) {
         lose(); 
     }
