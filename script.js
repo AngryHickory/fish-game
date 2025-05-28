@@ -141,7 +141,7 @@ function update(location) {
         button1.onmousedown = () => {
             buyingBait = true;
             buyBait(); 
-            baitInterval = setInterval(buyBait, 500); 
+            baitInterval = setInterval(buyBait, 250); 
         };
         button1.onmouseup = () => {
             buyingBait = false;
