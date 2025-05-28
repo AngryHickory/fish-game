@@ -1,10 +1,13 @@
 let xp = 0;
+let gold = 1000;
 let bait = 120;
-let gold = 0;
+let buyingBait = false;
+let baitInterval;
 let currentRod = null;
 let fishing;
 let fishHealth;
 let inventory = ["Stick"];
+
 
 let currentLocationIndex = 0;
 
@@ -131,7 +134,25 @@ function update(location) {
   button1.innerText = location["button text"][0];
   button2.innerText = location["button text"][1];
   button3.innerText = location["button text"][2];
-  button1.onclick = location["button functions"][0];
+
+  if (location.name === "store") {
+      button1.onmousedown = () => {
+          buyingBait = true;
+          buyBait(); // Initial purchase
+          baitInterval = setInterval(buyBait, 150); // Purchase every 500 ms while held
+      };
+      button1.onmouseup = () => {
+          buyingBait = false;
+          clearInterval(baitInterval); // Stop purchasing
+      };
+      button1.onmouseleave = () => {
+          buyingBait = false;
+          clearInterval(baitInterval); // Stop purchasing if mouse leaves button
+      };
+  } else {
+      button1.onclick = location["button functions"][0]; // Regular function if not in store
+  }
+
   button2.onclick = location["button functions"][1];
   button3.onclick = location["button functions"][2];
   text.innerText = location.text;
@@ -221,12 +242,13 @@ function castRod() {
 
 function buyBait() {
   if (gold >= 10) {
-    gold -= 10;
-    bait += 10;
-    goldText.innerText = gold;
-    baitText.innerText = bait;
+      gold -= 10;
+      bait += 10;
+      goldText.innerText = gold; 
+      baitText.innerText = bait; 
   } else {
-    text.innerText = "Not enough gold to buy more bait."
+      text.innerText = "Not enough gold to buy more bait.";
+      clearInterval(baitInterval);
   }
 }
 
