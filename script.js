@@ -1,5 +1,5 @@
 let xp = 0;
-let gold = 1000;
+let gold = 0;
 let bait = 120;
 let buyingBait = false;
 let baitInterval;
@@ -56,6 +56,7 @@ const fish = [
 
 const seaFish = [
   { name: "Cod", level: 30, health: 500 },
+  { name: "Barracuda", level: 30, health: 575 },
   { name: "Sailfish", level: 35, health: 650 },
   { name: "Swordfish", level: 40, health: 800 },
   { name: "Halibut", level: 50, health: 1000 },
@@ -294,6 +295,14 @@ function goFish() {
 }
 
 function reel() {
+    // Check if the fish is exhausted first
+    if (fishHealth <= 0) {
+        text.innerText = "The fish is exhausted! You reel it in easily.";
+        catchFish(); // Call the function to handle catching the fish
+        return; // Exit the function
+    }
+
+    // Check if the player has a rod equipped
     if (!currentRod) {
         text.innerText = "You can't reel in with the Stick; it's just a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
         return;
@@ -303,20 +312,17 @@ function reel() {
     text.innerText = "A fish is thrashing on the line!";
     text.innerText += " You try to reel it in with your " + currentRod.name + ".";
 
-    if (fishHealth > 0) {
-        bait -= getFishAttackValue(currentFishArray[fishing].level);
-        if (isFishHit()) {
-            fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
-            text.innerText += " You successfully reel it in!";
-        } else {
-            text.innerText += " The fish is getting away!";
-            if (Math.random() <= .1 && inventory.length > 1) {
-                text.innerText += " Your " + currentRod.name + " breaks.";
-                currentRod = null;
-            }
-        }
+    // Normal reeling process
+    bait -= getFishAttackValue(currentFishArray[fishing].level);
+    if (isFishHit()) {
+        fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
+        text.innerText += " You successfully reel it in!";
     } else {
-        text.innerText += " The fish is exhausted! You reel it in easily.";
+        text.innerText += " The fish is getting away!";
+        if (Math.random() <= .1 && inventory.length > 1) {
+            text.innerText += " Your " + currentRod.name + " breaks.";
+            currentRod = null;
+        }
     }
 
     // Update displays
@@ -326,10 +332,9 @@ function reel() {
     // Check for losing conditions
     if (bait <= 0) {
         lose(); 
-    } else if (fishHealth <= 0) {
-        catchFish();
     }
 }
+
 function getFishAttackValue(level) {
   const hit = (level * 5) - (Math.floor(Math.random() * xp));
   return hit > 0 ? hit : 0;
