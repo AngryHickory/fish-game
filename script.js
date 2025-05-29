@@ -1,6 +1,6 @@
-let xp = 500;
-let gold = 200;
-let bait = 12000;
+let xp = 0;
+let gold = 20;
+let bait = 120;
 let buyingBait = false;
 let buyingSpeed = 250;
 let increment = 1000;
@@ -446,19 +446,14 @@ function catchFish() {
     const caughtFish = currentFishArray[fishing];
     const isSeaFish = locations[currentLocationIndex].name === "open seas";
 
-    // Calculate rewards
     const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish);
     gold += goldEarned;
     xp += caughtFish.level; 
 
-    // Update UI
     goldText.innerText = gold;
     xpText.innerText = xp;
 
-    // Update message for caught fish
     text.innerText = `You caught the fish! You gained ${goldEarned} gold and ${caughtFish.level} XP!`;
-    
-    // Update the display location (if necessary)
     update(locations[4]); 
 }
 
