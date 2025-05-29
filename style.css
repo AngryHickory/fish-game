@@ -8,6 +8,7 @@ body {
   padding: 10px;
   font-weight: bold;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  height: 130px;
 }
 
 #textSpanRed {
@@ -27,6 +28,11 @@ body {
   margin: 30px auto 0px;
   padding: 10px;
 }
+
+#controls {
+  display: flex;
+  justify-content: space-around;
+} 
 
 #controls, #stats {
   border: 1px solid #1ea6b6;
@@ -49,6 +55,7 @@ body {
 }
 
 button {
+  flex: 1;
   cursor: pointer;
   color: #147e7e;
   background-color: #99BE1B;
