@@ -1,7 +1,9 @@
 let xp = 0;
-let gold = 20;
+let gold = 200;
 let bait = 120;
 let buyingBait = false;
+let buyingSpeed = 250;
+let increment = 1000;
 let baitInterval;
 let currentRod = null;
 let fishing;
@@ -141,15 +143,22 @@ function update(location) {
         button1.onmousedown = () => {
             buyingBait = true;
             buyBait(); 
-            baitInterval = setInterval(buyBait, 250); 
+            baitInterval = setInterval(() => {
+                buyBait();
+                buyingSpeed = Math.max(50, buyingSpeed - increment);
+                clearInterval(baitInterval);
+                baitInterval = setInterval(buyBait, buyingSpeed); 
+            }, buyingSpeed); 
         };
         button1.onmouseup = () => {
             buyingBait = false;
             clearInterval(baitInterval); 
+            buyingSpeed = 250; 
         };
         button1.onmouseleave = () => {
             buyingBait = false;
             clearInterval(baitInterval);
+            buyingSpeed = 250;
         };
 
         // Touch events for mobile devices
@@ -157,15 +166,22 @@ function update(location) {
             event.preventDefault();
             buyingBait = true;
             buyBait(); 
-            baitInterval = setInterval(buyBait, 250); 
+            baitInterval = setInterval(() => {
+                buyBait();
+                buyingSpeed = Math.max(100, buyingSpeed - increment);
+                clearInterval(baitInterval);
+                baitInterval = setInterval(buyBait, buyingSpeed);
+            }, buyingSpeed); 
         };
         button1.ontouchend = () => {
             buyingBait = false;
             clearInterval(baitInterval); 
+            buyingSpeed = 250;
         };
         button1.ontouchcancel = () => {
             buyingBait = false;
             clearInterval(baitInterval);
+            buyingSpeed = 250;
         };
 
         button1.onclick = null; 
