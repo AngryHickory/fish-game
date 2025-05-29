@@ -208,7 +208,7 @@ function getRandomFishName(isSeaFish) {
 
 function generateFish(isSeaFish = false) {
     const baseLevel = isSeaFish ? Math.floor(Math.random() * 20) + 10 : Math.floor(Math.random() * 10) + 1;
-    const level = baseLevel + Math.floor(xp / 20);
+    const level = baseLevel + Math.floor(xp / 90);
     const health = level * (isSeaFish ? 15 : 10);
 
     const name = getRandomFishName(isSeaFish);
