@@ -342,6 +342,12 @@ function goFish() {
     }
 }
 
+function getFishAttackValue(level) {
+  const minStruggle = level * 1.5;
+  const maxStruggle = level * 2.5;
+  return Math.floor(Math.random() * (maxStruggle - minStruggle + 1)) + minStruggle;
+}
+
 function reel() {
     if (fishHealth <= 0) {
         text.innerText = "The fish is exhausted! You reel it in easily.";
@@ -359,6 +365,7 @@ function reel() {
     text.innerText += " You try to reel it in.";
 
     bait -= getFishAttackValue(currentFishArray[fishing].level);
+    bait = Math.round(bait);
     if (isFishHit()) {
         fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
         
@@ -380,7 +387,7 @@ function reel() {
         }
     } else {
         text.innerText += " The fish is getting away!";
-        if (!isRodBroken && Math.random() <= 0.1 && inventory.length > 1) {
+        if (!isRodBroken && Math.random() <= 0.03 && inventory.length > 1) {
             text.innerText += " Your " + currentRod.name + " breaks.";
             currentRod = null;
             isRodBroken = true;
@@ -400,11 +407,6 @@ function reel() {
     }
 }
 
-function getFishAttackValue(level) {
-  const hit = (level * 2) - (Math.floor(Math.random() * xp));
-  return hit > 0 ? hit : 0;
-}
-
 function isFishHit() {
   return Math.random() > .2 || bait < 20;
 }
@@ -415,12 +417,13 @@ function brace() {
     const fishAttackValue = getFishAttackValue(currentFishArray[fishing].level);
     if (Math.random() <= 0.4) {
         text.innerText += " The fish begins to wear itself out!";
-        const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.7);
+        const newFishHealth = Math.round(fishHealth - fishAttackValue * 1);
         fishHealth = newFishHealth > 0 ? newFishHealth : 0;
     } else {
         text.innerText += " You're unable to brace! Keep trying!";
-        bait -= Math.round(fishAttackValue * 0.2);
-        if (Math.random() <= .01 && inventory.length !== 1) {
+        bait -= Math.round(fishAttackValue * 0.25);
+        bait = Math.round(bait);
+        if (Math.random() <= .03 && inventory.length !== 1) {
         text.innerText += " Your " + inventory.pop() + " breaks.";
         currentRod = null;
         isRodBroken = true;
@@ -437,7 +440,7 @@ function brace() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 2000 : 3.7; // Base multiplier
+    const baseReward = isSeaFish ? 2000 : 2.5; // Base multiplier
     return Math.floor(level * baseReward * (1 + Math.log(level))); // Logarithmic scaling
 }
 
