@@ -341,8 +341,8 @@ function reel() {
         
         // Check if the fish can heal
         if (fishAbility(currentFishArray[fishing], true)) {
-            text.innerText += " The sea fish recovered 100 health!";
-            fishHealth += 100; // Heal the fish
+            text.innerText += " The fish recovered some health!";
+            fishHealth += 50; // Heal the fish
         } 
         
         // Check if the fish's health is now zero or below
@@ -351,7 +351,7 @@ function reel() {
             catchFish(); 
             return; 
         } else {
-            text.innerText += " You successfully reel it in, but the fish is still alive!";
+            text.innerText += " You almost reel it in, but the fish slips away at the last second!";
         }
     } else {
         text.innerText += " The fish is getting away!";
