@@ -1,4 +1,4 @@
-let xp = 0;
+let xp = 500;
 let gold = 200;
 let bait = 12000;
 let buyingBait = false;
@@ -6,8 +6,10 @@ let buyingSpeed = 250;
 let increment = 1000;
 let baitInterval;
 let currentRod = null;
+let isRodBroken = false;
 let fishing;
 let fishHealth;
+let fishHealCooldown = 0;
 let inventory = ["Stick"];
 
 
@@ -26,15 +28,15 @@ const fishLevelText = document.querySelector("#fishLevel");
 const fishHealthText = document.querySelector("#fishHealth");
 
 const rods = [
-  { name: "Stick", power: 5 },
+  { name: "Basic Rod", power: 5 },
   { name: "Wooden Rod", power: 25 },
   { name: "Blue Rod", power: 35 },
   { name: "Red Rod", power: 35 },
   { name: "Green Rod", power: 35 },
   { name: "Yellow Rod", power: 35 },
   { name: "Aluminum Rod", power: 40 },
-  { name: "Professional Rod", power: 60 },
-  { name: "Master Rod", power: 80 },
+  { name: "Steel Rod", power: 60 },
+  { name: "Fishing Rod", power: 80 },
   { name: "Experimental Rod", power: 100 },
 ];
 
@@ -196,7 +198,10 @@ function update(location) {
 
     button2.onclick = location["button functions"][1];
     button3.onclick = location["button functions"][2];
-    text.innerText = location.text;
+    
+    if (location.name !== "fish caught") {
+        text.innerText = location.text; // Only set default text if it's not the catch message
+    }
 
     currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
 }
@@ -307,6 +312,7 @@ function buyRod() {
     
     currentRod = newRod;
     inventory[1] = currentRod.name;
+    isRodBroken = false;
 
     text.innerText += " In your inventory you have: " + inventory.join(", ");
   } else {
@@ -350,18 +356,19 @@ function reel() {
 
     const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
     text.innerText = "A fish is thrashing on the line!";
-    text.innerText += " You try to reel it in with your " + currentRod.name + ".";
+    text.innerText += " You try to reel it in.";
 
     bait -= getFishAttackValue(currentFishArray[fishing].level);
     if (isFishHit()) {
         fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
         
 
-        if (fishAbility(currentFishArray[fishing], true)) {
+        if (fishAbility(currentFishArray[fishing], true) && fishHealCooldown === 0) {
             const fishHealPercentage = 0.3;
             const fishHealAmount = Math.floor(fishHealth * fishHealPercentage);
             text.innerText += " The fish recovered " + fishHealAmount + " health!";
             fishHealth += fishHealAmount;
+            fishHealCooldown = 5;
         } 
         
         if (fishHealth <= 0) {
@@ -378,6 +385,11 @@ function reel() {
             currentRod = null;
             isRodBroken = true;
         }
+    }
+
+    if (fishHealCooldown > 0) {
+        fishHealCooldown--;
+        console.log("Fish Heal Cooldown:", fishHealCooldown);
     }
 
     baitText.innerText = bait; 
@@ -434,14 +446,19 @@ function catchFish() {
     const caughtFish = currentFishArray[fishing];
     const isSeaFish = locations[currentLocationIndex].name === "open seas";
 
+    // Calculate rewards
     const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish);
     gold += goldEarned;
     xp += caughtFish.level; 
 
+    // Update UI
     goldText.innerText = gold;
     xpText.innerText = xp;
 
-    locations[4].text = `You caught the ${caughtFish.name}! You gained ${goldEarned} gold and ${caughtFish.level} XP!`;
+    // Update message for caught fish
+    text.innerText = `You caught the fish! You gained ${goldEarned} gold and ${caughtFish.level} XP!`;
+    
+    // Update the display location (if necessary)
     update(locations[4]); 
 }
 
