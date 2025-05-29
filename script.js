@@ -1,5 +1,5 @@
 let xp = 0;
-let gold = 200;
+let gold = 0;
 let bait = 120;
 let buyingBait = false;
 let buyingSpeed = 250;
