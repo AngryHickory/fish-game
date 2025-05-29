@@ -1,6 +1,6 @@
 let xp = 0;
-let gold = 20;
-let bait = 120;
+let gold = 200;
+let bait = 12000;
 let buyingBait = false;
 let buyingSpeed = 250;
 let increment = 1000;
@@ -22,6 +22,7 @@ const baitText = document.querySelector("#baitText");
 const goldText = document.querySelector("#goldText");
 const fishStats = document.querySelector("#fishStats");
 const fishName = document.querySelector("#fishName");
+const fishLevelText = document.querySelector("#fishLevel");
 const fishHealthText = document.querySelector("#fishHealth");
 
 const rods = [
@@ -221,7 +222,7 @@ function getRandomFishName(isSeaFish) {
 }
 
 function generateFish(isSeaFish = false) {
-    const baseLevel = isSeaFish ? Math.floor(Math.random() * 20) + 10 : Math.floor(Math.random() * 10) + 1;
+    const baseLevel = isSeaFish ? Math.floor(Math.random() * 80) + 20 : Math.floor(Math.random() * 20) + 1;
     const level = baseLevel + Math.floor(xp / 90);
     const health = level * (isSeaFish ? 50 : 20);
 
@@ -258,6 +259,7 @@ function seaBattle() {
         fishHealth = currentFishArray[fishing].health; 
         fishStats.style.display = "block"; 
         fishName.innerText = currentFishArray[fishing].name; 
+        fishLevelText.innerText = currentFishArray[fishing].level;
         fishHealthText.innerText = fishHealth;
 
         console.log("Selected Fish:", currentFishArray[fishing].name); 
@@ -326,6 +328,7 @@ function goFish() {
         fishStats.style.display = "block"; 
         fishName.innerText = currentFishArray[fishing].name; 
         fishHealthText.innerText = fishHealth;
+        fishLevelText.innerText = currentFishArray[fishing].level;
 
         console.log("Selected Fish:", currentFishArray[fishing].name); 
     } else {
@@ -421,17 +424,19 @@ function brace() {
     }
 }
 
+function calculateGoldReward(level, isSeaFish) {
+    const baseReward = isSeaFish ? 2000 : 6.7; // Base multiplier
+    return Math.floor(level * baseReward * (1 + Math.log(level))); // Logarithmic scaling
+}
+
 function catchFish() {
     const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
     const caughtFish = currentFishArray[fishing];
-    
-    if (locations[currentLocationIndex].name === "open seas") {
-        gold += Math.floor(caughtFish.level * 2000) + 1; // Adjust multiplier for sea fish
-    } else {
-        gold += Math.floor(caughtFish.level * 6.7) + 1; // Adjust multiplier for regular fish
-    }
+    const isSeaFish = locations[currentLocationIndex].name === "open seas";
 
-    xp += currentFishArray[fishing].level; 
+    gold += calculateGoldReward(caughtFish.level, isSeaFish);
+    xp += caughtFish.level; 
+
     goldText.innerText = gold;
     xpText.innerText = xp;
     update(locations[4]); 
