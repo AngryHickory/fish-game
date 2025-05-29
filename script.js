@@ -1,6 +1,6 @@
 let xp = 0;
-let gold = 20;
-let bait = 120;
+let gold = 2000;
+let bait = 12000;
 let buyingBait = false;
 let baitInterval;
 let currentRod = null;
@@ -339,13 +339,14 @@ function reel() {
     if (isFishHit()) {
         fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
         
-        // Check if the fish can heal
+
         if (fishAbility(currentFishArray[fishing], true)) {
-            text.innerText += " The fish recovered some health!";
-            fishHealth += 50; // Heal the fish
+            const fishHealPercentage = 0.3;
+            const fishHealAmount = Math.floor(fishHealth * fishHealPercentage);
+            text.innerText += " The fish recovered " + fishHealAmount + " health!";
+            fishHealth += fishHealAmount;
         } 
         
-        // Check if the fish's health is now zero or below
         if (fishHealth <= 0) {
             text.innerText += " You successfully reel it in!";
             catchFish(); 
@@ -355,17 +356,16 @@ function reel() {
         }
     } else {
         text.innerText += " The fish is getting away!";
-        if (Math.random() <= 0.1 && inventory.length > 1) {
+        if (!isRodBroken && Math.random() <= 0.9 && inventory.length > 1) {
             text.innerText += " Your " + currentRod.name + " breaks.";
             currentRod = null;
+            isRodBroken = true;
         }
     }
 
-    // Update UI elements
     baitText.innerText = bait; 
     fishHealthText.innerText = fishHealth;
 
-    // Check for losing condition
     if (bait <= 0) {
         lose(); 
     }
