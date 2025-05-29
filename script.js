@@ -1,6 +1,6 @@
 let xp = 0;
-let gold = 0;
-let bait = 120;
+let gold = 200;
+let bait = 1200;
 let buyingBait = false;
 let buyingSpeed = 250;
 let increment = 1000;
@@ -39,11 +39,7 @@ const rods = [
 
 const fish = [
   { name: "Bluegill", level: 2, health: 15 },
-  { name: "Bluegill", level: 2, health: 15 },
   { name: "Bullhead Catfish", level: 4, health: 30 },
-  { name: "Bullhead Catfish", level: 4, health: 30 },
-  { name: "Bullhead Catfish", level: 4, health: 30 },
-  { name: "Pickerel", level: 8, health: 60 },
   { name: "Pickerel", level: 8, health: 60 },
   { name: "Perch", level: 12, health: 90 },
   { name: "Smallmouth Bass", level: 14, health: 110 },
@@ -140,6 +136,8 @@ function update(location) {
 
     // Set button actions based on location
     if (location.name === "store") {
+        clearInterval(baitInterval);
+
         button1.onmousedown = () => {
             buyingBait = true;
             buyBait(); 
@@ -225,7 +223,7 @@ function getRandomFishName(isSeaFish) {
 function generateFish(isSeaFish = false) {
     const baseLevel = isSeaFish ? Math.floor(Math.random() * 20) + 10 : Math.floor(Math.random() * 10) + 1;
     const level = baseLevel + Math.floor(xp / 90);
-    const health = level * (isSeaFish ? 15 : 10);
+    const health = level * (isSeaFish ? 50 : 20);
 
     const name = getRandomFishName(isSeaFish);
 
@@ -238,7 +236,7 @@ function generateFish(isSeaFish = false) {
 
 function generateRod() {
   const randomIndex = Math.floor(Math.random() * rods.length);
-  const basePower = Math.floor(Math.random() * 70) + 5;
+  const basePower = Math.floor(Math.random() * 100) + 5;
   const selectedRod = rods[randomIndex];
   return {
     name: selectedRod.name,
@@ -248,7 +246,7 @@ function generateRod() {
 
 function fishAbility(fish, isSeaFish) {
     if (isSeaFish) {
-        return Math.random() < 0.2;
+        return Math.random() < 0.12;
     }
     return false;
 }
@@ -388,7 +386,7 @@ function reel() {
 }
 
 function getFishAttackValue(level) {
-  const hit = (level * 5) - (Math.floor(Math.random() * xp));
+  const hit = (level * 2) - (Math.floor(Math.random() * xp));
   return hit > 0 ? hit : 0;
 }
 
@@ -400,14 +398,14 @@ function brace() {
     const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
     text.innerText = "You brace the rod against the sudden movements!";
     const fishAttackValue = getFishAttackValue(currentFishArray[fishing].level);
-    if (Math.random() <= 0.3) {
+    if (Math.random() <= 0.4) {
         text.innerText += " The fish begins to wear itself out!";
         const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.7);
         fishHealth = newFishHealth > 0 ? newFishHealth : 0;
     } else {
         text.innerText += " You're unable to brace! Keep trying!";
         bait -= Math.round(fishAttackValue * 0.2);
-        if (Math.random() <= .1 && inventory.length !== 1) {
+        if (Math.random() <= .01 && inventory.length !== 1) {
         text.innerText += " Your " + inventory.pop() + " breaks.";
         currentRod = null;
         isRodBroken = true;
@@ -425,7 +423,14 @@ function brace() {
 
 function catchFish() {
     const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
-    gold += Math.floor(currentFishArray[fishing].level * 6.7) + 1; 
+    const caughtFish = currentFishArray[fishing];
+    
+    if (locations[currentLocationIndex].name === "open seas") {
+        gold += Math.floor(caughtFish.level * 2000) + 1; // Adjust multiplier for sea fish
+    } else {
+        gold += Math.floor(caughtFish.level * 6.7) + 1; // Adjust multiplier for regular fish
+    }
+
     xp += currentFishArray[fishing].level; 
     goldText.innerText = gold;
     xpText.innerText = xp;
