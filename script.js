@@ -389,7 +389,7 @@ function brace() {
         const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.7);
         fishHealth = newFishHealth > 0 ? newFishHealth : 0;
     } else {
-        text.innerText += " You're unable to brace!";
+        text.innerText += " You're unable to brace! Keep trying!";
         bait -= Math.round(fishAttackValue * 0.2);
         if (Math.random() <= .1 && inventory.length !== 1) {
         text.innerText += " Your " + inventory.pop() + " breaks.";
