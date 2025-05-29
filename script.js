@@ -437,7 +437,7 @@ function brace() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 2000 : 6.7; // Base multiplier
+    const baseReward = isSeaFish ? 2000 : 3.7; // Base multiplier
     return Math.floor(level * baseReward * (1 + Math.log(level))); // Logarithmic scaling
 }
 
