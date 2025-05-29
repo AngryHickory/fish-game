@@ -434,11 +434,14 @@ function catchFish() {
     const caughtFish = currentFishArray[fishing];
     const isSeaFish = locations[currentLocationIndex].name === "open seas";
 
-    gold += calculateGoldReward(caughtFish.level, isSeaFish);
+    const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish);
+    gold += goldEarned;
     xp += caughtFish.level; 
 
     goldText.innerText = gold;
     xpText.innerText = xp;
+
+    locations[4].text = `You caught the ${caughtFish.name}! You gained ${goldEarned} gold and ${caughtFish.level} XP!`;
     update(locations[4]); 
 }
 
