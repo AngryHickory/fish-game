@@ -1,6 +1,6 @@
 let xp = 0;
-let gold = 2000;
-let bait = 12000;
+let gold = 20;
+let bait = 125;
 let buyingBait = false;
 let baitInterval;
 let currentRod = null;
@@ -356,7 +356,7 @@ function reel() {
         }
     } else {
         text.innerText += " The fish is getting away!";
-        if (!isRodBroken && Math.random() <= 0.9 && inventory.length > 1) {
+        if (!isRodBroken && Math.random() <= 0.1 && inventory.length > 1) {
             text.innerText += " Your " + currentRod.name + " breaks.";
             currentRod = null;
             isRodBroken = true;
@@ -394,6 +394,7 @@ function brace() {
         if (Math.random() <= .1 && inventory.length !== 1) {
         text.innerText += " Your " + inventory.pop() + " breaks.";
         currentRod = null;
+        isRodBroken = true;
       }
     }
     baitText.innerText = bait;
