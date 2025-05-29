@@ -1,6 +1,6 @@
 let xp = 0;
 let gold = 20;
-let bait = 125;
+let bait = 120;
 let buyingBait = false;
 let baitInterval;
 let currentRod = null;
