@@ -327,7 +327,7 @@ function reel() {
     }
 
     if (!currentRod) {
-        text.innerText = "You can't reel in with the Stick; it's just a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
+        text.innerText = "You can't reel in, you've only got a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
         return;
     }
 

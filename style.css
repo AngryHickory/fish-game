@@ -10,8 +10,12 @@ body {
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
-#textSpan {
+#textSpanRed {
   color: rgb(170, 10, 10);
+}
+
+#textSpanGreen {
+  color: #01834f;
 }
 
 #game {
