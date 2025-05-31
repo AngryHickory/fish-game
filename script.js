@@ -397,14 +397,12 @@ function stopBuying() {
     clearTimeout(buyTimeout); // Stop any active buying loop
     buyingBait = false;
     buyingSpeed = 250; // Reset to initial speed
-    // console.log("Stopped buying. Speed reset to:", buyingSpeed); // Debugging
 }
 
 function startBuying() {
     if (!buyingBait) { // Only start if not already buying
         buyingBait = true;
         buyingSpeed = 250; // Reset speed for a fresh start
-        // console.log("Started buying. Initial speed:", buyingSpeed); // Debugging
         buyBaitLoop(); // Start the recursive buying loop
     }
 }
@@ -415,7 +413,6 @@ function buyBaitLoop() {
 
         // Decrease the delay for the next purchase
         buyingSpeed = Math.max(minBuyingSpeed, buyingSpeed - increment);
-        // console.log("Next purchase speed:", buyingSpeed); // Debugging
 
         // Schedule the next purchase
         buyTimeout = setTimeout(buyBaitLoop, buyingSpeed);
@@ -577,7 +574,6 @@ function seaBattle() {
     fishLevelText.innerText = currentFishInBattle.level;
     fishHealthText.innerText = currentFishInBattle.health; 
     
-    console.log("Selected Fish:", currentFishInBattle.name);
 }
 
 function castRod() {
@@ -608,7 +604,6 @@ function goFish() {
     fishHealthText.innerText = fishHealth;
     fishLevelText.innerText = currentFishInBattle.level;
 
-    console.log("Selected Fish:", currentFishInBattle.name);
 }
 
 function getFishAttackValue(level) {
@@ -666,7 +661,6 @@ function reel() {
 
     if (fishHealCooldown > 0) {
         fishHealCooldown--;
-        console.log("Fish Heal Cooldown:", fishHealCooldown);
     }
 
     updateStatsDisplay();
@@ -704,7 +698,7 @@ function brace() {
         text.innerText += " You're unable to brace! Keep trying!";
         
         let damageMultiplier = 1;
-        if (currentFishInBattle.level >= playerLevel * 4) {
+        if (currentFishInBattle.level >= getPlayerLevel() * 4) {
             damageMultiplier = 3;
         }
 
@@ -735,8 +729,6 @@ function calculateGoldReward(level, isSeaFish) {
 
 function catchFish() {
     const caughtFish = currentFishInBattle;
-    console.log("Caught Fish Level:", caughtFish.level);
-    console.log("Is Sea Fish:", locations[currentLocationIndex].name === "sea battle");
     const isSeaFish = locations[currentLocationIndex].name === "sea battle";
 
     const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish);
