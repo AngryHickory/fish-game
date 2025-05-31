@@ -74,8 +74,8 @@ const seaFish = [
 const locations = [
   {
     name: "town square",
-    "button text": ["Go to Store", "Go Fishing", "Open Seas", ""],
-    "button functions": [goStore, goFishing, openSeas, null],
+    "button text": ["Go to Store", "Go Fishing", "Open Seas", "Settings"],
+    "button functions": [goStore, goFishing, openSeas, goSettings],
     text: "You are in the town square. You see a sign that says \"Store\"."
   },
   {
@@ -122,6 +122,13 @@ locations.push({
     "button text": ["Reel", "Brace", "Cut Line", ""],
     "button functions": [reel, brace, goTown, null],
     text: "You have a fish on the line!"
+});
+
+locations.push({
+    name: "settings",
+    "button text": ["Save Game", "New Game", "", "Town Square"],
+    "button functions": [saveGame, newGame, null, goTown],
+    text: "Game Settings. Use these options to manage your game progress. Starting a new game will erase all current progress."
 });
 
 const fishArrayMap = {
@@ -228,6 +235,19 @@ function goFishing() {
 
 function openSeas() {
     update(locations[6]); 
+}
+
+function saveGame() {
+    const gameData = {
+        xp: xp,
+        gold: gold,
+        bait: bait,
+        inventory: inventory,
+        currentRod: currentRod,
+        isRodBroken: isRodBroken
+    };
+    localStorage.setItem('fishingGameSave', JSON.stringify(gameData));
+    text.innerText = "Game saved! You can now exit the game.";
 }
 
 function lose() {
