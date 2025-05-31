@@ -1,5 +1,5 @@
 let xp = 0;
-let gold = 0;
+let gold = 20;
 let bait = 120;
 let buyingBait = false;
 let buyingSpeed = 500;
@@ -94,7 +94,7 @@ const locations = [
 {
   name: "battle",
   "button text": ["Reel", "Brace", "Cut Line", ""],
-  "button functions": [reel, brace, goTown, null],
+  "button functions": [reel, brace, goFishing, null],
   text: "You have a fish on the line!"
 },
 {
@@ -105,8 +105,8 @@ const locations = [
 },
 {
   name: "lose",
-  "button text": ["REPLAY?", "", "", ""],
-  "button functions": [restart, null, null, null],
+  "button text": ["New Game", "Load Game", "", ""],
+  "button functions": [newGame, loadGame, null, null],
   text: "Out of bait... GAME OVER"
 }
 ];
@@ -121,7 +121,7 @@ locations.push({
 locations.push({
     name: "sea battle",
     "button text": ["Reel", "Brace", "Cut Line", ""],
-    "button functions": [reel, brace, goTown, null],
+    "button functions": [reel, brace, openSeas, null],
     text: "You have a fish on the line!"
 });
 
