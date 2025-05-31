@@ -2,9 +2,10 @@ let xp = 0;
 let gold = 20;
 let bait = 120;
 let buyingBait = false;
-let buyingSpeed = 250;
-let increment = 1000;
-let baitInterval;
+let buyingSpeed = 500;
+let increment = 20;
+let minBuyingSpeed = 10;
+let buyTimeout;
 let currentRod = null;
 let isRodBroken = false;
 let fishing;
@@ -131,62 +132,66 @@ button1.onclick = goStore;
 button2.onclick = goFishing;
 button3.onclick = openSeas;
 
+function stopBuying() {
+    clearTimeout(buyTimeout); // Stop any active buying loop
+    buyingBait = false;
+    buyingSpeed = 250; // Reset to initial speed
+    // console.log("Stopped buying. Speed reset to:", buyingSpeed); // Debugging
+}
+
+function startBuying() {
+    if (!buyingBait) { // Only start if not already buying
+        buyingBait = true;
+        buyingSpeed = 250; // Reset speed for a fresh start
+        // console.log("Started buying. Initial speed:", buyingSpeed); // Debugging
+        buyBaitLoop(); // Start the recursive buying loop
+    }
+}
+
+function buyBaitLoop() {
+    if (buyingBait && gold >= 10) {
+        buyBait(); // Make the purchase
+
+        // Decrease the delay for the next purchase
+        buyingSpeed = Math.max(minBuyingSpeed, buyingSpeed - increment);
+        // console.log("Next purchase speed:", buyingSpeed); // Debugging
+
+        // Schedule the next purchase
+        buyTimeout = setTimeout(buyBaitLoop, buyingSpeed);
+    } else {
+        // If out of gold or button released, stop buying
+        stopBuying();
+        if (gold < 10) {
+            text.innerText = "Not enough gold to buy more bait.";
+        }
+    }
+}
+
 function update(location) {
     fishStats.style.display = "none";
     button1.innerText = location["button text"][0];
     button2.innerText = location["button text"][1];
     button3.innerText = location["button text"][2];
 
-    // Set button actions based on location
     if (location.name === "store") {
-        clearInterval(baitInterval);
+        stopBuying(); // Ensure any previous buying loop is stopped when entering store
 
-        button1.onmousedown = () => {
-            buyingBait = true;
-            buyBait(); 
-            baitInterval = setInterval(() => {
-                buyBait();
-                buyingSpeed = Math.max(50, buyingSpeed - increment);
-                clearInterval(baitInterval);
-                baitInterval = setInterval(buyBait, buyingSpeed); 
-            }, buyingSpeed); 
-        };
-        button1.onmouseup = () => {
-            buyingBait = false;
-            clearInterval(baitInterval); 
-            buyingSpeed = 250; 
-        };
-        button1.onmouseleave = () => {
-            buyingBait = false;
-            clearInterval(baitInterval);
-            buyingSpeed = 250;
-        };
+        // Mouse events
+        button1.onmousedown = startBuying; // Just call startBuying on mouse down
+        button1.onmouseup = stopBuying;    // Stop on mouse up
+        button1.onmouseleave = stopBuying; // Stop on mouse leave
 
         // Touch events for mobile devices
         button1.ontouchstart = (event) => {
-            event.preventDefault();
-            buyingBait = true;
-            buyBait(); 
-            baitInterval = setInterval(() => {
-                buyBait();
-                buyingSpeed = Math.max(100, buyingSpeed - increment);
-                clearInterval(baitInterval);
-                baitInterval = setInterval(buyBait, buyingSpeed);
-            }, buyingSpeed); 
+            event.preventDefault(); // Prevent default touch behavior
+            startBuying();
         };
-        button1.ontouchend = () => {
-            buyingBait = false;
-            clearInterval(baitInterval); 
-            buyingSpeed = 250;
-        };
-        button1.ontouchcancel = () => {
-            buyingBait = false;
-            clearInterval(baitInterval);
-            buyingSpeed = 250;
-        };
+        button1.ontouchend = stopBuying;
+        button1.ontouchcancel = stopBuying;
 
-        button1.onclick = null; 
+        button1.onclick = null; // Ensure click is null to prevent double-firing
     } else {
+        // For other locations, set regular onclick and clear handlers
         button1.onclick = location["button functions"][0];
         button1.onmousedown = null;
         button1.onmouseup = null;
@@ -194,6 +199,7 @@ function update(location) {
         button1.ontouchstart = null;
         button1.ontouchend = null;
         button1.ontouchcancel = null;
+        stopBuying(); // Ensure buying stops if we navigate away from the store
     }
 
     button2.onclick = location["button functions"][1];
