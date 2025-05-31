@@ -632,9 +632,6 @@ function reel() {
     text.innerText = "A fish is thrashing on the line!";
     text.innerText += " You try to reel it in.";
 
-    bait -= getFishAttackValue(currentFishInBattle.level);
-    bait = Math.round(bait);
-
     if (isFishHit()) {
         fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
         
@@ -654,6 +651,10 @@ function reel() {
         } else {
             text.innerText += " You almost reel it in, but the fish slips away at the last second!";
         }
+
+        bait -= getFishAttackValue(currentFishInBattle.level);
+        bait = Math.round(bait);
+
     } else {
         text.innerText += " The fish is getting away!";
         if (!isRodBroken && Math.random() <= 0.03 && inventory.length > 1) {
@@ -681,29 +682,49 @@ function isFishHit() {
 }
 
 function brace() {
+
+    if (fishHealth <= 0) {
+        text.innerText = "The " + currentFishInBattle.name + " is already exhausted. Time to reel it in!";
+        return; // Exit the function early
+    }
+
     text.innerText = "You brace the rod against the " + currentFishInBattle.name + "'s sudden movements!";
     const fishAttackValue = getFishAttackValue(currentFishInBattle.level);
+    
     if (Math.random() <= 0.4) {
         text.innerText += " The " + currentFishInBattle.name + " begins to wear itself out!";
         const newFishHealth = Math.round(fishHealth - fishAttackValue * 1);
         fishHealth = newFishHealth > 0 ? newFishHealth : 0;
+
+        if (fishHealth <= 0) {
+            fishHealth = 0;
+            text.innerText = "The " + currentFishInBattle.name + " is exhausted. Time to reel it in!";
+        }
     } else {
         text.innerText += " You're unable to brace! Keep trying!";
-        bait -= Math.round(fishAttackValue * 0.25);
-        bait = Math.round(bait);
-        if (Math.random() <= .03 && inventory.length !== 1) {
-        text.innerText += " Your " + inventory.pop() + " breaks.";
-        currentRod = null;
-        isRodBroken = true;
-      }
+        
+        let damageMultiplier = 1;
+        if (currentFishInBattle.level >= playerLevel * 4) {
+            damageMultiplier = 3;
+        }
+
+        if (fishHealth > 0) {
+            bait -= Math.round(fishAttackValue * 0.25 * damageMultiplier);
+            bait = Math.round(bait);
+        }
+        
+        if (Math.random() <= 0.03 && inventory.length !== 1) {
+            text.innerText += " Your " + inventory.pop() + " breaks.";
+            currentRod = null;
+            isRodBroken = true;
+        }
     }
+    
     updateStatsDisplay();
     fishHealthText.innerText = fishHealth;
+
     if (bait <= 0) {
         lose();
-    } else if (fishHealth <= 0) {
-        fishHealth = 0;
-        text.innerText = "The " + currentFishInBattle.name + " is exhausted. Time to reel it in!";
     }
 }
 
