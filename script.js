@@ -6,6 +6,9 @@ let buyingSpeed = 500;
 let increment = 20;
 let minBuyingSpeed = 10;
 let buyTimeout;
+let sellingXP = false;
+let sellXPSpeed = 250;
+let sellXPTimeout;
 let currentRod = null;
 let isRodBroken = false;
 let fishing;
@@ -19,6 +22,7 @@ let currentLocationIndex = 0;
 const button1 = document.querySelector("#button1");
 const button2 = document.querySelector("#button2");
 const button3 = document.querySelector("#button3");
+const button4 = document.querySelector("#button4");
 const text = document.querySelector("#text");
 const xpText = document.querySelector("#xpText");
 const baitText = document.querySelector("#baitText");
@@ -70,53 +74,53 @@ const seaFish = [
 const locations = [
   {
     name: "town square",
-    "button text": ["Go to Store", "Go Fishing", "Open Seas"],
-    "button functions": [goStore, goFishing, openSeas],
+    "button text": ["Go to Store", "Go Fishing", "Open Seas", ""],
+    "button functions": [goStore, goFishing, openSeas, null],
     text: "You are in the town square. You see a sign that says \"Store\"."
   },
   {
     name: "store",
-    "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Town Square"],
-    "button functions": [buyBait, buyRod, goTown],
+    "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Sell XP", "Town Square"],
+    "button functions": [buyBait, buyRod, sellXP, goTown],
     text: "You enter the store."
   },
   {
   name: "goFishing",
-  "button text": ["Cast Rod", "Cast Rod", "Town Square"],
-  "button functions": [castRod, castRod, goTown],
+  "button text": ["Cast Rod", "Cast Rod", "Town Square", ""],
+  "button functions": [castRod, castRod, goTown, null],
   text: "You're at the water's edge. You cast your rod."
 },
 {
   name: "battle",
-  "button text": ["Reel", "Brace", "Cut Line"],
-  "button functions": [reel, brace, goTown],
+  "button text": ["Reel", "Brace", "Cut Line", ""],
+  "button functions": [reel, brace, goTown, null],
   text: "You have a fish on the line!"
 },
 {
   name: "fish caught",
-  "button text": ["Town Square", "Town Square", "Town Square"],
-  "button functions": [goTown, goTown, goTown],
+  "button text": ["Town Square", "Town Square", "Town Square", ""],
+  "button functions": [goTown, goTown, goTown, null],
   text: "You caught the fish! You gained gold and XP!"
 },
 {
   name: "lose",
-  "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
-  "button functions": [restart, restart, restart],
+  "button text": ["REPLAY?", "REPLAY?", "REPLAY?", ""],
+  "button functions": [restart, restart, restart, null],
   text: "Out of bait... GAME OVER"
 }
 ];
 
 locations.push({
     name: "open seas",
-    "button text": ["Cast Rod", "Cast Rod", "Return to shore"],
-    "button functions": [castRod, castRod, goTown],
+    "button text": ["Cast Rod", "Cast Rod", "Return to shore", ""],
+    "button functions": [castRod, castRod, goTown, null],
     text: "You've ventured into the open seas. Cast your rod!"
 });
 
 locations.push({
     name: "sea battle",
-    "button text": ["Reel", "Brace", "Cut Line"],
-    "button functions": [reel, brace, goTown],
+    "button text": ["Reel", "Brace", "Cut Line", ""],
+    "button functions": [reel, brace, goTown, null],
     text: "You have a fish on the line!"
 });
 
@@ -131,6 +135,133 @@ const fishArrayMap = {
 button1.onclick = goStore;
 button2.onclick = goFishing;
 button3.onclick = openSeas;
+button4.style.display = "none";
+
+
+// NAVIGATION RELATED FUNCTIONS
+
+function update(location) {
+    fishStats.style.display = "none";
+    button1.innerText = location["button text"][0];
+    button2.innerText = location["button text"][1];
+    button3.innerText = location["button text"][2]; 
+    button4.innerText = location["button text"][3]; 
+
+    if (location.name === "store") {
+        stopBuying();    // Stop buy bait loop if active
+        stopSellingXP(); // NEW: Stop sell XP loop if active when entering store
+
+        // --- Button 1 (Buy Bait) rapid-fire setup ---
+        button1.onmousedown = startBuying;
+        button1.onmouseup = stopBuying;
+        button1.onmouseleave = stopBuying;
+        button1.ontouchstart = (event) => { event.preventDefault(); startBuying(); };
+        button1.ontouchend = stopBuying;
+        button1.ontouchcancel = stopBuying;
+        button1.onclick = null; // Prevent single click
+
+        // --- NEW: Button 3 (Sell XP) rapid-fire setup ---
+        button3.onmousedown = startSellingXP;
+        button3.onmouseup = stopSellingXP;
+        button3.onmouseleave = stopSellingXP;
+        button3.ontouchstart = (event) => {
+            event.preventDefault(); // Prevent default touch behavior
+            startSellingXP();
+        };
+        button3.ontouchend = stopSellingXP;
+        button3.ontouchcancel = stopSellingXP;
+        button3.onclick = null; // Prevent single click if holding
+
+        // --- Button 2 (Buy Rod) & Button 4 (Town Square) in store (single click) ---
+        button2.onclick = location["button functions"][1]; // Buy Rod - no change needed
+        button4.style.display = "block"; // Make button4 visible
+        button4.onclick = location["button functions"][3]; // Assign goTown function
+
+    } else {
+        // --- Clear Button 1 handlers for non-store locations ---
+        button1.onclick = location["button functions"][0]; // Assign normal click for non-store
+        button1.onmousedown = null;
+        button1.onmouseup = null;
+        button1.onmouseleave = null;
+        button1.ontouchstart = null;
+        button1.ontouchend = null;
+        button1.ontouchcancel = null;
+        stopBuying(); // Ensure buying stops if we navigate away
+
+        // --- NEW: Clear Button 3 handlers for non-store locations ---
+        button3.onclick = location["button functions"][2]; // Assign normal click for non-store
+        button3.onmousedown = null;
+        button3.onmouseup = null;
+        button3.onmouseleave = null;
+        button3.ontouchstart = null;
+        button3.ontouchend = null;
+        button3.ontouchcancel = null;
+        stopSellingXP(); // Ensure selling stops if we navigate away
+
+        // --- Hide Button 4 outside the store ---
+        button4.style.display = "none";
+        button4.onclick = null;
+
+        // Button 2 always works normally (no rapid-fire)
+        button2.onclick = location["button functions"][1];
+    }
+    
+    if (location.name !== "fish caught") {
+        text.innerText = location.text;
+    }
+
+    currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
+}
+
+function goTown() {
+  update(locations[0]);
+}
+
+function goStore() {
+  update(locations[1]);
+
+}
+
+function goFishing() {
+  update(locations[2]);
+}
+
+function openSeas() {
+    update(locations[6]); 
+}
+
+function lose() {
+  update(locations[5]);
+}
+
+function restart() {
+  xp = 0;
+  bait = 120;
+  gold = 0;
+  currentRod = null;
+  inventory = ["Stick"];
+  goldText.innerText = gold;
+  baitText.innerText = bait;
+  xpText.innerText = xp;
+  goTown();
+}
+
+
+
+
+// STORE RELATED FUNCTIONS
+
+function buyBait() {
+  if (gold >= 1) {
+      gold -= 1;
+      bait += 1;
+      goldText.innerText = gold; 
+      baitText.innerText = bait; 
+  } else {
+      text.innerText = "Not enough gold to buy more bait.";
+      clearInterval(baitInterval);
+  }
+}
 
 function stopBuying() {
     clearTimeout(buyTimeout); // Stop any active buying loop
@@ -167,64 +298,79 @@ function buyBaitLoop() {
     }
 }
 
-function update(location) {
-    fishStats.style.display = "none";
-    button1.innerText = location["button text"][0];
-    button2.innerText = location["button text"][1];
-    button3.innerText = location["button text"][2];
-
-    if (location.name === "store") {
-        stopBuying(); // Ensure any previous buying loop is stopped when entering store
-
-        // Mouse events
-        button1.onmousedown = startBuying; // Just call startBuying on mouse down
-        button1.onmouseup = stopBuying;    // Stop on mouse up
-        button1.onmouseleave = stopBuying; // Stop on mouse leave
-
-        // Touch events for mobile devices
-        button1.ontouchstart = (event) => {
-            event.preventDefault(); // Prevent default touch behavior
-            startBuying();
-        };
-        button1.ontouchend = stopBuying;
-        button1.ontouchcancel = stopBuying;
-
-        button1.onclick = null; // Ensure click is null to prevent double-firing
-    } else {
-        // For other locations, set regular onclick and clear handlers
-        button1.onclick = location["button functions"][0];
-        button1.onmousedown = null;
-        button1.onmouseup = null;
-        button1.onmouseleave = null;
-        button1.ontouchstart = null;
-        button1.ontouchend = null;
-        button1.ontouchcancel = null;
-        stopBuying(); // Ensure buying stops if we navigate away from the store
+function buyRod() {
+  if (gold >= 30) {
+    gold -= 30;
+    const newRod = generateRod();
+    rods.push(newRod);
+    goldText.innerText = gold;
+    text.innerText = "You now have a " + newRod.name + " with power " + newRod.power + ".";
+    if (currentRod) {
+      text.innerText += " Your " + currentRod.name + " has been replaced.";
     }
-
-    button2.onclick = location["button functions"][1];
-    button3.onclick = location["button functions"][2];
     
-    if (location.name !== "fish caught") {
-        text.innerText = location.text; // Only set default text if it's not the catch message
+    currentRod = newRod;
+    inventory[1] = currentRod.name;
+    isRodBroken = false;
+
+    text.innerText += " In your inventory you have: " + inventory.join(", ");
+  } else {
+    text.innerText = "You do not have enough gold to buy a rod.";
+  }
+}
+
+function sellXP() {
+    const xpToSell = 1;
+    const goldEarned = 1;
+
+    if (xp >= xpToSell) {
+        xp -= xpToSell;
+        gold += goldEarned;
+        xpText.innerText = xp;
+        goldText.innerText = gold;
+        text.innerText = `You sold ${xpToSell} XP for ${goldEarned} gold.`;
+    } else {
+        text.innerText = `You need at least ${xpToSell} XP to sell!`;
     }
-
-    currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
 }
 
-function goTown() {
-  update(locations[0]);
+function stopSellingXP() {
+    clearTimeout(sellXPTimeout); // Stop any active selling loop
+    sellingXP = false;
+    sellXPSpeed = 250; // Reset to initial speed
 }
 
-function goStore() {
-  update(locations[1]);
+function startSellingXP() {
+    if (!sellingXP) { // Only start if not already selling
+        sellingXP = true;
+        sellXPSpeed = 250; // Reset speed for a fresh start
+        sellXPLoop(); // Start the recursive selling loop
+    }
+}
 
+function sellXPLoop() {
+    // This value should match xpToSell in your sellXP function
+    const xpNeededForOneSell = 1;
+
+    if (sellingXP && xp >= xpNeededForOneSell) {
+        sellXP(); // Make the sale
+
+        // Decrease the delay for the next sale (reusing increment and minBuyingSpeed)
+        sellXPSpeed = Math.max(minBuyingSpeed, sellXPSpeed - increment);
+
+        // Schedule the next sale
+        sellXPTimeout = setTimeout(sellXPLoop, sellXPSpeed);
+    } else {
+        // If out of XP or button released, stop selling
+        stopSellingXP();
+        if (xp < xpNeededForOneSell) {
+            text.innerText = `Not enough XP to sell! You need at least ${xpNeededForOneSell} XP.`;
+        }
+    }
 }
 
 
-function goFishing() {
-  update(locations[2]);
-}
+//FISHING/BATTLE RELATED FUNCTIONS
 
 function getRandomFishName(isSeaFish) {
     const fishArray = isSeaFish ? seaFish : fish;
@@ -291,43 +437,6 @@ function castRod() {
         update(locations[3]); 
         goFish(); 
     }
-}
-
-function buyBait() {
-  if (gold >= 10) {
-      gold -= 10;
-      bait += 10;
-      goldText.innerText = gold; 
-      baitText.innerText = bait; 
-  } else {
-      text.innerText = "Not enough gold to buy more bait.";
-      clearInterval(baitInterval);
-  }
-}
-
-function buyRod() {
-  if (gold >= 30) {
-    gold -= 30;
-    const newRod = generateRod();
-    rods.push(newRod);
-    goldText.innerText = gold;
-    text.innerText = "You now have a " + newRod.name + " with power " + newRod.power + ".";
-    if (currentRod) {
-      text.innerText += " Your " + currentRod.name + " has been replaced.";
-    }
-    
-    currentRod = newRod;
-    inventory[1] = currentRod.name;
-    isRodBroken = false;
-
-    text.innerText += " In your inventory you have: " + inventory.join(", ");
-  } else {
-    text.innerText = "You do not have enough gold to buy a rod.";
-  }
-}
-
-function openSeas() {
-    update(locations[6]); 
 }
 
 function goFish() {
@@ -468,18 +577,3 @@ function catchFish() {
     update(locations[4]); 
 }
 
-function lose() {
-  update(locations[5]);
-}
-
-function restart() {
-  xp = 0;
-  bait = 120;
-  gold = 0;
-  currentRod = null;
-  inventory = ["Stick"];
-  goldText.innerText = gold;
-  baitText.innerText = bait;
-  xpText.innerText = xp;
-  goTown();
-}
