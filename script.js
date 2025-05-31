@@ -11,11 +11,10 @@ let sellXPSpeed = 250;
 let sellXPTimeout;
 let currentRod = null;
 let isRodBroken = false;
-let fishing;
+let currentFishInBattle = null;
 let fishHealth;
 let fishHealCooldown = 0;
 let inventory = ["Stick"];
-
 
 let currentLocationIndex = 0;
 
@@ -31,6 +30,7 @@ const fishStats = document.querySelector("#fishStats");
 const fishName = document.querySelector("#fishName");
 const fishLevelText = document.querySelector("#fishLevel");
 const fishHealthText = document.querySelector("#fishHealth");
+const playerLevelText = document.querySelector("#playerLevelText");
 
 const rods = [
   { name: "Basic Rod", power: 5 },
@@ -259,6 +259,39 @@ function openSeas() {
     update(locations[6]); 
 }
 
+
+//UTILITY RELATED FUNCTIONS
+
+const XP_CURVE_CONSTANT = 45; // Based on initial testing: 45 gives Level 2 at 90 XP, Level 3 at 270 XP, etc.
+
+// Function to calculate the TOTAL XP needed to reach a specific level
+function getTotalXpForLevel(level) {
+    if (level <= 1) {
+        return 0; // Level 1 requires 0 XP
+    }
+    // Formula: XP_CURVE_CONSTANT * Level * (Level - 1)
+    // This gives an increasing requirement for each subsequent level
+    return XP_CURVE_CONSTANT * level * (level - 1);
+}
+
+// Function to determine the player's current level based on their total XP
+function getPlayerLevel() {
+    let currentLevel = 1;
+    // Keep increasing the level until the player's current XP is less than
+    // the total XP required for the *next* level.
+    while (xp >= getTotalXpForLevel(currentLevel + 1)) {
+        currentLevel++;
+    }
+    return currentLevel;
+}
+
+// Function to calculate how much XP is needed for the next level
+function getXPToNextLevel() {
+    const currentLevel = getPlayerLevel();
+    const xpNeededForNextLevel = getTotalXpForLevel(currentLevel + 1);
+    return xpNeededForNextLevel - xp;
+}
+
 function saveGame() {
     const gameData = {
         xp: xp,
@@ -297,6 +330,7 @@ function loadGame() {
 
         // Update display to reflect loaded stats
         xpText.innerText = xp;
+        playerLevelText.innerText = getPlayerLevel();
         goldText.innerText = gold;
         baitText.innerText = bait;
 
@@ -324,6 +358,7 @@ function restart() {
   goldText.innerText = gold;
   baitText.innerText = bait;
   xpText.innerText = xp;
+  playerLevelText.innerText = getPlayerLevel();
   goTown();
 }
 
@@ -409,6 +444,7 @@ function sellXP() {
         gold += goldEarned;
         xpText.innerText = xp;
         goldText.innerText = gold;
+        playerLevelText.innerText = getPlayerLevel();
         text.innerText = `You sold ${xpToSell} XP for ${goldEarned} gold.`;
     } else {
         text.innerText = `You need at least ${xpToSell} XP to sell!`;
@@ -459,17 +495,22 @@ function getRandomFishName(isSeaFish) {
     return fishArray[randomIndex].name;
 }
 
-function generateFish(isSeaFish = false) {
-    const baseLevel = isSeaFish ? Math.floor(Math.random() * 80) + 20 : Math.floor(Math.random() * 20) + 1;
-    const level = baseLevel + Math.floor(xp / 90);
-    const health = level * (isSeaFish ? 50 : 20);
+function generateFish(fishTemplate, isSeaFish = false) {
+    const xpScalingLevelBonus = Math.floor(xp / 90);
+    const levelVariation = Math.floor(Math.random() * 5) - 2;
+    let finalLevel = fishTemplate.level + xpScalingLevelBonus + levelVariation;
 
-    const name = getRandomFishName(isSeaFish);
+    if (finalLevel < 1) {
+        finalLevel = 1
+    }
+    
+    const healthPerLevelMultiplier = isSeaFish ? 50 : 20;
+    const finalHealth = finalLevel * healthPerLevelMultiplier;
 
     return {
-        name: name,
-        level: level,
-        health: health
+        name: fishTemplate.name,
+        level: finalLevel,
+        health: finalHealth
     };
 }
 
@@ -490,52 +531,70 @@ function fishAbility(fish, isSeaFish) {
     return false;
 }
 
-function seaBattle() {
-    const currentFishArray = seaFish; 
+function calculateXpGain(caughtFishLevel, playerLevel) {
+    const baseXpPerLevel = 1; // This is the base XP you get per fish level when levels are equal.
+                               // Adjust this constant to make overall XP gain faster or slower.
 
-    if (fishing < currentFishArray.length) {
-        fishHealth = currentFishArray[fishing].health; 
-        fishStats.style.display = "block"; 
-        fishName.innerText = currentFishArray[fishing].name; 
-        fishLevelText.innerText = currentFishArray[fishing].level;
-        fishHealthText.innerText = fishHealth;
+    let xpGain = caughtFishLevel * baseXpPerLevel; // Start with base XP based on fish's level
 
-        console.log("Selected Fish:", currentFishArray[fishing].name); 
+    const levelDifference = caughtFishLevel - playerLevel;
+
+    // Apply modifiers based on level difference
+    if (levelDifference < -5) { // Fish is 5+ levels lower than player
+        xpGain *= 0.2; // 80% XP reduction
+    } else if (levelDifference < -2) { // Fish is 3-5 levels lower
+        xpGain *= 0.5; // 50% XP reduction
+    } else if (levelDifference < 0) { // Fish is 1-2 levels lower
+        xpGain *= 0.8; // 20% XP reduction
+    } else if (levelDifference > 5) { // Fish is 5+ levels higher than player
+        xpGain *= 1.5; // 50% XP bonus
+    } else if (levelDifference > 2) { // Fish is 3-5 levels higher
+        xpGain *= 1.2; // 20% XP bonus
     }
+
+    // Ensure XP gain is at least 1, never negative or zero
+    return Math.max(1, Math.floor(xpGain));
+}
+
+function seaBattle() {
+    fishHealth = currentFishInBattle.health;
+    fishStats.style.display = "block";
+    fishName.innerText = currentFishInBattle.name;
+    fishLevelText.innerText = currentFishInBattle.level;
+    fishHealthText.innerText = currentFishInBattle.health; 
+    
+    console.log("Selected Fish:", currentFishInBattle.name);
 }
 
 function castRod() {
-    const currentLocation = locations[currentLocationIndex].name; 
+    const currentLocation = locations[currentLocationIndex].name;
+    const fishArray = (currentLocation === "open seas") ? seaFish : fish;
 
+    // 1. Select a random fish TEMPLATE from the array (based on its name/species)
+    const randomIndex = Math.floor(Math.random() * fishArray.length);
+    const selectedFishTemplate = fishArray[randomIndex];
+
+    // 2. Generate the ACTUAL fish for battle using the template, XP, and randomness
+    currentFishInBattle = generateFish(selectedFishTemplate, currentLocation === "open seas");
+
+    // Update UI and start battle based on the current location
     if (currentLocation === "open seas") {
-        fishing = Math.floor(Math.random() * seaFish.length); 
-        seaFish[fishing] = generateFish(true);
-        update(locations[7]);
-        seaBattle(); 
-    } else {
-        fishing = Math.floor(Math.random() * fish.length); 
-        fish[fishing] = generateFish(false);
-        update(locations[3]); 
-        goFish(); 
+        update(locations[7]); // locations[7] is "sea battle"
+        seaBattle(); // This function will now use 'currentFishInBattle'
+    } else { // Assumed to be "goFishing"
+        update(locations[3]); // locations[3] is "battle"
+        goFish(); // This function will now use 'currentFishInBattle'
     }
 }
 
 function goFish() {
-    const locationName = locations[currentLocationIndex].name; 
-    const currentFishArray = fishArrayMap[locationName] || fish;  
+    fishHealth = currentFishInBattle.health; 
+    fishStats.style.display = "block";
+    fishName.innerText = currentFishInBattle.name;
+    fishHealthText.innerText = fishHealth;
+    fishLevelText.innerText = currentFishInBattle.level;
 
-   
-    if (fishing < currentFishArray.length) {
-        fishHealth = currentFishArray[fishing].health; 
-        fishStats.style.display = "block"; 
-        fishName.innerText = currentFishArray[fishing].name; 
-        fishHealthText.innerText = fishHealth;
-        fishLevelText.innerText = currentFishArray[fishing].level;
-
-        console.log("Selected Fish:", currentFishArray[fishing].name); 
-    } else {
-        console.error("Fishing index out of bounds:", fishing);
-    }
+    console.log("Selected Fish:", currentFishInBattle.name);
 }
 
 function getFishAttackValue(level) {
@@ -547,7 +606,7 @@ function getFishAttackValue(level) {
 function reel() {
     if (fishHealth <= 0) {
         text.innerText = "The fish is exhausted! You reel it in easily.";
-        catchFish(); 
+        catchFish();
         return; 
     }
 
@@ -555,24 +614,24 @@ function reel() {
         text.innerText = "You can't reel in, you've only got a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
         return;
     }
-
-    const currentFishArray = (locations[currentLocationIndex].name === "sea battle") ? seaFish : fish; 
+ 
     text.innerText = "A fish is thrashing on the line!";
     text.innerText += " You try to reel it in.";
 
-    bait -= getFishAttackValue(currentFishArray[fishing].level);
+    bait -= getFishAttackValue(currentFishInBattle.level);
     bait = Math.round(bait);
+
     if (isFishHit()) {
         fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
         
 
-        if (fishAbility(currentFishArray[fishing], true) && fishHealCooldown === 0) {
+        if (fishAbility(currentFishInBattle, locations[currentLocationIndex].name === "sea battle") && fishHealCooldown === 0) {
             const fishHealPercentage = 0.3;
             const fishHealAmount = Math.floor(fishHealth * fishHealPercentage);
             text.innerText += " The fish recovered " + fishHealAmount + " health!";
             fishHealth += fishHealAmount;
             fishHealCooldown = 5;
-        } 
+        }
         
         if (fishHealth <= 0) {
             text.innerText += " You successfully reel it in!";
@@ -608,11 +667,10 @@ function isFishHit() {
 }
 
 function brace() {
-    const currentFishArray = (locations[currentLocationIndex].name === "sea battle") ? seaFish : fish; 
-    text.innerText = "You brace the rod against the sudden movements!";
-    const fishAttackValue = getFishAttackValue(currentFishArray[fishing].level);
+    text.innerText = "You brace the rod against the " + currentFishInBattle.name + "'s sudden movements!";
+    const fishAttackValue = getFishAttackValue(currentFishInBattle.level);
     if (Math.random() <= 0.4) {
-        text.innerText += " The fish begins to wear itself out!";
+        text.innerText += " The " + currentFishInBattle.name + " begins to wear itself out!";
         const newFishHealth = Math.round(fishHealth - fishAttackValue * 1);
         fishHealth = newFishHealth > 0 ? newFishHealth : 0;
     } else {
@@ -631,7 +689,7 @@ function brace() {
         lose();
     } else if (fishHealth <= 0) {
         fishHealth = 0;
-        text.innerText = "The " + currentFishArray[fishing].name + " is exhausted. Time to reel it in!";
+        text.innerText = "The " + currentFishInBattle.name + " is exhausted. Time to reel it in!";
     }
 }
 
@@ -641,18 +699,20 @@ function calculateGoldReward(level, isSeaFish) {
 }
 
 function catchFish() {
-    const currentFishArray = (locations[currentLocationIndex].name === "sea battle") ? seaFish : fish; 
-    const caughtFish = currentFishArray[fishing];
+    const caughtFish = currentFishInBattle;
     console.log("Caught Fish Level:", caughtFish.level);
     console.log("Is Sea Fish:", locations[currentLocationIndex].name === "sea battle");
     const isSeaFish = locations[currentLocationIndex].name === "sea battle";
 
     const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish);
     gold += goldEarned;
-    xp += caughtFish.level; 
+    const playerLevel = getPlayerLevel(); // Get the player's current calculated level
+    const xpEarned = calculateXpGain(caughtFish.level, playerLevel); // Calculate XP based on difficulty
+    xp += xpEarned; // Add the calculated XP to total XP 
 
     goldText.innerText = gold;
     xpText.innerText = xp;
+    playerLevelText.innerText = getPlayerLevel();
 
     text.innerText = `You caught the fish! You gained ${goldEarned} gold and ${caughtFish.level} XP!`;
     update(locations[4]); 
@@ -660,6 +720,7 @@ function catchFish() {
 
 // Set initial stats display before attempting to load (will be overwritten if loadGame succeeds)
 xpText.innerText = xp;
+playerLevelText.innerText = getPlayerLevel();
 goldText.innerText = gold;
 baitText.innerText = bait;
 
