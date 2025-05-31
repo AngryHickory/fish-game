@@ -1,6 +1,6 @@
-let xp = 0;
-let gold = 20;
-let bait = 120;
+let xp = 1000;
+let gold = 200;
+let bait = 2000;
 let buyingBait = false;
 let buyingSpeed = 500;
 let increment = 20;
@@ -366,7 +366,7 @@ function reel() {
         return;
     }
 
-    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
+    const currentFishArray = (locations[currentLocationIndex].name === "sea battle") ? seaFish : fish; 
     text.innerText = "A fish is thrashing on the line!";
     text.innerText += " You try to reel it in.";
 
@@ -418,7 +418,7 @@ function isFishHit() {
 }
 
 function brace() {
-    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
+    const currentFishArray = (locations[currentLocationIndex].name === "sea battle") ? seaFish : fish; 
     text.innerText = "You brace the rod against the sudden movements!";
     const fishAttackValue = getFishAttackValue(currentFishArray[fishing].level);
     if (Math.random() <= 0.4) {
@@ -446,14 +446,16 @@ function brace() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 2000 : 2.5; // Base multiplier
+    const baseReward = isSeaFish ? 3 : 2.5; // Base multiplier
     return Math.floor(level * baseReward * (1 + Math.log(level))); // Logarithmic scaling
 }
 
 function catchFish() {
-    const currentFishArray = (locations[currentLocationIndex].name === "open seas") ? seaFish : fish; 
+    const currentFishArray = (locations[currentLocationIndex].name === "sea battle") ? seaFish : fish; 
     const caughtFish = currentFishArray[fishing];
-    const isSeaFish = locations[currentLocationIndex].name === "open seas";
+    console.log("Caught Fish Level:", caughtFish.level);
+    console.log("Is Sea Fish:", locations[currentLocationIndex].name === "sea battle");
+    const isSeaFish = locations[currentLocationIndex].name === "sea battle";
 
     const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish);
     gold += goldEarned;
