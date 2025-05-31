@@ -1,5 +1,5 @@
 let xp = 0;
-let gold = 20;
+let gold = 20000;
 let bait = 120;
 let buyingBait = false;
 let buyingSpeed = 500;
@@ -628,7 +628,7 @@ function reel() {
     text.innerText += " You try to reel it in.";
 
     if (isFishHit()) {
-        fishHealth -= currentRod.power + Math.floor(Math.random() * xp) + 1; 
+        fishHealth -= currentRod.power + Math.floor(Math.random() * xp / 3) + 1; 
         
 
         if (fishAbility(currentFishInBattle, locations[currentLocationIndex].name === "sea battle") && fishHealCooldown === 0) {
