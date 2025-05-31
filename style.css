@@ -9,6 +9,7 @@ body {
   font-weight: bold;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   height: 130px;
+  box-sizing: border-box;
 }
 
 .textSpanRed {
@@ -20,8 +21,9 @@ body {
 }
 
 #game {
+  display: flex;
+  flex-direction: column;
   max-width: 500px;
-  max-height: 400px;
   background-color: #20b3c4;
   border-radius: 5px;
   color: #ffffff;
@@ -32,26 +34,39 @@ body {
 #controls {
   display: flex;
   justify-content: space-around;
-} 
-
-#controls, #stats {
   border: 1px solid #1ea6b6;
   padding: 5px;
   color: #123450;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+} 
+
+#stats {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px 15px;
+    border: 1px solid #1ea6b6;
+    padding: 10px 5px;
+    color: #123450;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    margin-bottom: 10px;
+}
+
+.stat-text { 
+    white-space: nowrap;
+    color: #123450;
 }
 
 #fishStats {
-  display: none;
-  border: 1px solid #1b99a8;
-  padding: 5px;
-  color: #dff7fa;
-  background-color: #159369;
-}
-
-
-.stat {
-  padding-right: 10px;
+    display: none;
+    border: 1px solid #1b99a8;
+    padding: 5px;
+    color: #dff7fa;
+    background-color: #159369;
+    display: flex; /* Will be toggled by JS, but set up for flex */
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px 15px;
 }
 
 button {

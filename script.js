@@ -31,6 +31,7 @@ const fishName = document.querySelector("#fishName");
 const fishLevelText = document.querySelector("#fishLevel");
 const fishHealthText = document.querySelector("#fishHealth");
 const playerLevelText = document.querySelector("#playerLevelText");
+const xpToNextLevelText = document.querySelector("#xpToNextLevelText");
 
 const rods = [
   { name: "Basic Rod", power: 5 },
@@ -262,7 +263,31 @@ function openSeas() {
 
 //UTILITY RELATED FUNCTIONS
 
+function updateStatsDisplay() {
+    xpText.innerText = xp;
+    goldText.innerText = gold;
+    baitText.innerText = bait;
+    playerLevelText.innerText = getPlayerLevel();
+
+    // Only show XP to Next Level if not at max level (or a very high level)
+    const nextLevelXP = getXPToNextLevel();
+    if (nextLevelXP > 0) { // If nextLevelXP is 0, it means you've reached a very high level where next level isn't calculated or it's maxed out
+        xpToNextLevelText.innerText = nextLevelXP;
+        // Also ensure the parent container for this text is visible if you hide it by default
+        if (xpToNextLevelText.parentElement) {
+            xpToNextLevelText.parentElement.style.display = "inline-block"; // Or "block" depending on your CSS
+        }
+    } else {
+        xpToNextLevelText.innerText = "MAX"; // Or any other indicator for max level
+        if (xpToNextLevelText.parentElement) {
+            xpToNextLevelText.parentElement.style.display = "inline-block"; // Or "block"
+        }
+    }
+}
+
 const XP_CURVE_CONSTANT = 45; // Based on initial testing: 45 gives Level 2 at 90 XP, Level 3 at 270 XP, etc.
+
+
 
 // Function to calculate the TOTAL XP needed to reach a specific level
 function getTotalXpForLevel(level) {
@@ -277,8 +302,6 @@ function getTotalXpForLevel(level) {
 // Function to determine the player's current level based on their total XP
 function getPlayerLevel() {
     let currentLevel = 1;
-    // Keep increasing the level until the player's current XP is less than
-    // the total XP required for the *next* level.
     while (xp >= getTotalXpForLevel(currentLevel + 1)) {
         currentLevel++;
     }
@@ -328,11 +351,7 @@ function loadGame() {
         isRodBroken = gameData.isRodBroken !== undefined ? gameData.isRodBroken : false;
         fishHealCooldown = gameData.fishHealCooldown !== undefined ? gameData.fishHealCooldown : 0;
 
-        // Update display to reflect loaded stats
-        xpText.innerText = xp;
-        playerLevelText.innerText = getPlayerLevel();
-        goldText.innerText = gold;
-        baitText.innerText = bait;
+        updateStatsDisplay();
 
         text.innerText = "Game loaded! Your previous adventure awaits.";
         goTown(); // Move to the town square after loading
@@ -355,10 +374,7 @@ function restart() {
   gold = 20;
   currentRod = null;
   inventory = ["Stick"];
-  goldText.innerText = gold;
-  baitText.innerText = bait;
-  xpText.innerText = xp;
-  playerLevelText.innerText = getPlayerLevel();
+  updateStatsDisplay();
   goTown();
 }
 
@@ -371,11 +387,9 @@ function buyBait() {
   if (gold >= 10) {
       gold -= 10;
       bait += 10;
-      goldText.innerText = gold; 
-      baitText.innerText = bait; 
+      updateStatsDisplay();
   } else {
       text.innerText = "Not enough gold to buy more bait.";
-      clearInterval(baitInterval);
   }
 }
 
@@ -419,7 +433,7 @@ function buyRod() {
     gold -= 30;
     const newRod = generateRod();
     rods.push(newRod);
-    goldText.innerText = gold;
+    updateStatsDisplay();
     text.innerText = "You now have a " + newRod.name + " with power " + newRod.power + ".";
     if (currentRod) {
       text.innerText += " Your " + currentRod.name + " has been replaced.";
@@ -440,12 +454,18 @@ function sellXP() {
     const goldEarned = 1;
 
     if (xp >= xpToSell) {
+        const oldLevel = getPlayerLevel(); // Get level BEFORE selling XP
         xp -= xpToSell;
         gold += goldEarned;
-        xpText.innerText = xp;
-        goldText.innerText = gold;
-        playerLevelText.innerText = getPlayerLevel();
-        text.innerText = `You sold ${xpToSell} XP for ${goldEarned} gold.`;
+        // Use the new updateStatsDisplay function
+        updateStatsDisplay();
+        const newLevel = getPlayerLevel(); // Get level AFTER selling XP
+
+        let message = `You sold ${xpToSell} XP for ${goldEarned} gold.`;
+        if (newLevel < oldLevel) {
+            message += ` You are now Level ${newLevel}.`; // Inform if level dropped
+        }
+        text.innerText = message;
     } else {
         text.innerText = `You need at least ${xpToSell} XP to sell!`;
     }
@@ -532,27 +552,21 @@ function fishAbility(fish, isSeaFish) {
 }
 
 function calculateXpGain(caughtFishLevel, playerLevel) {
-    const baseXpPerLevel = 1; // This is the base XP you get per fish level when levels are equal.
-                               // Adjust this constant to make overall XP gain faster or slower.
-
-    let xpGain = caughtFishLevel * baseXpPerLevel; // Start with base XP based on fish's level
-
+    const baseXpPerLevel = 1;
+    let xpGain = caughtFishLevel * baseXpPerLevel;
     const levelDifference = caughtFishLevel - playerLevel;
 
-    // Apply modifiers based on level difference
-    if (levelDifference < -5) { // Fish is 5+ levels lower than player
-        xpGain *= 0.2; // 80% XP reduction
-    } else if (levelDifference < -2) { // Fish is 3-5 levels lower
-        xpGain *= 0.5; // 50% XP reduction
-    } else if (levelDifference < 0) { // Fish is 1-2 levels lower
-        xpGain *= 0.8; // 20% XP reduction
-    } else if (levelDifference > 5) { // Fish is 5+ levels higher than player
-        xpGain *= 1.5; // 50% XP bonus
-    } else if (levelDifference > 2) { // Fish is 3-5 levels higher
-        xpGain *= 1.2; // 20% XP bonus
+    if (levelDifference < -5) {
+        xpGain *= 0.2;
+    } else if (levelDifference < -2) {
+        xpGain *= 0.5;
+    } else if (levelDifference < 0) {
+        xpGain *= 0.8;
+    } else if (levelDifference > 5) {
+        xpGain *= 1.5;
+    } else if (levelDifference > 2) {
+        xpGain *= 1.2;
     }
-
-    // Ensure XP gain is at least 1, never negative or zero
     return Math.max(1, Math.floor(xpGain));
 }
 
@@ -654,7 +668,7 @@ function reel() {
         console.log("Fish Heal Cooldown:", fishHealCooldown);
     }
 
-    baitText.innerText = bait; 
+    updateStatsDisplay();
     fishHealthText.innerText = fishHealth;
 
     if (bait <= 0) {
@@ -683,7 +697,7 @@ function brace() {
         isRodBroken = true;
       }
     }
-    baitText.innerText = bait;
+    updateStatsDisplay();
     fishHealthText.innerText = fishHealth;
     if (bait <= 0) {
         lose();
@@ -706,23 +720,27 @@ function catchFish() {
 
     const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish);
     gold += goldEarned;
-    const playerLevel = getPlayerLevel(); // Get the player's current calculated level
-    const xpEarned = calculateXpGain(caughtFish.level, playerLevel); // Calculate XP based on difficulty
-    xp += xpEarned; // Add the calculated XP to total XP 
 
-    goldText.innerText = gold;
-    xpText.innerText = xp;
-    playerLevelText.innerText = getPlayerLevel();
+    const oldPlayerLevel = getPlayerLevel(); // Get player level BEFORE adding XP
+    const xpEarned = calculateXpGain(caughtFish.level, oldPlayerLevel);
+    xp += xpEarned;
 
-    text.innerText = `You caught the fish! You gained ${goldEarned} gold and ${caughtFish.level} XP!`;
-    update(locations[4]); 
+    const newPlayerLevel = getPlayerLevel(); // Get player level AFTER adding XP
+
+    // Use the new updateStatsDisplay function
+    updateStatsDisplay();
+
+    let catchMessage = `You caught the fish! You gained ${goldEarned} gold and ${xpEarned} XP!`; // Changed to xpEarned for accuracy
+    if (newPlayerLevel > oldPlayerLevel) {
+        catchMessage += `\n\n🎉 LEVEL UP! You are now Level ${newPlayerLevel}! 🎉`;
+    }
+    text.innerText = catchMessage;
+
+    update(locations[4]);
 }
 
 // Set initial stats display before attempting to load (will be overwritten if loadGame succeeds)
-xpText.innerText = xp;
-playerLevelText.innerText = getPlayerLevel();
-goldText.innerText = gold;
-baitText.innerText = bait;
+updateStatsDisplay();
 
 // Attempt to load a game. The loadGame() function returns true if a game was loaded.
 const gameLoaded = loadGame();
