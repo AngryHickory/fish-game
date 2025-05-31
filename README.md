@@ -16,3 +16,13 @@ To do:
 - More attributes for rods?
 - More attributes for fish?
 - Secret location?
+- multi fish battles?
+- special attacks for fish?
+- add reel item? Random drop from fish?
+- boss battles?
+- track caught fish
+- new attack?
+- sell XP [X]
+- display inventory
+- display player level
+- fish stamina bar? 
