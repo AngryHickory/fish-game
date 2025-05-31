@@ -1,5 +1,5 @@
 let xp = 0;
-let gold = 20;
+let gold = 0;
 let bait = 120;
 let buyingBait = false;
 let buyingSpeed = 500;
@@ -86,8 +86,8 @@ const locations = [
   },
   {
   name: "goFishing",
-  "button text": ["Cast Rod", "Cast Rod", "Town Square", ""],
-  "button functions": [castRod, castRod, goTown, null],
+  "button text": ["Cast Rod", "", "Town Square", ""],
+  "button functions": [castRod, null, goTown, null],
   text: "You're at the water's edge. You cast your rod."
 },
 {
@@ -98,22 +98,22 @@ const locations = [
 },
 {
   name: "fish caught",
-  "button text": ["Town Square", "Town Square", "Town Square", ""],
-  "button functions": [goTown, goTown, goTown, null],
+  "button text": ["Town Square", "", "", ""],
+  "button functions": [goTown, null, null, null],
   text: "You caught the fish! You gained gold and XP!"
 },
 {
   name: "lose",
-  "button text": ["REPLAY?", "REPLAY?", "REPLAY?", ""],
-  "button functions": [restart, restart, restart, null],
+  "button text": ["REPLAY?", "", "", ""],
+  "button functions": [restart, null, null, null],
   text: "Out of bait... GAME OVER"
 }
 ];
 
 locations.push({
     name: "open seas",
-    "button text": ["Cast Rod", "Cast Rod", "Return to shore", ""],
-    "button functions": [castRod, castRod, goTown, null],
+    "button text": ["Cast Rod", "", "Return to shore", ""],
+    "button functions": [castRod, null, goTown, null],
     text: "You've ventured into the open seas. Cast your rod!"
 });
 
@@ -147,17 +147,68 @@ button4.style.display = "none";
 
 // NAVIGATION RELATED FUNCTIONS
 
+function showStartScreen() {
+    // Ensure the initial HTML text remains
+    // We don't touch text.innerText here, so the HTML content persists.
+
+    // Configure buttons for the start screen
+    button1.innerText = "Start Game";
+    button1.onclick = goTownFromStart; // Define this function next
+    button1.style.display = "block"; // Make sure it's visible
+
+    button2.innerText = "";
+    button2.onclick = null;
+    button2.style.display = "none"; // Hide other buttons
+
+    button3.innerText = "";
+    button3.onclick = null;
+    button3.style.display = "none"; // Hide other buttons
+
+    button4.innerText = "";
+    button4.onclick = null;
+    button4.style.display = "none"; // Hide other buttons
+
+    fishStats.style.display = "none"; // Hide fish stats on the start screen
+}
+
+// A new function to handle the transition from the start screen to town
+function goTownFromStart() {
+    goTown(); // This will now correctly transition to the town square state
+}
+
 function update(location) {
     fishStats.style.display = "none";
-    button1.innerText = location["button text"][0];
-    button2.innerText = location["button text"][1];
-    button3.innerText = location["button text"][2]; 
-    button4.innerText = location["button text"][3]; 
 
+    // --- Step 1: Always set innerText for all buttons ---
+    // Use empty string if text is null/undefined to prevent 'null' or 'undefined' appearing on buttons
+    button1.innerText = location["button text"][0] || "";
+    button2.innerText = location["button text"][1] || "";
+    button3.innerText = location["button text"][2] || "";
+    button4.innerText = location["button text"][3] || "";
+
+    // --- Step 2: Set default onclick handlers and clear rapid-fire specific handlers ---
+    // Clear any rapid-fire specific handlers from previous states
+    button1.onmousedown = null; button1.onmouseup = null; button1.onmouseleave = null; button1.ontouchstart = null; button1.ontouchend = null; button1.ontouchcancel = null;
+    button3.onmousedown = null; button3.onmouseup = null; button3.onmouseleave = null; button3.ontouchstart = null; button3.ontouchend = null; button3.ontouchcancel = null;
+    stopBuying(); // Ensure buying loop is stopped
+    stopSellingXP(); // Ensure selling XP loop is stopped
+
+    // Assign normal click handlers by default
+    button1.onclick = location["button functions"][0];
+    button2.onclick = location["button functions"][1];
+    button3.onclick = location["button functions"][2];
+    button4.onclick = location["button functions"][3]; // This will be overridden for store's button4
+
+    // --- Step 3: Manage button display based on whether they have text/function ---
+    // Default all buttons to hidden, then show if they have text or a function.
+    // This is more robust than assuming 'block' and then hiding.
+    button1.style.display = (button1.innerText || button1.onclick) ? "block" : "none";
+    button2.style.display = (button2.innerText || button2.onclick) ? "block" : "none";
+    button3.style.display = (button3.innerText || button3.onclick) ? "block" : "none";
+    button4.style.display = (button4.innerText || button4.onclick) ? "block" : "none"; // Default for button4, overridden below
+
+    // --- Step 4: Apply specific overrides for 'store' and 'town square' ---
     if (location.name === "store") {
-        stopBuying();    // Stop buy bait loop if active
-        stopSellingXP(); // NEW: Stop sell XP loop if active when entering store
-
         // --- Button 1 (Buy Bait) rapid-fire setup ---
         button1.onmousedown = startBuying;
         button1.onmouseup = stopBuying;
@@ -165,54 +216,25 @@ function update(location) {
         button1.ontouchstart = (event) => { event.preventDefault(); startBuying(); };
         button1.ontouchend = stopBuying;
         button1.ontouchcancel = stopBuying;
-        button1.onclick = null; // Prevent single click
+        button1.onclick = null; // Prevent single click when rapid-fire is active
 
-        // --- NEW: Button 3 (Sell XP) rapid-fire setup ---
+        // --- Button 3 (Sell XP) rapid-fire setup ---
         button3.onmousedown = startSellingXP;
         button3.onmouseup = stopSellingXP;
         button3.onmouseleave = stopSellingXP;
-        button3.ontouchstart = (event) => {
-            event.preventDefault(); // Prevent default touch behavior
-            startSellingXP();
-        };
+        button3.ontouchstart = (event) => { event.preventDefault(); startSellingXP(); };
         button3.ontouchend = stopSellingXP;
         button3.ontouchcancel = stopSellingXP;
-        button3.onclick = null; // Prevent single click if holding
+        button3.onclick = null; // Prevent single click when rapid-fire is active
 
-        // --- Button 2 (Buy Rod) & Button 4 (Town Square) in store (single click) ---
-        button2.onclick = location["button functions"][1]; // Buy Rod - no change needed
-        button4.style.display = "block"; // Make button4 visible
-        button4.onclick = location["button functions"][3]; // Assign goTown function
-
-    } else {
-        // --- Clear Button 1 handlers for non-store locations ---
-        button1.onclick = location["button functions"][0]; // Assign normal click for non-store
-        button1.onmousedown = null;
-        button1.onmouseup = null;
-        button1.onmouseleave = null;
-        button1.ontouchstart = null;
-        button1.ontouchend = null;
-        button1.ontouchcancel = null;
-        stopBuying(); // Ensure buying stops if we navigate away
-
-        // --- NEW: Clear Button 3 handlers for non-store locations ---
-        button3.onclick = location["button functions"][2]; // Assign normal click for non-store
-        button3.onmousedown = null;
-        button3.onmouseup = null;
-        button3.onmouseleave = null;
-        button3.ontouchstart = null;
-        button3.ontouchend = null;
-        button3.ontouchcancel = null;
-        stopSellingXP(); // Ensure selling stops if we navigate away
-
-        // --- Hide Button 4 outside the store ---
-        button4.style.display = "none";
-        button4.onclick = null;
-
-        // Button 2 always works normally (no rapid-fire)
-        button2.onclick = location["button functions"][1];
+        button4.style.display = "block"; // Explicitly show button4 in the store
+        // button4.onclick is already set above, no change needed unless store button4 is different.
+    } else if (location.name === "town square") {
+        button4.style.display = "block"; // Explicitly show button4 in the town square
+        // button4.onclick is already set above.
     }
-    
+    // For other locations, button4's visibility is determined by the default logic in Step 3
+
     if (location.name !== "fish caught") {
         text.innerText = location.text;
     }
@@ -244,10 +266,49 @@ function saveGame() {
         bait: bait,
         inventory: inventory,
         currentRod: currentRod,
-        isRodBroken: isRodBroken
+        isRodBroken: isRodBroken,
+        fishHealCooldown: fishHealCooldown
     };
     localStorage.setItem('fishingGameSave', JSON.stringify(gameData));
     text.innerText = "Game saved! You can now exit the game.";
+}
+
+function newGame() {
+    if (confirm("Are you sure you want to start a new game? All current progress will be lost!")) {
+        localStorage.removeItem('fishingGameSave');
+        text.innerText = "New game started! Refreshing...";
+        location.reload();
+    }
+}
+
+function loadGame() {
+    const savedData = localStorage.getItem('fishingGameSave');
+    if (savedData) {
+        const gameData = JSON.parse(savedData);
+
+        // Apply saved data, with fallbacks for new variables or corrupted saves
+        xp = gameData.xp !== undefined ? gameData.xp : 0;
+        gold = gameData.gold !== undefined ? gameData.gold : 20;
+        bait = gameData.bait !== undefined ? gameData.bait : 120;
+        inventory = gameData.inventory !== undefined ? gameData.inventory : ["Stick"];
+        currentRod = gameData.currentRod !== undefined ? gameData.currentRod : null;
+        isRodBroken = gameData.isRodBroken !== undefined ? gameData.isRodBroken : false;
+        fishHealCooldown = gameData.fishHealCooldown !== undefined ? gameData.fishHealCooldown : 0;
+
+        // Update display to reflect loaded stats
+        xpText.innerText = xp;
+        goldText.innerText = gold;
+        baitText.innerText = bait;
+
+        text.innerText = "Game loaded! Your previous adventure awaits.";
+        goTown(); // Move to the town square after loading
+        return true; // Indicate a successful load
+    }
+    return false; // No save data found
+}
+
+function goSettings() {
+    update(locations[8]);
 }
 
 function lose() {
@@ -257,7 +318,7 @@ function lose() {
 function restart() {
   xp = 0;
   bait = 120;
-  gold = 0;
+  gold = 20;
   currentRod = null;
   inventory = ["Stick"];
   goldText.innerText = gold;
@@ -272,9 +333,9 @@ function restart() {
 // STORE RELATED FUNCTIONS
 
 function buyBait() {
-  if (gold >= 1) {
-      gold -= 1;
-      bait += 1;
+  if (gold >= 10) {
+      gold -= 10;
+      bait += 10;
       goldText.innerText = gold; 
       baitText.innerText = bait; 
   } else {
@@ -597,3 +658,15 @@ function catchFish() {
     update(locations[4]); 
 }
 
+// Set initial stats display before attempting to load (will be overwritten if loadGame succeeds)
+xpText.innerText = xp;
+goldText.innerText = gold;
+baitText.innerText = bait;
+
+// Attempt to load a game. The loadGame() function returns true if a game was loaded.
+const gameLoaded = loadGame();
+
+if (!gameLoaded) {
+    // If no game was loaded, display the start screen with instructions
+    showStartScreen();
+}
