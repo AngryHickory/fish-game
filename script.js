@@ -1,6 +1,6 @@
 // GLOBAL ENTRIES
 let xp = 0;
-let gold = 0;
+let gold = 100;
 let bait = 200;
 let buyingBait = false;
 let buyingSpeed = 500;
@@ -308,9 +308,16 @@ function goStore() {
     let nextRod = null;
 
     // Determine the next rod to buy
-    if (availableRods.length > 0) {
-        const currentRodIndex = currentRod ? rods.findIndex(r => r.name === currentRod.name) : -1;
-        nextRod = availableRods[currentRodIndex + 1] || availableRods[0]; // Get the next rod or the first available
+    if (currentRod) {
+        const currentRodIndex = rods.findIndex(r => r.name === currentRod.name);
+        if (currentRodIndex !== -1 && currentRodIndex < rods.length - 1) {
+            nextRod = rods[currentRodIndex + 1]; // Get the next rod in the list
+        }
+    }
+
+    // If no next rod available, offer the first available rod
+    if (!nextRod) {
+        nextRod = availableRods[0]; // Default to the first available rod
     }
 
     // Update rod purchase button
@@ -330,13 +337,13 @@ function goStore() {
         const hookPrice = nextHook.price;
 
         locations[1]["button text"][2] = `Buy ${nextHook.name} (${hookPrice} Gold)`;
-        locations[1]["button functions"][2] = () => buyHook(); 
+        locations[1]["button functions"][2] = () => buyHook(); // Ensure buyHook is called correctly
     } else {
         locations[1]["button text"][2] = "No more hooks available";
         locations[1]["button functions"][2] = null;
     }
 
-    update(locations[1]);
+    update(locations[1]); // Refresh store UI
 }
 
 function goFishing() {
@@ -600,11 +607,11 @@ function buyRod(rodToBuy = null) {
     const playerLevel = getPlayerLevel();
     let targetRod = rodToBuy;
 
+    // If no specific rod is passed, find the next available based on current rod
     if (!targetRod) {
-        // Find the next available rod based on current rod
         const currentRodIndex = currentRod ? rods.findIndex(r => r.name === currentRod.name) : -1;
-        if (currentRodIndex === -1) {
-            targetRod = rods.find(rod => rod.name === "Basic Rod"); // Offer Basic Rod if no rods owned
+        if (currentRodIndex === -1 || isRodBroken) {
+            targetRod = rods.find(rod => rod.name === "Stick with Line") || rods[0]; // Allow repurchase of broken rod
         } else {
             targetRod = rods[currentRodIndex + 1]; // Get the next rod in the list
         }
@@ -626,10 +633,10 @@ function buyRod(rodToBuy = null) {
         gold -= rodPrice;
         currentRod = targetRod;
         inventory[0] = currentRod.name; // Update inventory
-        isRodBroken = false;
+        isRodBroken = false; // Reset the broken status
         updateStatsDisplay();
         text.innerText = `You now have a ${currentRod.name} with power ${currentRod.power}!`;
-        goStore(); 
+        goStore(); // Update store display
     } else {
         text.innerText = `You do not have enough gold to buy the ${targetRod.name}. You need ${rodPrice} gold.`;
     }
