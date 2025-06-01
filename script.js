@@ -38,15 +38,15 @@ const playerLevelText = document.querySelector("#playerLevelText");
 const xpToNextLevelText = document.querySelector("#xpToNextLevelText");
 
 const rods = [
-    { name: "Stick with Line", power: 2, levelRequired: 1, basePrice: 0 }, // Starting "rod"
-    { name: "Basic Rod", power: 5, levelRequired: 1, basePrice: 30 },
-    { name: "Wooden Rod", power: 10, levelRequired: 5, basePrice: 150 },
-    { name: "Bamboo Rod", power: 15, levelRequired: 10, basePrice: 300 },
-    { name: "Blue Rod", power: 20, levelRequired: 15, basePrice: 600 },
-    { name: "Red Rod", power: 26, levelRequired: 20, basePrice: 900 },
-    { name: "Green Rod", power: 34, levelRequired: 25, basePrice: 1200 },
-    { name: "Yellow Rod", power: 42, levelRequired: 30, basePrice: 1500 },
-    { name: "Aluminum Rod", power: 52, levelRequired: 35, basePrice: 2000 },
+    { name: "Stick with Line", power: 2, levelRequired: 1, basePrice: 0 },
+    { name: "Basic Rod", power: 10, levelRequired: 1, basePrice: 30 },
+    { name: "Wooden Rod", power: 14, levelRequired: 5, basePrice: 150 },
+    { name: "Bamboo Rod", power: 18, levelRequired: 10, basePrice: 300 },
+    { name: "Blue Rod", power: 24, levelRequired: 15, basePrice: 600 },
+    { name: "Red Rod", power: 30, levelRequired: 20, basePrice: 900 },
+    { name: "Green Rod", power: 38, levelRequired: 25, basePrice: 1200 },
+    { name: "Yellow Rod", power: 46, levelRequired: 30, basePrice: 1500 },
+    { name: "Aluminum Rod", power: 55, levelRequired: 35, basePrice: 2000 },
     { name: "Steel Rod", power: 64, levelRequired: 40, basePrice: 3000 },
     { name: "Graphite Rod", power: 76, levelRequired: 50, basePrice: 5000 },
     { name: "Fiberglass Rod", power: 88, levelRequired: 60, basePrice: 7500 },
