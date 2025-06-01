@@ -1,5 +1,5 @@
 // GLOBAL ENTRIES
-let xp = 0;
+let xp = 1000;
 let gold = 100;
 let bait = 200;
 let buyingBait = false;
@@ -299,7 +299,6 @@ function goTown() {
     }
 
     update(townSquareLocation);
-    
 }
 
 function goStore() {
@@ -915,7 +914,7 @@ function brace() {
 
     if (Math.random() <= 0.4) {
         text.innerText += " The " + currentFishInBattle.name + " begins to wear itself out!";
-        const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.5);
+        const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.2);
 
         if (newFishHealth < fishHealth) {
             flashElement(fishHealthText, "red", 350);
