@@ -288,6 +288,7 @@ function goTown() {
     }
 
     update(townSquareLocation);
+    startMusic();
 }
 
 function goStore() {
