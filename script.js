@@ -37,6 +37,7 @@ const fishLevelText = document.querySelector("#fishLevel");
 const fishHealthText = document.querySelector("#fishHealth");
 const playerLevelText = document.querySelector("#playerLevelText");
 const xpToNextLevelText = document.querySelector("#xpToNextLevelText");
+const gameMusic = document.getElementById('gameMusic');
 
 // Google Chrome fix for sticky hover
 let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
@@ -199,10 +200,12 @@ function showStartScreen() {
     button4.style.display = "none"; // Hide other buttons
 
     fishStats.style.display = "none"; // Hide fish stats on the start screen
+    startMusic();
 }
 
 // A new function to handle the transition from the start screen to town
 function goTownFromStart() {
+    startMusic()
     goTown(); // This will now correctly transition to the town square state
 }
 
@@ -338,6 +341,12 @@ function openSeas() {
 
 //UTILITY RELATED FUNCTIONS
 
+function startMusic() {
+    gameMusic.play().catch(error => {
+        console.log("Error playing music:", error);
+    });
+}
+
 function updateStatsDisplay() {
     xpText.innerText = xp;
     goldText.innerText = gold;
@@ -460,6 +469,7 @@ function loadGame() {
         }
 
         updateStatsDisplay();
+        startMusic();
 
         text.innerText = "Game loaded! Your previous adventure awaits.";
         goTown();
