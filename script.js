@@ -47,8 +47,8 @@ if (isTouchDevice) {
 const rods = [
     { name: "Stick with Line", power: 2, levelRequired: 1, basePrice: 0 },
     { name: "Basic Rod", power: 10, levelRequired: 1, basePrice: 30 },
-    { name: "Wooden Rod", power: 14, levelRequired: 5, basePrice: 150 },
-    { name: "Bamboo Rod", power: 18, levelRequired: 10, basePrice: 300 },
+    { name: "Wooden Rod", power: 14, levelRequired: 4, basePrice: 150 },
+    { name: "Bamboo Rod", power: 18, levelRequired: 8, basePrice: 300 },
     { name: "Blue Rod", power: 24, levelRequired: 15, basePrice: 600 },
     { name: "Red Rod", power: 30, levelRequired: 20, basePrice: 900 },
     { name: "Green Rod", power: 38, levelRequired: 25, basePrice: 1200 },
@@ -479,7 +479,7 @@ function loadGame() {
 
         updateStatsDisplay();
         startMusic()
-        
+
         text.innerText = "Game loaded! Your previous adventure awaits.";
         goTown();
         return true;
