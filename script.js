@@ -179,26 +179,22 @@ button4.style.display = "none";
 // NAVIGATION RELATED FUNCTIONS
 
 function showStartScreen() {
-    // Ensure the initial HTML text remains
-    // We don't touch text.innerText here, so the HTML content persists.
 
     // Configure buttons for the start screen
     button1.innerText = "Start Game";
-    button1.onclick = goTownFromStart; // Define this function next
-    button1.style.display = "block"; // Make sure it's visible
+    button1.onclick = goTownFromStart; 
+    button1.style.display = "block"; 
 
     button2.innerText = "";
     button2.onclick = null;
-    button2.style.display = "none"; // Hide other buttons
+    button2.style.display = "none"; 
 
     button3.innerText = "";
     button3.onclick = null;
-    button3.style.display = "none"; // Hide other buttons
-
+    button3.style.display = "none"; 
     button4.innerText = "";
     button4.onclick = null;
-    button4.style.display = "none"; // Hide other buttons
-
+    button4.style.display = "none"; 
     fishStats.style.display = "none"; // Hide fish stats on the start screen
     startMusic();
 }
@@ -206,7 +202,7 @@ function showStartScreen() {
 // A new function to handle the transition from the start screen to town
 function goTownFromStart() {
     startMusic()
-    goTown(); // This will now correctly transition to the town square state
+    goTown();
 }
 
 function update(location) {
