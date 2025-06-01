@@ -1,6 +1,6 @@
 // GLOBAL ENTRIES
 let xp = 0;
-let gold = 0;
+let gold = 2000;
 let bait = 200;
 let buyingBait = false;
 let buyingSpeed = 500;
@@ -237,7 +237,10 @@ function update(location) {
         button1.onmousedown = startBuying;
         button1.onmouseup = stopBuying;
         button1.onmouseleave = stopBuying;
-        button1.ontouchstart = (event) => { event.preventDefault(); startBuying(); };
+        button1.ontouchstart = (event) => {
+        event.preventDefault(); // Prevent default touch behavior
+        startBuying(); // Start buying process
+    };
         button1.ontouchend = stopBuying;
         button1.ontouchcancel = stopBuying;
         button1.onclick = null; 
@@ -361,6 +364,11 @@ function updateStatsDisplay() {
 function flashElement(element, color) {
     element.style.transition = "color 0.5s";
     element.style.color = color;
+
+    // Reset color after a short duration
+    setTimeout(() => {
+        element.style.color = ""; // Reset to original color
+    }, 500);
 }
 
 const XP_CURVE_CONSTANT = 45; 
