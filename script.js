@@ -52,13 +52,13 @@ const rods = [
 
 const hooks = [
     { name: "Basic Hook", level: 5, price: 0 },
-    { name: "Iron Hook", level: 10, price: 50 },
-    { name: "Steel Hook", level: 20, price: 150 },
-    { name: "Silver Hook", level: 30, price: 300 },
-    { name: "Gold Hook", level: 40, price: 500 },
-    { name: "Diamond Hook", level: 50, price: 800 },
-    { name: "Master Hook", level: 70, price: 1200 },
-    { name: "Legendary Hook", level: 100, price: 2000 }
+    { name: "Iron Hook", level: 10, price: 300 },
+    { name: "Steel Hook", level: 20, price: 600 },
+    { name: "Silver Hook", level: 30, price: 800 },
+    { name: "Gold Hook", level: 40, price: 1200 },
+    { name: "Diamond Hook", level: 50, price: 1500 },
+    { name: "Master Hook", level: 70, price: 1800 },
+    { name: "Legendary Hook", level: 100, price: 2500 }
 ];
 
 const fish = [
@@ -84,7 +84,8 @@ const seaFish = [
   { name: "Halibut", level: 50, health: 1000 },
   { name: "Tuna", level: 55, health: 1200 },
   { name: "Blue Marlin", level: 70, health: 2000 },
-  { name: "Great White Shark", level: 90, health: 2500 }
+  { name: "Great White Shark", level: 90, health: 2500 },
+  { name: "Megalodon", level: 100, health: 7500 }
 ];
 
 const locations = [
@@ -254,7 +255,7 @@ function goTown() {
     // Check player level for Open Seas access
     if (playerLevel < 5) {
         townSquareLocation["button functions"][2] = () => {
-            text.innerText = "You need to reach Level 20 to venture into the Open Seas!";
+            text.innerText = "You need to reach Level 5 to venture into the Open Seas!";
         };
     } else {
         townSquareLocation["button text"][2] = originalOpenSeasText;
