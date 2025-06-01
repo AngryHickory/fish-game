@@ -7,9 +7,6 @@ let buyingSpeed = 500;
 let increment = 20;
 let minBuyingSpeed = 10;
 let buyTimeout;
-let sellingXP = false;
-let sellXPSpeed = 250;
-let sellXPTimeout;
 let currentRod = null;
 let isRodBroken = false;
 let currentFishInBattle = null;
@@ -692,7 +689,7 @@ function fishAbility(fish, isSeaFish) {
 }
 
 function calculateXpGain(caughtFishLevel, playerLevel) {
-    const baseXpPerLevel = 1;
+    const baseXpPerLevel = 1.5;
     let xpGain = caughtFishLevel * baseXpPerLevel;
     const levelDifference = caughtFishLevel - playerLevel;
 
@@ -937,7 +934,7 @@ function brace() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 6 : 4;
+    const baseReward = isSeaFish ? 5 : 3;
     return Math.floor(level * baseReward * (1 + Math.log(level)));
 }
 
