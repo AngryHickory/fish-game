@@ -16,7 +16,7 @@ let currentFishInBattle = null;
 let fishHealth;
 let fishHealCooldown = 0;
 let reelCooldown = 0;
-let inventory = ["Stick"];
+let inventory = ["Stick with Line"];
 let currentHook = { name: "Basic Hook", level: 5 };
 let bestFishCaught = [];
 
@@ -38,16 +38,21 @@ const playerLevelText = document.querySelector("#playerLevelText");
 const xpToNextLevelText = document.querySelector("#xpToNextLevelText");
 
 const rods = [
-  { name: "Basic Rod", power: 5 },
-  { name: "Wooden Rod", power: 25 },
-  { name: "Blue Rod", power: 35 },
-  { name: "Red Rod", power: 35 },
-  { name: "Green Rod", power: 35 },
-  { name: "Yellow Rod", power: 35 },
-  { name: "Aluminum Rod", power: 40 },
-  { name: "Steel Rod", power: 60 },
-  { name: "Fishing Rod", power: 80 },
-  { name: "Experimental Rod", power: 100 },
+    { name: "Stick with Line", power: 2, levelRequired: 1, basePrice: 0 }, // Starting "rod"
+    { name: "Basic Rod", power: 5, levelRequired: 1, basePrice: 30 },
+    { name: "Wooden Rod", power: 10, levelRequired: 5, basePrice: 150 },
+    { name: "Bamboo Rod", power: 15, levelRequired: 10, basePrice: 300 },
+    { name: "Blue Rod", power: 20, levelRequired: 15, basePrice: 600 },
+    { name: "Red Rod", power: 26, levelRequired: 20, basePrice: 900 },
+    { name: "Green Rod", power: 34, levelRequired: 25, basePrice: 1200 },
+    { name: "Yellow Rod", power: 42, levelRequired: 30, basePrice: 1500 },
+    { name: "Aluminum Rod", power: 52, levelRequired: 35, basePrice: 2000 },
+    { name: "Steel Rod", power: 64, levelRequired: 40, basePrice: 3000 },
+    { name: "Graphite Rod", power: 76, levelRequired: 50, basePrice: 5000 },
+    { name: "Fiberglass Rod", power: 88, levelRequired: 60, basePrice: 7500 },
+    { name: "Titanium Rod", power: 100, levelRequired: 70, basePrice: 10000 },
+    { name: "Experimental Rod", power: 120, levelRequired: 80, basePrice: 15000 },
+    { name: "Legendary Rod", power: 140, levelRequired: 100, basePrice: 25000 }
 ];
 
 const hooks = [
@@ -196,14 +201,12 @@ function goTownFromStart() {
 function update(location) {
     fishStats.style.display = "none";
 
-    // --- Step 1: Always set innerText for all buttons ---
     // Use empty string if text is null/undefined to prevent 'null' or 'undefined' appearing on buttons
     button1.innerText = location["button text"][0] || "";
     button2.innerText = location["button text"][1] || "";
     button3.innerText = location["button text"][2] || "";
     button4.innerText = location["button text"][3] || "";
 
-    // --- Step 2: Set default onclick handlers and clear rapid-fire specific handlers ---
     // Clear any rapid-fire specific handlers from previous states
     button1.onmousedown = null; button1.onmouseup = null; button1.onmouseleave = null; button1.ontouchstart = null; button1.ontouchend = null; button1.ontouchcancel = null;
     button3.onmousedown = null; button3.onmouseup = null; button3.onmouseleave = null; button3.ontouchstart = null; button3.ontouchend = null; button3.ontouchcancel = null;
@@ -215,7 +218,6 @@ function update(location) {
     button3.onclick = location["button functions"][2];
     button4.onclick = location["button functions"][3]; // This will be overridden for store's button4
 
-    // --- Step 3: Manage button display based on whether they have text/function ---
     // Default all buttons to hidden, then show if they have text or a function.
     // This is more robust than assuming 'block' and then hiding.
     button1.style.display = (button1.innerText || button1.onclick) ? "block" : "none";
@@ -237,8 +239,21 @@ function update(location) {
         button4.style.display = "block";
     }
 
+    // --- Inventory Display Logic ---
     if (location.name !== "fish caught") {
-        text.innerText = location.text;
+        let newText = location.text; // Start with the base text for the location
+
+        if (location.name === "town square" || location.name === "store") {
+            // Append inventory details
+            newText += `\n\nYour current rod: ${currentRod ? currentRod.name : 'None'}`;
+            newText += `\nYour hook: ${currentHook.name} (Max Fish Level: ${currentHook.level}${currentHook.name === "Legendary Hook" ? " - All Fish" : ""})`;
+            
+            // You can also add more general inventory items if you have them,
+            // but for now, rod and hook are the key "inventory" items.
+            // If 'inventory' array contains more than just the rod name, you might list them:
+            // newText += `\nInventory: ${inventory.join(", ")}`;
+        }
+        text.innerText = newText; // Set the final text
     }
 
     currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
@@ -266,8 +281,39 @@ function goTown() {
 }
 
 function goStore() {
-  update(locations[1]);
+    const playerLevel = getPlayerLevel();
+    const availableRods = rods.filter(rod => playerLevel >= rod.levelRequired);
+    let nextRodToBuy = null;
 
+    if (currentRod) {
+        // Find the next rod after the current one, based on its index in the sorted array
+        const currentIndex = rods.findIndex(r => r.name === currentRod.name);
+        if (currentIndex !== -1 && currentIndex < rods.length - 1) {
+            nextRodToBuy = rods[currentIndex + 1];
+        }
+    } else {
+        // If no rod, the player can buy the first available rod for their level
+        nextRodToBuy = availableRods.find(rod => rod.levelRequired === 1); // Should be "Stick with Line" or "Basic Rod"
+    }
+
+    // Filter available rods again to ensure the nextRodToBuy is actually available for the player's level
+    if (nextRodToBuy && playerLevel < nextRodToBuy.levelRequired) {
+        nextRodToBuy = null; // Cannot buy the next rod yet if level is too low
+    }
+
+
+    if (nextRodToBuy) {
+        const rodPrice = calculateRodPrice(nextRodToBuy);
+        locations[1]["button text"][1] = `Buy ${nextRodToBuy.name} (${rodPrice} Gold)`;
+        locations[1]["button functions"][1] = () => buyRod(nextRodToBuy); // Pass the specific rod to buyRod
+    } else {
+        // If no more rods are available for purchase based on level or all bought
+        locations[1]["button text"][1] = "No more rods available";
+        locations[1]["button functions"][1] = () => { text.innerText = "You have bought all available rods or your level is too low for the next one."; };
+    }
+
+
+    update(locations[1]);
 }
 
 function goFishing() {
@@ -370,13 +416,26 @@ function loadGame() {
         xp = gameData.xp !== undefined ? gameData.xp : 0;
         gold = gameData.gold !== undefined ? gameData.gold : 20;
         bait = gameData.bait !== undefined ? gameData.bait : 120;
-        inventory = gameData.inventory !== undefined ? gameData.inventory : ["Stick"];
-        currentRod = gameData.currentRod !== undefined ? gameData.currentRod : null;
+        inventory = gameData.inventory !== undefined ? gameData.inventory : ["Stick with Line"];
         isRodBroken = gameData.isRodBroken !== undefined ? gameData.isRodBroken : false;
         fishHealCooldown = gameData.fishHealCooldown !== undefined ? gameData.fishHealCooldown : 0;
         reelCooldown = gameData.reelCooldown !== undefined ? gameData.reelCooldown : 0;
         currentHook = gameData.currentHook !== undefined ? gameData.currentHook : { name: "Basic Hook", level: 5 };
         bestFishCaught = gameData.bestFishCaught !== undefined ? gameData.bestFishCaught : [];
+
+        let loadedRodName = null;
+        if (gameData.currentRod && typeof gameData.currentRod.name === 'string') {
+            loadedRodName = gameData.currentRod.name;
+        }
+
+        // Find the specific rod object from the 'rods' array
+        currentRod = rods.find(rod => rod.name === loadedRodName) || null;
+        if (!currentRod) {
+            currentRod = rods.find(rod => rod.name === "Stick with Line");
+            if (!inventory.includes("Stick with Line")) {
+                inventory[0] = "Stick with Line";
+            }
+        }
 
         updateStatsDisplay();
 
@@ -434,7 +493,7 @@ function restart() {
   bait = 120;
   gold = 20;
   currentRod = null;
-  inventory = ["Stick"];
+  inventory = ["Stick with Line"];
   updateStatsDisplay();
   goTown();
 }
@@ -486,25 +545,49 @@ function buyBaitLoop() {
     }
 }
 
-function buyRod() {
-  if (gold >= 30) {
-    gold -= 30;
-    const newRod = generateRod();
-    rods.push(newRod);
-    updateStatsDisplay();
-    text.innerText = "You now have a " + newRod.name + " with power " + newRod.power + ".";
-    if (currentRod) {
-      text.innerText += " Your " + currentRod.name + " has been replaced.";
-    }
-    
-    currentRod = newRod;
-    inventory[1] = currentRod.name;
-    isRodBroken = false;
+function calculateRodPrice(rod) {
+    return Math.floor(rod.basePrice * (1 + (rod.levelRequired / 10)));
+}
 
-    text.innerText += " In your inventory you have: " + inventory.join(", ");
-  } else {
-    text.innerText = "You do not have enough gold to buy a rod.";
-  }
+function buyRod(rodToBuy = null) {
+    const playerLevel = getPlayerLevel();
+    let targetRod = rodToBuy;
+
+    if (!targetRod) {
+        // If not specific rod is passed, find the next available based on current rod
+        const currentRodIndex = currentRod ? rods.findIndex(r => r.name === currentRod.name) : -1;
+        if (currentRodIndex === -1) { // No rod or "Stick with Line" was default, offer Basic Rod
+            targetRod = rods.find(r => r.name === "Basic Rod");
+        } else {
+            targetRod = rods[currentRodIndex + 1]; // Try to get the next rod in the list
+        }
+    }
+
+    if (!targetRod) {
+        text.innerText = "You have bought all available rods!";
+        return;
+    }
+
+    if (playerLevel < targetRod.levelRequired) {
+        text.innerText = `You need to reach Level ${targetRod.levelRequired} to buy the ${targetRod.name}. You are Level ${playerLevel}.`;
+        return;
+    }
+
+    const rodPrice = calculateRodPrice(targetRod);
+
+    if (gold >= rodPrice) {
+        gold -= rodPrice;
+        currentRod = targetRod;
+        inventory[0] = currentRod.name; // Assuming rod is always at index 0 or replaces existing rod
+        isRodBroken = false;
+        updateStatsDisplay();
+        text.innerText = `You now have a ${currentRod.name} with power ${currentRod.power}!`;
+        text.innerText += ` In your inventory you have: ${inventory.join(", ")}`;
+
+        goStore(); // This will refresh the "Buy Rod" button text and function
+    } else {
+        text.innerText = `You do not have enough gold to buy the ${targetRod.name}. You need ${rodPrice} gold.`;
+    }
 }
 
 function buyHook() {
@@ -527,7 +610,7 @@ function buyHook() {
         } else {
             text.innerText = `You bought a ${currentHook.name}! You can now catch fish up to level ${currentHook.level}.`;
         }
-        
+
     } else {
         text.innerText = `You need ${nextHook.price} gold to buy the ${nextHook.name}. You have ${gold} gold.`;
     }
@@ -564,16 +647,6 @@ function generateFish(fishTemplate, isSeaFish = false) {
         level: finalLevel,
         health: finalHealth
     };
-}
-
-function generateRod() {
-  const randomIndex = Math.floor(Math.random() * rods.length);
-  const basePower = Math.floor(Math.random() * 100) + 5;
-  const selectedRod = rods[randomIndex];
-  return {
-    name: selectedRod.name,
-    power: basePower
-  };
 }
 
 function fishAbility(fish, isSeaFish) {
@@ -615,6 +688,21 @@ function castRod() {
     const currentLocation = locations[currentLocationIndex].name;
     const fishArray = (currentLocation === "open seas") ? seaFish : fish;
 
+    if (bait <= 0) {
+        text.innerText = "You are out of bait! Visit the store to buy more.";
+        // You might want to call lose() here or allow the player to go back to town
+        // For now, I'll just prevent casting.
+        return;
+    }
+    if (!currentRod || currentRod.name === "Stick with Line") {
+        text.innerText = "You need a proper fishing rod to cast! Visit the store to buy one.";
+        return;
+    }
+    if (isRodBroken) {
+        text.innerText = `Your ${currentRod.name} is broken! You need to buy a new one at the store.`;
+        return;
+    }
+
     const randomIndex = Math.floor(Math.random() * fishArray.length);
     const selectedFishTemplate = fishArray[randomIndex];
 
@@ -648,7 +736,7 @@ function getFishAttackValue(level) {
 
 function reel() {
     if (fishHealth <= 0) {
-        reelCooldown = 0; 
+        reelCooldown = 0;
         text.innerText = "The fish is exhausted! You reel it in easily.";
         catchFish();
         return;
@@ -656,23 +744,32 @@ function reel() {
 
     if (reelCooldown > 0) {
         text.innerText = "You can't reel yet! The rod needs to rest. Try bracing!";
-        return; 
+        return;
     }
 
-    if (!currentRod) {
-        text.innerText = "You can't reel in, you've only got a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
+    if (!currentRod || currentRod.name === "Stick with Line") {
+        text.innerText = "You've only got a stick with line tied to it! You'll need to buy a proper rod at the store. Try bracing for now.";
+        return;
+    }
+    if (isRodBroken) {
+        text.innerText = `Your ${currentRod.name} is broken! You need to buy a new one at the store.`;
         return;
     }
 
     text.innerText = "A fish is thrashing on the line!";
     text.innerText += " You try to reel it in.";
 
+    const playerLevel = getPlayerLevel();
+    const playerLevelDamageBonus = Math.floor(playerLevel * 0.5); // Adjust this factor (0.5) to control how much player level affects damage
+    const reelDamage = currentRod.power + playerLevelDamageBonus + Math.floor(Math.random() * 5); // Add a small random element
+
     if (isFishHit()) {
-        fishHealth -= currentRod.power + Math.floor(Math.random() * xp / 3) + 1;
+        fishHealth -= reelDamage;
+        text.innerText += ` You deal ${reelDamage} damage to the fish!`;
 
         if (fishAbility(currentFishInBattle, locations[currentLocationIndex].name === "sea battle") && fishHealCooldown === 0) {
             const fishHealPercentage = 0.3;
-            const fishHealAmount = Math.floor(fishHealth * fishHealPercentage);
+            const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75)); // Heal based on original health, with variation
             text.innerText += " The fish recovered " + fishHealAmount + " health!";
             fishHealth += fishHealAmount;
             fishHealCooldown = 5;
@@ -693,10 +790,11 @@ function reel() {
 
     } else {
         text.innerText += " The fish is getting away!";
-        if (!isRodBroken && Math.random() <= 0.03 && inventory.length > 1) {
+        // Increased chance of breaking a broken rod, but if it's already broken, no further action
+        if (!isRodBroken && Math.random() <= 0.05) { // Slightly increased break chance (e.g., from 0.03 to 0.05)
             text.innerText += " Your " + currentRod.name + " breaks.";
-            currentRod = null;
-            isRodBroken = true;
+            isRodBroken = true; // Mark the rod as broken
+            // Do NOT set currentRod to null here, keep it for display but prevent reeling
         }
     }
 
@@ -725,6 +823,15 @@ function brace() {
     if (fishHealth <= 0) {
         text.innerText = "The " + currentFishInBattle.name + " is already exhausted. Time to reel it in!";
         return; 
+    }
+
+    if (!currentRod || currentRod.name === "Stick with Line") {
+        text.innerText = "You've only got a stick with line tied to it! You'll need to buy a proper rod at the store.";
+        return;
+    }
+    if (isRodBroken) {
+        text.innerText = `Your ${currentRod.name} is broken! You need to buy a new one at the store.`;
+        return;
     }
 
     text.innerText = "You brace the rod against the " + currentFishInBattle.name + "'s sudden movements!";
@@ -815,6 +922,8 @@ updateStatsDisplay();
 const gameLoaded = loadGame();
 
 if (!gameLoaded) {
-    // If no game was loaded, display the start screen with instructions
+    // If no game was loaded, initialize the first rod and show start screen
+    currentRod = rods.find(rod => rod.name === "Stick with Line");
+    inventory = ["Stick with Line"];
     showStartScreen();
 }
