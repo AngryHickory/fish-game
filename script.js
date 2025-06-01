@@ -1,5 +1,5 @@
 let xp = 0;
-let gold = 20;
+let gold = 2000;
 let bait = 120;
 let buyingBait = false;
 let buyingSpeed = 500;
@@ -14,7 +14,9 @@ let isRodBroken = false;
 let currentFishInBattle = null;
 let fishHealth;
 let fishHealCooldown = 0;
+let reelCooldown = 0;
 let inventory = ["Stick"];
+let currentHook = { name: "Basic Hook", level: 5 };
 
 let currentLocationIndex = 0;
 
@@ -44,6 +46,17 @@ const rods = [
   { name: "Steel Rod", power: 60 },
   { name: "Fishing Rod", power: 80 },
   { name: "Experimental Rod", power: 100 },
+];
+
+const hooks = [
+    { name: "Basic Hook", level: 5, price: 0 },
+    { name: "Iron Hook", level: 10, price: 50 },
+    { name: "Steel Hook", level: 20, price: 150 },
+    { name: "Silver Hook", level: 30, price: 300 },
+    { name: "Gold Hook", level: 40, price: 500 },
+    { name: "Diamond Hook", level: 50, price: 800 },
+    { name: "Master Hook", level: 70, price: 1200 },
+    { name: "Legendary Hook", level: 100, price: 2000 }
 ];
 
 const fish = [
@@ -81,8 +94,8 @@ const locations = [
   },
   {
     name: "store",
-    "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Sell XP", "Town Square"],
-    "button functions": [buyBait, buyRod, sellXP, goTown],
+    "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Buy Hook", "Town Square"],
+    "button functions": [buyBait, buyRod, buyHook, goTown],
     text: "You enter the store."
   },
   {
@@ -192,7 +205,6 @@ function update(location) {
     button1.onmousedown = null; button1.onmouseup = null; button1.onmouseleave = null; button1.ontouchstart = null; button1.ontouchend = null; button1.ontouchcancel = null;
     button3.onmousedown = null; button3.onmouseup = null; button3.onmouseleave = null; button3.ontouchstart = null; button3.ontouchend = null; button3.ontouchcancel = null;
     stopBuying(); // Ensure buying loop is stopped
-    stopSellingXP(); // Ensure selling XP loop is stopped
 
     // Assign normal click handlers by default
     button1.onclick = location["button functions"][0];
@@ -208,33 +220,19 @@ function update(location) {
     button3.style.display = (button3.innerText || button3.onclick) ? "block" : "none";
     button4.style.display = (button4.innerText || button4.onclick) ? "block" : "none"; // Default for button4, overridden below
 
-    // --- Step 4: Apply specific overrides for 'store' and 'town square' ---
     if (location.name === "store") {
-        // --- Button 1 (Buy Bait) rapid-fire setup ---
         button1.onmousedown = startBuying;
         button1.onmouseup = stopBuying;
         button1.onmouseleave = stopBuying;
         button1.ontouchstart = (event) => { event.preventDefault(); startBuying(); };
         button1.ontouchend = stopBuying;
         button1.ontouchcancel = stopBuying;
-        button1.onclick = null; // Prevent single click when rapid-fire is active
+        button1.onclick = null; 
 
-        // --- Button 3 (Sell XP) rapid-fire setup ---
-        button3.onmousedown = startSellingXP;
-        button3.onmouseup = stopSellingXP;
-        button3.onmouseleave = stopSellingXP;
-        button3.ontouchstart = (event) => { event.preventDefault(); startSellingXP(); };
-        button3.ontouchend = stopSellingXP;
-        button3.ontouchcancel = stopSellingXP;
-        button3.onclick = null; // Prevent single click when rapid-fire is active
-
-        button4.style.display = "block"; // Explicitly show button4 in the store
-        // button4.onclick is already set above, no change needed unless store button4 is different.
+        button4.style.display = "block"; 
     } else if (location.name === "town square") {
-        button4.style.display = "block"; // Explicitly show button4 in the town square
-        // button4.onclick is already set above.
+        button4.style.display = "block";
     }
-    // For other locations, button4's visibility is determined by the default logic in Step 3
 
     if (location.name !== "fish caught") {
         text.innerText = location.text;
@@ -269,23 +267,23 @@ function updateStatsDisplay() {
     baitText.innerText = bait;
     playerLevelText.innerText = getPlayerLevel();
 
-    // Only show XP to Next Level if not at max level (or a very high level)
+ 
     const nextLevelXP = getXPToNextLevel();
-    if (nextLevelXP > 0) { // If nextLevelXP is 0, it means you've reached a very high level where next level isn't calculated or it's maxed out
+    if (nextLevelXP > 0) { 
         xpToNextLevelText.innerText = nextLevelXP;
-        // Also ensure the parent container for this text is visible if you hide it by default
+
         if (xpToNextLevelText.parentElement) {
-            xpToNextLevelText.parentElement.style.display = "inline-block"; // Or "block" depending on your CSS
+            xpToNextLevelText.parentElement.style.display = "inline-block";
         }
     } else {
-        xpToNextLevelText.innerText = "MAX"; // Or any other indicator for max level
+        xpToNextLevelText.innerText = "MAX"; 
         if (xpToNextLevelText.parentElement) {
-            xpToNextLevelText.parentElement.style.display = "inline-block"; // Or "block"
+            xpToNextLevelText.parentElement.style.display = "inline-block";
         }
     }
 }
 
-const XP_CURVE_CONSTANT = 45; // Based on initial testing: 45 gives Level 2 at 90 XP, Level 3 at 270 XP, etc.
+const XP_CURVE_CONSTANT = 45; 
 
 
 
@@ -294,8 +292,6 @@ function getTotalXpForLevel(level) {
     if (level <= 1) {
         return 0; // Level 1 requires 0 XP
     }
-    // Formula: XP_CURVE_CONSTANT * Level * (Level - 1)
-    // This gives an increasing requirement for each subsequent level
     return XP_CURVE_CONSTANT * level * (level - 1);
 }
 
@@ -315,6 +311,7 @@ function getXPToNextLevel() {
     return xpNeededForNextLevel - xp;
 }
 
+// Function to save game
 function saveGame() {
     const gameData = {
         xp: xp,
@@ -323,12 +320,15 @@ function saveGame() {
         inventory: inventory,
         currentRod: currentRod,
         isRodBroken: isRodBroken,
-        fishHealCooldown: fishHealCooldown
+        fishHealCooldown: fishHealCooldown,
+        reelCooldown: reelCooldown
     };
     localStorage.setItem('fishingGameSave', JSON.stringify(gameData));
     text.innerText = "Game saved! You can now exit the game.";
 }
 
+
+// Function to start new game
 function newGame() {
     if (confirm("Are you sure you want to start a new game? All current progress will be lost!")) {
         localStorage.removeItem('fishingGameSave');
@@ -337,6 +337,7 @@ function newGame() {
     }
 }
 
+// Function to load game
 function loadGame() {
     const savedData = localStorage.getItem('fishingGameSave');
     if (savedData) {
@@ -350,14 +351,15 @@ function loadGame() {
         currentRod = gameData.currentRod !== undefined ? gameData.currentRod : null;
         isRodBroken = gameData.isRodBroken !== undefined ? gameData.isRodBroken : false;
         fishHealCooldown = gameData.fishHealCooldown !== undefined ? gameData.fishHealCooldown : 0;
+        reelCooldown = gameData.reelCooldown !== undefined ? gameData.reelCooldown : 0; // Load reelCooldown
 
         updateStatsDisplay();
 
         text.innerText = "Game loaded! Your previous adventure awaits.";
-        goTown(); // Move to the town square after loading
-        return true; // Indicate a successful load
+        goTown();
+        return true;
     }
-    return false; // No save data found
+    return false;
 }
 
 function goSettings() {
@@ -446,63 +448,25 @@ function buyRod() {
   }
 }
 
-function sellXP() {
-    const xpToSell = 1;
-    const goldEarned = 1;
+function buyHook() {
+    const nextHookIndex = hooks.findIndex(hook => hook.level > currentHook.level);
 
-    if (xp >= xpToSell) {
-        const oldLevel = getPlayerLevel(); // Get level BEFORE selling XP
-        xp -= xpToSell;
-        gold += goldEarned;
-        // Use the new updateStatsDisplay function
+    if (nextHookIndex === -1) {
+        text.innerText = "You already have the best hook available!";
+        return;
+    }
+
+    const nextHook = hooks[nextHookIndex];
+
+    if (gold >= nextHook.price) {
+        gold -= nextHook.price;
+        currentHook = nextHook;
         updateStatsDisplay();
-        const newLevel = getPlayerLevel(); // Get level AFTER selling XP
-
-        let message = `You sold ${xpToSell} XP for ${goldEarned} gold.`;
-        if (newLevel < oldLevel) {
-            message += ` You are now Level ${newLevel}.`; // Inform if level dropped
-        }
-        text.innerText = message;
+        text.innerText = `You bought a ${currentHook.name}! You can now catch fish up to level ${currentHook.level}.`;
     } else {
-        text.innerText = `You need at least ${xpToSell} XP to sell!`;
+        text.innerText = `You need ${nextHook.price} gold to buy the ${nextHook.name}. You have ${gold} gold.`;
     }
 }
-
-function stopSellingXP() {
-    clearTimeout(sellXPTimeout); // Stop any active selling loop
-    sellingXP = false;
-    sellXPSpeed = 250; // Reset to initial speed
-}
-
-function startSellingXP() {
-    if (!sellingXP) { // Only start if not already selling
-        sellingXP = true;
-        sellXPSpeed = 250; // Reset speed for a fresh start
-        sellXPLoop(); // Start the recursive selling loop
-    }
-}
-
-function sellXPLoop() {
-    // This value should match xpToSell in your sellXP function
-    const xpNeededForOneSell = 1;
-
-    if (sellingXP && xp >= xpNeededForOneSell) {
-        sellXP(); // Make the sale
-
-        // Decrease the delay for the next sale (reusing increment and minBuyingSpeed)
-        sellXPSpeed = Math.max(minBuyingSpeed, sellXPSpeed - increment);
-
-        // Schedule the next sale
-        sellXPTimeout = setTimeout(sellXPLoop, sellXPSpeed);
-    } else {
-        // If out of XP or button released, stop selling
-        stopSellingXP();
-        if (xp < xpNeededForOneSell) {
-            text.innerText = `Not enough XP to sell! You need at least ${xpNeededForOneSell} XP.`;
-        }
-    }
-}
-
 
 //FISHING/BATTLE RELATED FUNCTIONS
 
@@ -518,9 +482,13 @@ function generateFish(fishTemplate, isSeaFish = false) {
     let finalLevel = fishTemplate.level + xpScalingLevelBonus + levelVariation;
 
     if (finalLevel < 1) {
-        finalLevel = 1
+        finalLevel = 1;
     }
-    
+
+    if (currentHook && finalLevel > currentHook.level) {
+        finalLevel = currentHook.level;
+    }
+
     const healthPerLevelMultiplier = isSeaFish ? 50 : 20;
     const finalHealth = finalLevel * healthPerLevelMultiplier;
 
@@ -573,27 +541,26 @@ function seaBattle() {
     fishName.innerText = currentFishInBattle.name;
     fishLevelText.innerText = currentFishInBattle.level;
     fishHealthText.innerText = currentFishInBattle.health; 
-    
+    reelCooldown = 0;
 }
 
 function castRod() {
     const currentLocation = locations[currentLocationIndex].name;
     const fishArray = (currentLocation === "open seas") ? seaFish : fish;
 
-    // 1. Select a random fish TEMPLATE from the array (based on its name/species)
     const randomIndex = Math.floor(Math.random() * fishArray.length);
     const selectedFishTemplate = fishArray[randomIndex];
 
-    // 2. Generate the ACTUAL fish for battle using the template, XP, and randomness
+
     currentFishInBattle = generateFish(selectedFishTemplate, currentLocation === "open seas");
 
     // Update UI and start battle based on the current location
     if (currentLocation === "open seas") {
-        update(locations[7]); // locations[7] is "sea battle"
-        seaBattle(); // This function will now use 'currentFishInBattle'
-    } else { // Assumed to be "goFishing"
-        update(locations[3]); // locations[3] is "battle"
-        goFish(); // This function will now use 'currentFishInBattle'
+        update(locations[7]);
+        seaBattle(); 
+    } else { 
+        update(locations[3]); 
+        goFish();
     }
 }
 
@@ -603,7 +570,7 @@ function goFish() {
     fishName.innerText = currentFishInBattle.name;
     fishHealthText.innerText = fishHealth;
     fishLevelText.innerText = currentFishInBattle.level;
-
+    reelCooldown = 0;
 }
 
 function getFishAttackValue(level) {
@@ -614,8 +581,14 @@ function getFishAttackValue(level) {
 
 function reel() {
     if (fishHealth <= 0) {
+        reelCooldown = 0; 
         text.innerText = "The fish is exhausted! You reel it in easily.";
         catchFish();
+        return;
+    }
+
+    if (reelCooldown > 0) {
+        text.innerText = "You can't reel yet! The rod needs to rest. Try bracing!";
         return; 
     }
 
@@ -623,13 +596,12 @@ function reel() {
         text.innerText = "You can't reel in, you've only got a stick with line tied to it! You'll need to buy a rod at the store. Try bracing for now.";
         return;
     }
- 
+
     text.innerText = "A fish is thrashing on the line!";
     text.innerText += " You try to reel it in.";
 
     if (isFishHit()) {
-        fishHealth -= currentRod.power + Math.floor(Math.random() * xp / 3) + 1; 
-        
+        fishHealth -= currentRod.power + Math.floor(Math.random() * xp / 3) + 1;
 
         if (fishAbility(currentFishInBattle, locations[currentLocationIndex].name === "sea battle") && fishHealCooldown === 0) {
             const fishHealPercentage = 0.3;
@@ -638,11 +610,13 @@ function reel() {
             fishHealth += fishHealAmount;
             fishHealCooldown = 5;
         }
-        
+
         if (fishHealth <= 0) {
+            fishHealth = 0;
+            reelCooldown = 0;
             text.innerText += " You successfully reel it in!";
-            catchFish(); 
-            return; 
+            catchFish();
+            return;
         } else {
             text.innerText += " You almost reel it in, but the fish slips away at the last second!";
         }
@@ -659,6 +633,11 @@ function reel() {
         }
     }
 
+    // Set a new random cooldown for reel after a successful (or attempted) reel
+    reelCooldown = Math.floor(Math.random() * 5) + 1;
+    text.innerText += `\n\nYour rod needs to rest. Reel cooldown: ${reelCooldown} turns.`;
+
+
     if (fishHealCooldown > 0) {
         fishHealCooldown--;
     }
@@ -667,7 +646,7 @@ function reel() {
     fishHealthText.innerText = fishHealth;
 
     if (bait <= 0) {
-        lose(); 
+        lose();
     }
 }
 
@@ -676,15 +655,14 @@ function isFishHit() {
 }
 
 function brace() {
-
     if (fishHealth <= 0) {
         text.innerText = "The " + currentFishInBattle.name + " is already exhausted. Time to reel it in!";
-        return; // Exit the function early
+        return; 
     }
 
     text.innerText = "You brace the rod against the " + currentFishInBattle.name + "'s sudden movements!";
     const fishAttackValue = getFishAttackValue(currentFishInBattle.level);
-    
+
     if (Math.random() <= 0.4) {
         text.innerText += " The " + currentFishInBattle.name + " begins to wear itself out!";
         const newFishHealth = Math.round(fishHealth - fishAttackValue * 1);
@@ -696,7 +674,7 @@ function brace() {
         }
     } else {
         text.innerText += " You're unable to brace! Keep trying!";
-        
+
         let damageMultiplier = 1;
         if (currentFishInBattle.level >= getPlayerLevel() * 4) {
             damageMultiplier = 3;
@@ -706,14 +684,17 @@ function brace() {
             bait -= Math.round(fishAttackValue * 0.25 * damageMultiplier);
             bait = Math.round(bait);
         }
-        
-        if (Math.random() <= 0.03 && inventory.length !== 1) {
-            text.innerText += " Your " + inventory.pop() + " breaks.";
-            currentRod = null;
-            isRodBroken = true;
+    }
+
+    // Decrease reel cooldown
+    if (reelCooldown > 0) {
+        reelCooldown--;
+        text.innerText += `\nReel cooldown: ${reelCooldown} turns remaining.`;
+        if (reelCooldown === 0) {
+            text.innerText += "\nYou can reel again!";
         }
     }
-    
+
     updateStatsDisplay();
     fishHealthText.innerText = fishHealth;
 
@@ -723,8 +704,8 @@ function brace() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 3 : 2.5; // Base multiplier
-    return Math.floor(level * baseReward * (1 + Math.log(level))); // Logarithmic scaling
+    const baseReward = isSeaFish ? 5 : 2.5;
+    return Math.floor(level * baseReward * (1 + Math.log(level)));
 }
 
 function catchFish() {
