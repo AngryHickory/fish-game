@@ -847,8 +847,8 @@ function brace() {
         text.innerText += " You're unable to brace! Keep trying!";
 
         let damageMultiplier = 1;
-        if (currentFishInBattle.level >= getPlayerLevel() * 4) {
-            damageMultiplier = 2.25;
+        if (currentFishInBattle.level >= getPlayerLevel() * 4 && currentFishInBattle.level > 5) {
+            damageMultiplier = 2.5;
         }
 
         if (fishHealth > 0) {
