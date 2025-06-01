@@ -1,6 +1,6 @@
 // GLOBAL ENTRIES
-let xp = 0;
-let gold = 20;
+let xp = 5000;
+let gold = 20000;
 let bait = 200;
 let buyingBait = false;
 let buyingSpeed = 500;
@@ -521,7 +521,13 @@ function buyHook() {
         gold -= nextHook.price;
         currentHook = nextHook;
         updateStatsDisplay();
-        text.innerText = `You bought a ${currentHook.name}! You can now catch fish up to level ${currentHook.level}.`;
+
+        if (currentHook.name === "Legendary Hook") {
+            text.innerText = `You bought the ${currentHook.name}! With this hook, you can now catch any fish, no matter how powerful!`;
+        } else {
+            text.innerText = `You bought a ${currentHook.name}! You can now catch fish up to level ${currentHook.level}.`;
+        }
+        
     } else {
         text.innerText = `You need ${nextHook.price} gold to buy the ${nextHook.name}. You have ${gold} gold.`;
     }
@@ -544,7 +550,9 @@ function generateFish(fishTemplate, isSeaFish = false) {
         finalLevel = 1;
     }
 
-    if (currentHook && finalLevel > currentHook.level) {
+    if (currentHook && currentHook.name === "Legendary Hook") {
+  
+    } else if (currentHook && finalLevel > currentHook.level) {
         finalLevel = currentHook.level;
     }
 
@@ -736,7 +744,7 @@ function brace() {
 
         let damageMultiplier = 1;
         if (currentFishInBattle.level >= getPlayerLevel() * 4) {
-            damageMultiplier = 3;
+            damageMultiplier = 2.25;
         }
 
         if (fishHealth > 0) {
