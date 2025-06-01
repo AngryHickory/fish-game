@@ -17,7 +17,7 @@ let inventory = ["Stick with Line"];
 let currentHook = { name: "Basic Hook", level: 5 };
 let bestFishCaught = [];
 let isFlashing = false;
-
+let isMusicPlaying = true;
 let currentLocationIndex = 0;
 
 const button1 = document.querySelector("#button1");
@@ -35,6 +35,7 @@ const fishHealthText = document.querySelector("#fishHealth");
 const playerLevelText = document.querySelector("#playerLevelText");
 const xpToNextLevelText = document.querySelector("#xpToNextLevelText");
 const gameMusic = document.getElementById('gameMusic');
+const toggleMusicButton = document.querySelector("#toggleMusicButton");
 
 // Google Chrome fix for sticky hover
 let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
@@ -171,6 +172,7 @@ button1.onclick = goStore;
 button2.onclick = goFishing;
 button3.onclick = openSeas;
 button4.style.display = "none";
+toggleMusicButton.onclick = toggleMusic;
 
 
 // NAVIGATION RELATED FUNCTIONS
@@ -193,6 +195,8 @@ function showStartScreen() {
     button4.onclick = null;
     button4.style.display = "none"; 
     fishStats.style.display = "none"; // Hide fish stats on the start screen
+    toggleMusicButton.onclick = toggleMusic;
+    toggleMusicButton.innerText = "Toggle Music";
     startMusic();
 }
 
@@ -200,6 +204,17 @@ function showStartScreen() {
 function goTownFromStart() {
     startMusic()
     goTown();
+}
+
+function toggleMusic() {
+    if (isMusicPlaying) {
+        gameMusic.pause();
+    } else {
+        gameMusic.play().catch(error => {
+            console.log("Error playing music:", error);
+        });
+    }
+    isMusicPlaying = !isMusicPlaying;
 }
 
 function update(location) {
@@ -293,34 +308,18 @@ function goStore() {
     const availableRods = rods.filter(rod => playerLevel >= rod.levelRequired);
     let nextRodToBuy = null;
 
-    if (currentRod) {
-        // Find the next rod after the current one, based on its index in the sorted array
-        const currentIndex = rods.findIndex(r => r.name === currentRod.name);
-        if (currentIndex !== -1 && currentIndex < rods.length - 1) {
-            nextRodToBuy = rods[currentIndex + 1];
+    if (currentHook) {
+        const nextHookIndex = hooks.findIndex(hook => hook.level > currentHook.level);
+        if (nextHookIndex !== -1) {
+            const nextHook = hooks[nextHookIndex];
+            const hookPrice = nextHook.price;
+
+            locations[1]["button text"][2] = `Buy ${nextHook.name} (${hookPrice} Gold)`;
+            locations[1]["button functions"][2] = () => buyHook();
         }
-    } else {
-        // If no rod, the player can buy the first available rod for their level
-        nextRodToBuy = availableRods.find(rod => rod.levelRequired === 1); // Should be "Stick with Line" or "Basic Rod"
     }
 
-    // Filter available rods again to ensure the nextRodToBuy is actually available for the player's level
-    if (nextRodToBuy && playerLevel < nextRodToBuy.levelRequired) {
-        nextRodToBuy = null; // Cannot buy the next rod yet if level is too low
-    }
-
-
-    if (nextRodToBuy) {
-        const rodPrice = calculateRodPrice(nextRodToBuy);
-        locations[1]["button text"][1] = `Buy ${nextRodToBuy.name} (${rodPrice} Gold)`;
-        locations[1]["button functions"][1] = () => buyRod(nextRodToBuy); // Pass the specific rod to buyRod
-    } else {
-        // If no more rods are available for purchase based on level or all bought
-        locations[1]["button text"][1] = "No more rods available";
-        locations[1]["button functions"][1] = () => { text.innerText = "You have bought all available rods or your level is too low for the next one."; };
-    }
-
-
+    // Update store UI
     update(locations[1]);
 }
 
@@ -623,6 +622,7 @@ function buyRod(rodToBuy = null) {
 }
 
 function buyHook() {
+    const playerLevel = getPlayerLevel();
     const nextHookIndex = hooks.findIndex(hook => hook.level > currentHook.level);
 
     if (nextHookIndex === -1) {
@@ -632,20 +632,25 @@ function buyHook() {
 
     const nextHook = hooks[nextHookIndex];
 
-    if (gold >= nextHook.price) {
-        gold -= nextHook.price;
-        currentHook = nextHook;
-        updateStatsDisplay();
-
-        if (currentHook.name === "Legendary Hook") {
-            text.innerText = `You bought the ${currentHook.name}! With this hook, you can now catch any fish, no matter how powerful!`;
-        } else {
-            text.innerText = `You bought a ${currentHook.name}! You can now catch fish up to level ${currentHook.level}.`;
-        }
-
-    } else {
-        text.innerText = `You need ${nextHook.price} gold to buy the ${nextHook.name}. You have ${gold} gold.`;
+    if (playerLevel < 5) {
+        text.innerText = `You need to reach Level 5 to buy the ${nextHook.name}. You are Level ${playerLevel}.`;
+        return;
     }
+
+    const hookPrice = nextHook.price;
+    locations[1]["button text"][2] = `Buy ${nextHook.name} (${hookPrice} Gold)`;
+    locations[1]["button functions"][2] = () => {
+        if (gold >= hookPrice) {
+            gold -= hookPrice;
+            currentHook = nextHook;
+            updateStatsDisplay();
+            text.innerText = `You bought a ${currentHook.name}! You can now catch fish up to level ${currentHook.level}.`;
+        } else {
+            text.innerText = `You need ${hookPrice} gold to buy the ${nextHook.name}. You have ${gold} gold.`;
+        }
+    };
+
+    update(locations[1]);
 }
 
 //FISHING/BATTLE RELATED FUNCTIONS

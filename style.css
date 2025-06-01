@@ -104,3 +104,20 @@ button:active {
   transform: translateY(0);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
+#toggleMusicButton {
+    position: absolute; /* Position relative to the nearest positioned ancestor */
+    top: 10px; /* Distance from the top */
+    right: 10px; /* Distance from the right */
+    padding: 5px 10px; /* Smaller padding */
+    font-size: 12px; /* Smaller font size */
+    background-color: #99BE1B; /* Button color */
+    border: 1px solid #7FA617; /* Border color */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.2s ease; /* Smooth background transition */
+}
+
+#toggleMusicButton:hover {
+    background-color: #C4E26A; /* Change color on hover */
+}
