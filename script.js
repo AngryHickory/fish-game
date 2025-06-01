@@ -414,8 +414,8 @@ function loadGame() {
 
         // Apply saved data, with fallbacks for new variables or corrupted saves
         xp = gameData.xp !== undefined ? gameData.xp : 0;
-        gold = gameData.gold !== undefined ? gameData.gold : 20;
-        bait = gameData.bait !== undefined ? gameData.bait : 120;
+        gold = gameData.gold !== undefined ? gameData.gold : 0;
+        bait = gameData.bait !== undefined ? gameData.bait : 200;
         inventory = gameData.inventory !== undefined ? gameData.inventory : ["Stick with Line"];
         isRodBroken = gameData.isRodBroken !== undefined ? gameData.isRodBroken : false;
         fishHealCooldown = gameData.fishHealCooldown !== undefined ? gameData.fishHealCooldown : 0;
@@ -490,8 +490,8 @@ function lose() {
 
 function restart() {
   xp = 0;
-  bait = 120;
-  gold = 20;
+  bait = 200;
+  gold = 0;
   currentRod = null;
   inventory = ["Stick with Line"];
   updateStatsDisplay();
@@ -690,12 +690,11 @@ function castRod() {
 
     if (bait <= 0) {
         text.innerText = "You are out of bait! Visit the store to buy more.";
-        // You might want to call lose() here or allow the player to go back to town
-        // For now, I'll just prevent casting.
         return;
     }
-    if (!currentRod || currentRod.name === "Stick with Line") {
-        text.innerText = "You need a proper fishing rod to cast! Visit the store to buy one.";
+    
+    if (!currentRod) { // This condition should ideally never be met if currentRod is always initialized
+        text.innerText = "You need a rod to cast! If you don't have a 'Stick with Line', something went wrong!";
         return;
     }
     if (isRodBroken) {
@@ -705,7 +704,6 @@ function castRod() {
 
     const randomIndex = Math.floor(Math.random() * fishArray.length);
     const selectedFishTemplate = fishArray[randomIndex];
-
 
     currentFishInBattle = generateFish(selectedFishTemplate, currentLocation === "open seas");
 
@@ -735,6 +733,7 @@ function getFishAttackValue(level) {
 }
 
 function reel() {
+    // If fish is already exhausted, reel it in regardless of rod
     if (fishHealth <= 0) {
         reelCooldown = 0;
         text.innerText = "The fish is exhausted! You reel it in easily.";
@@ -742,15 +741,17 @@ function reel() {
         return;
     }
 
+    if (currentRod && currentRod.name === "Stick with Line") {
+        text.innerText = "You've only got a stick with line tied to it! You can only reel this fish in when it's completely exhausted. Try bracing!";
+        return; // Prevent any reeling action/damage
+    }
+
+    // Normal reel cooldown and rod broken checks for proper rods
     if (reelCooldown > 0) {
         text.innerText = "You can't reel yet! The rod needs to rest. Try bracing!";
         return;
     }
 
-    if (!currentRod || currentRod.name === "Stick with Line") {
-        text.innerText = "You've only got a stick with line tied to it! You'll need to buy a proper rod at the store. Try bracing for now.";
-        return;
-    }
     if (isRodBroken) {
         text.innerText = `Your ${currentRod.name} is broken! You need to buy a new one at the store.`;
         return;
@@ -760,8 +761,8 @@ function reel() {
     text.innerText += " You try to reel it in.";
 
     const playerLevel = getPlayerLevel();
-    const playerLevelDamageBonus = Math.floor(playerLevel * 0.5); // Adjust this factor (0.5) to control how much player level affects damage
-    const reelDamage = currentRod.power + playerLevelDamageBonus + Math.floor(Math.random() * 5); // Add a small random element
+    const playerLevelDamageBonus = Math.floor(playerLevel * 0.5);
+    const reelDamage = currentRod.power + playerLevelDamageBonus + Math.floor(Math.random() * 5);
 
     if (isFishHit()) {
         fishHealth -= reelDamage;
@@ -769,7 +770,7 @@ function reel() {
 
         if (fishAbility(currentFishInBattle, locations[currentLocationIndex].name === "sea battle") && fishHealCooldown === 0) {
             const fishHealPercentage = 0.3;
-            const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75)); // Heal based on original health, with variation
+            const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75));
             text.innerText += " The fish recovered " + fishHealAmount + " health!";
             fishHealth += fishHealAmount;
             fishHealCooldown = 5;
@@ -790,18 +791,14 @@ function reel() {
 
     } else {
         text.innerText += " The fish is getting away!";
-        // Increased chance of breaking a broken rod, but if it's already broken, no further action
-        if (!isRodBroken && Math.random() <= 0.05) { // Slightly increased break chance (e.g., from 0.03 to 0.05)
+        if (!isRodBroken && Math.random() <= 0.05) {
             text.innerText += " Your " + currentRod.name + " breaks.";
-            isRodBroken = true; // Mark the rod as broken
-            // Do NOT set currentRod to null here, keep it for display but prevent reeling
+            isRodBroken = true;
         }
     }
 
-    // Set a new random cooldown for reel after a successful (or attempted) reel
     reelCooldown = Math.floor(Math.random() * 5) + 1;
     text.innerText += `\n\nYour rod needs to rest. Reel cooldown: ${reelCooldown} turns.`;
-
 
     if (fishHealCooldown > 0) {
         fishHealCooldown--;
@@ -822,11 +819,11 @@ function isFishHit() {
 function brace() {
     if (fishHealth <= 0) {
         text.innerText = "The " + currentFishInBattle.name + " is already exhausted. Time to reel it in!";
-        return; 
+        return;
     }
 
-    if (!currentRod || currentRod.name === "Stick with Line") {
-        text.innerText = "You've only got a stick with line tied to it! You'll need to buy a proper rod at the store.";
+    if (!currentRod) { // This check should ideally never be met if currentRod is always initialized
+        text.innerText = "You don't have a rod to brace with! If you don't have a 'Stick with Line', something went wrong!";
         return;
     }
     if (isRodBroken) {
