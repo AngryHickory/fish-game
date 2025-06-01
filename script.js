@@ -368,7 +368,7 @@ function flashElement(element, color) {
     // Reset color after a short duration
     setTimeout(() => {
         element.style.color = ""; // Reset to original color
-    }, 500);
+    }, 350);
 }
 
 const XP_CURVE_CONSTANT = 45; 
@@ -531,7 +531,8 @@ function buyBait() {
         bait += 10;
 
         // Flash bait text green when bait is bought
-        flashElement(baitText, "green");
+        flashElement(baitText, "green", 350);
+        flashElement(goldText, "red", 350);
 
         updateStatsDisplay();
     } else {
