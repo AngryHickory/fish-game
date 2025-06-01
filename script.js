@@ -791,9 +791,26 @@ function reel() {
 
     } else {
         text.innerText += " The fish is getting away!";
-        if (!isRodBroken && Math.random() <= 0.05) {
-            text.innerText += " Your " + currentRod.name + " breaks.";
-            isRodBroken = true;
+        if (Math.random() <= 0.005) {
+            let brokenRodName = currentRod.name;
+
+            const currentIndex = rods.findIndex(rod => rod.name === currentRod.name);
+
+            if (currentIndex > 0) {
+                currentRod = rods[currentIndex - 1]; 
+
+                inventory[0] = currentRod.name;
+                
+                isRodBroken = false;
+                text.innerText += ` Your ${brokenRodName} broke! You reverted to your ${currentRod.name}.`;
+            } else {
+                isRodBroken = true;
+                text.innerText += ` Your ${brokenRodName} broke! You have no functional rod left. Visit the store to buy a new one.`;
+                inventory[0] = "No Rod";
+
+            }
+            updateStatsDisplay();
+            return;
         }
     }
 
