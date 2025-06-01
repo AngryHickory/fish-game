@@ -1,5 +1,6 @@
+// GLOBAL ENTRIES
 let xp = 0;
-let gold = 2000;
+let gold = 20;
 let bait = 120;
 let buyingBait = false;
 let buyingSpeed = 500;
@@ -17,6 +18,7 @@ let fishHealCooldown = 0;
 let reelCooldown = 0;
 let inventory = ["Stick"];
 let currentHook = { name: "Basic Hook", level: 5 };
+let bestFishCaught = [];
 
 let currentLocationIndex = 0;
 
@@ -140,8 +142,8 @@ locations.push({
 
 locations.push({
     name: "settings",
-    "button text": ["Save Game", "New Game", "", "Town Square"],
-    "button functions": [saveGame, newGame, null, goTown],
+    "button text": ["Save Game", "New Game", "Best Catches", "Town Square"],
+    "button functions": [saveGame, newGame, viewBestCatches, goTown],
     text: "Game Settings. Use these options to manage your game progress. Starting a new game will erase all current progress."
 });
 
@@ -242,7 +244,24 @@ function update(location) {
 }
 
 function goTown() {
-  update(locations[0]);
+    const townSquareLocation = locations[0];
+    const playerLevel = getPlayerLevel();
+
+    // Temporarily store the original Open Seas button text and function
+    const originalOpenSeasText = townSquareLocation["button text"][2];
+    const originalOpenSeasFunction = townSquareLocation["button functions"][2];
+
+    // Check player level for Open Seas access
+    if (playerLevel < 5) {
+        townSquareLocation["button functions"][2] = () => {
+            text.innerText = "You need to reach Level 20 to venture into the Open Seas!";
+        };
+    } else {
+        townSquareLocation["button text"][2] = originalOpenSeasText;
+        townSquareLocation["button functions"][2] = originalOpenSeasFunction;
+    }
+
+    update(townSquareLocation);
 }
 
 function goStore() {
@@ -321,7 +340,9 @@ function saveGame() {
         currentRod: currentRod,
         isRodBroken: isRodBroken,
         fishHealCooldown: fishHealCooldown,
-        reelCooldown: reelCooldown
+        reelCooldown: reelCooldown,
+        currentHook: currentHook,
+        bestFishCaught: bestFishCaught
     };
     localStorage.setItem('fishingGameSave', JSON.stringify(gameData));
     text.innerText = "Game saved! You can now exit the game.";
@@ -334,6 +355,7 @@ function newGame() {
         localStorage.removeItem('fishingGameSave');
         text.innerText = "New game started! Refreshing...";
         location.reload();
+        bestFishCaught = [];
     }
 }
 
@@ -351,7 +373,9 @@ function loadGame() {
         currentRod = gameData.currentRod !== undefined ? gameData.currentRod : null;
         isRodBroken = gameData.isRodBroken !== undefined ? gameData.isRodBroken : false;
         fishHealCooldown = gameData.fishHealCooldown !== undefined ? gameData.fishHealCooldown : 0;
-        reelCooldown = gameData.reelCooldown !== undefined ? gameData.reelCooldown : 0; // Load reelCooldown
+        reelCooldown = gameData.reelCooldown !== undefined ? gameData.reelCooldown : 0;
+        currentHook = gameData.currentHook !== undefined ? gameData.currentHook : { name: "Basic Hook", level: 5 };
+        bestFishCaught = gameData.bestFishCaught !== undefined ? gameData.bestFishCaught : [];
 
         updateStatsDisplay();
 
@@ -360,6 +384,40 @@ function loadGame() {
         return true;
     }
     return false;
+}
+
+
+// Function to add best fish to bestFishCaught array
+function addBestFish(newFishRecord) {
+    bestFishCaught.push(newFishRecord);
+
+    // Sort the array by level in descending order (highest level first)
+    bestFishCaught.sort((a, b) => b.level - a.level);
+
+    // If the array has more than 10 entries, remove the last ones
+    if (bestFishCaught.length > 10) {
+        bestFishCaught = bestFishCaught.slice(0, 10);
+    }
+}
+
+function viewBestCatches() {
+    if (bestFishCaught.length === 0) {
+        text.innerText = "You haven't caught any notable fish yet! Go fishing!";
+        return;
+    }
+
+    let displayMessage = "--- Your Best Catches ---\n\n";
+
+    bestFishCaught.forEach((fish, index) => {
+        displayMessage += `${index + 1}. ${fish.name} (Lvl ${fish.level})\n`;
+        displayMessage += `   XP: ${fish.xp}, Gold: ${fish.gold}\n`;
+        if (fish.date) {
+            displayMessage += `   Caught on: ${fish.date}\n`;
+        }
+        displayMessage += "\n";
+    });
+
+    text.innerText = displayMessage;
 }
 
 function goSettings() {
@@ -721,7 +779,15 @@ function catchFish() {
 
     const newPlayerLevel = getPlayerLevel(); // Get player level AFTER adding XP
 
-    // Use the new updateStatsDisplay function
+    const fishRecord = {
+        name: caughtFish.name,
+        level: caughtFish.level,
+        xp: xpEarned,
+        gold: goldEarned,
+        date: new Date().toLocaleDateString() 
+    };
+    addBestFish(fishRecord);
+
     updateStatsDisplay();
 
     let catchMessage = `You caught the fish! You gained ${goldEarned} gold and ${xpEarned} XP!`; // Changed to xpEarned for accuracy

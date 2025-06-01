@@ -10,6 +10,7 @@ body {
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   height: 130px;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .textSpanRed {
