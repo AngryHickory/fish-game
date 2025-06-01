@@ -794,14 +794,14 @@ function reel() {
 
     const playerLevel = getPlayerLevel();
     const playerLevelDamageBonus = Math.floor(playerLevel * 0.5);
-    const reelDamage = currentRod.power + playerLevelDamageBonus + Math.floor(Math.random() * 5);
+    const reelDamage = currentRod.power + playerLevelDamageBonus + Math.floor(Math.random() * 10);
 
     if (isFishHit()) {
         fishHealth -= reelDamage;
         text.innerText += ` You deal ${reelDamage} damage to the fish!`;
 
         if (fishAbility(currentFishInBattle, locations[currentLocationIndex].name === "sea battle") && fishHealCooldown === 0) {
-            const fishHealPercentage = 0.3;
+            const fishHealPercentage = 0.4;
             const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75));
             text.innerText += " The fish recovered " + fishHealAmount + " health!";
             fishHealth += fishHealAmount;
@@ -889,7 +889,7 @@ function brace() {
 
     if (Math.random() <= 0.4) {
         text.innerText += " The " + currentFishInBattle.name + " begins to wear itself out!";
-        const newFishHealth = Math.round(fishHealth - fishAttackValue * 1);
+        const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.5);
 
         if (newFishHealth < fishHealth) {
             flashElement(fishHealthText, "red", 350);
@@ -934,7 +934,7 @@ function brace() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 5 : 3;
+    const baseReward = isSeaFish ? 7.5 : 6;
     return Math.floor(level * baseReward * (1 + Math.log(level)));
 }
 
