@@ -15,6 +15,7 @@ Features:
 - Brace move will have a chance to reflect damage
 - Save function
 - Make buy bait button holdable
+- background music
 
 To do: 
 - More attributes for rods?
@@ -22,7 +23,7 @@ To do:
 - Secret location?
 - multi fish battles?
 - special attacks for fish?
-- add reel item? Random drop from fish?
-- boss battles?
+- add elite and legendary fishing line - random drop from fish
+- boss battles? - Chance for elite fish to eat regular fish < chance for legendary fish to eat elite fish
 - new attack?
 - fish stamina bar? 
