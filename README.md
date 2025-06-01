@@ -25,5 +25,5 @@ To do:
 - special attacks for fish?
 - add elite and legendary fishing line - random drop from fish
 - boss battles? - Chance for elite fish to eat regular fish < chance for legendary fish to eat elite fish
-- new attack?
-- fish stamina bar? 
+- new attack? 
+- lock hooks based on level like rods
