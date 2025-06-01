@@ -875,7 +875,7 @@ function brace() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 6 : 3;
+    const baseReward = isSeaFish ? 6 : 4;
     return Math.floor(level * baseReward * (1 + Math.log(level)));
 }
 
