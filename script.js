@@ -202,7 +202,6 @@ function showStartScreen() {
 
 // A new function to handle the transition from the start screen to town
 function goTownFromStart() {
-    startMusic()
     goTown();
 }
 
@@ -300,26 +299,43 @@ function goTown() {
     }
 
     update(townSquareLocation);
-    startMusic();
+    
 }
 
 function goStore() {
     const playerLevel = getPlayerLevel();
     const availableRods = rods.filter(rod => playerLevel >= rod.levelRequired);
-    let nextRodToBuy = null;
+    let nextRod = null;
 
-    if (currentHook) {
-        const nextHookIndex = hooks.findIndex(hook => hook.level > currentHook.level);
-        if (nextHookIndex !== -1) {
-            const nextHook = hooks[nextHookIndex];
-            const hookPrice = nextHook.price;
-
-            locations[1]["button text"][2] = `Buy ${nextHook.name} (${hookPrice} Gold)`;
-            locations[1]["button functions"][2] = () => buyHook();
-        }
+    // Determine the next rod to buy
+    if (availableRods.length > 0) {
+        const currentRodIndex = currentRod ? rods.findIndex(r => r.name === currentRod.name) : -1;
+        nextRod = availableRods[currentRodIndex + 1] || availableRods[0]; // Get the next rod or the first available
     }
 
-    // Update store UI
+    // Update rod purchase button
+    if (nextRod) {
+        const rodPrice = calculateRodPrice(nextRod);
+        locations[1]["button text"][1] = `Buy ${nextRod.name} (${rodPrice} Gold)`;
+        locations[1]["button functions"][1] = () => buyRod(nextRod);
+    } else {
+        locations[1]["button text"][1] = "No more rods available";
+        locations[1]["button functions"][1] = null;
+    }
+
+    // Handle hook button text
+    const nextHookIndex = hooks.findIndex(hook => hook.level > currentHook.level);
+    if (nextHookIndex !== -1) {
+        const nextHook = hooks[nextHookIndex];
+        const hookPrice = nextHook.price;
+
+        locations[1]["button text"][2] = `Buy ${nextHook.name} (${hookPrice} Gold)`;
+        locations[1]["button functions"][2] = () => buyHook(); 
+    } else {
+        locations[1]["button text"][2] = "No more hooks available";
+        locations[1]["button functions"][2] = null;
+    }
+
     update(locations[1]);
 }
 
@@ -462,8 +478,8 @@ function loadGame() {
         }
 
         updateStatsDisplay();
-        startMusic();
-
+        startMusic()
+        
         text.innerText = "Game loaded! Your previous adventure awaits.";
         goTown();
         return true;
@@ -585,12 +601,12 @@ function buyRod(rodToBuy = null) {
     let targetRod = rodToBuy;
 
     if (!targetRod) {
-        // If not specific rod is passed, find the next available based on current rod
+        // Find the next available rod based on current rod
         const currentRodIndex = currentRod ? rods.findIndex(r => r.name === currentRod.name) : -1;
-        if (currentRodIndex === -1) { // No rod or "Stick with Line" was default, offer Basic Rod
-            targetRod = rods.find(r => r.name === "Basic Rod");
+        if (currentRodIndex === -1) {
+            targetRod = rods.find(rod => rod.name === "Basic Rod"); // Offer Basic Rod if no rods owned
         } else {
-            targetRod = rods[currentRodIndex + 1]; // Try to get the next rod in the list
+            targetRod = rods[currentRodIndex + 1]; // Get the next rod in the list
         }
     }
 
@@ -609,13 +625,11 @@ function buyRod(rodToBuy = null) {
     if (gold >= rodPrice) {
         gold -= rodPrice;
         currentRod = targetRod;
-        inventory[0] = currentRod.name; // Assuming rod is always at index 0 or replaces existing rod
+        inventory[0] = currentRod.name; // Update inventory
         isRodBroken = false;
         updateStatsDisplay();
         text.innerText = `You now have a ${currentRod.name} with power ${currentRod.power}!`;
-        text.innerText += ` In your inventory you have: ${inventory.join(", ")}`;
-
-        goStore(); // This will refresh the "Buy Rod" button text and function
+        goStore(); 
     } else {
         text.innerText = `You do not have enough gold to buy the ${targetRod.name}. You need ${rodPrice} gold.`;
     }
