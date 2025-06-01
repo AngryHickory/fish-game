@@ -86,12 +86,18 @@ button {
   margin-bottom: 2px;
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   button:hover {
     background-image: linear-gradient(to bottom, #C4E26A, #99BE1B);
     box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2);
     transform: translateY(-1px);
   }
+}
+
+body.touch-device button:hover {
+  background-image: linear-gradient(to bottom, #99BE1B, #C4E26A);
+  box-shadow: none;
+  transform: none;
 }
 
 button:active {

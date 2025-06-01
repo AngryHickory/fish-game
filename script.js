@@ -19,6 +19,7 @@ let reelCooldown = 0;
 let inventory = ["Stick with Line"];
 let currentHook = { name: "Basic Hook", level: 5 };
 let bestFishCaught = [];
+let isFlashing = false;
 
 let currentLocationIndex = 0;
 
@@ -36,6 +37,13 @@ const fishLevelText = document.querySelector("#fishLevel");
 const fishHealthText = document.querySelector("#fishHealth");
 const playerLevelText = document.querySelector("#playerLevelText");
 const xpToNextLevelText = document.querySelector("#xpToNextLevelText");
+
+// Google Chrome fix for sticky hover
+let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+
+if (isTouchDevice) {
+    document.body.classList.add('touch-device');
+}
 
 const rods = [
     { name: "Stick with Line", power: 2, levelRequired: 1, basePrice: 0 },
@@ -104,7 +112,7 @@ const locations = [
     name: "store",
     "button text": ["Buy 10 Bait (10 Gold)", "Buy Rod (30 Gold)", "Buy Hook", "Town Square"],
     "button functions": [buyBait, buyRod, buyHook, goTown],
-    text: "You enter the store."
+    text: "You enter the store. You can buy a new rod to increase your power, or buy a new hook to unlock bigger fish!"
   },
   {
   name: "goFishing",
@@ -349,6 +357,12 @@ function updateStatsDisplay() {
     }
 }
 
+// Function to make text flash colors when numbers
+function flashElement(element, color) {
+    element.style.transition = "color 0.5s";
+    element.style.color = color;
+}
+
 const XP_CURVE_CONSTANT = 45; 
 
 
@@ -504,26 +518,31 @@ function restart() {
 // STORE RELATED FUNCTIONS
 
 function buyBait() {
-  if (gold >= 10) {
-      gold -= 10;
-      bait += 10;
-      updateStatsDisplay();
-  } else {
-      text.innerText = "Not enough gold to buy more bait.";
-  }
+    if (gold >= 10) {
+        gold -= 10;
+        bait += 10;
+
+        // Flash bait text green when bait is bought
+        flashElement(baitText, "green");
+
+        updateStatsDisplay();
+    } else {
+        text.innerText = "Not enough gold to buy more bait.";
+    }
 }
 
 function stopBuying() {
-    clearTimeout(buyTimeout); // Stop any active buying loop
+    clearTimeout(buyTimeout);
     buyingBait = false;
-    buyingSpeed = 250; // Reset to initial speed
+    buyingSpeed = 250;
+    baitText.style.color = ""; 
 }
 
 function startBuying() {
-    if (!buyingBait) { // Only start if not already buying
+    if (!buyingBait) {
         buyingBait = true;
-        buyingSpeed = 250; // Reset speed for a fresh start
-        buyBaitLoop(); // Start the recursive buying loop
+        buyingSpeed = 250;
+        buyBaitLoop();
     }
 }
 
@@ -773,6 +792,7 @@ function reel() {
             const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75));
             text.innerText += " The fish recovered " + fishHealAmount + " health!";
             fishHealth += fishHealAmount;
+            flashElement(fishHealthText, "green", 350);
             fishHealCooldown = 5;
         }
 
@@ -786,8 +806,11 @@ function reel() {
             text.innerText += " You almost reel it in, but the fish slips away at the last second!";
         }
 
+        flashElement(fishHealthText, "red", 350);
+
         bait -= getFishAttackValue(currentFishInBattle.level);
         bait = Math.round(bait);
+        flashElement(fishHealthText, "red", 350);
 
     } else {
         text.innerText += " The fish is getting away!";
@@ -854,6 +877,11 @@ function brace() {
     if (Math.random() <= 0.4) {
         text.innerText += " The " + currentFishInBattle.name + " begins to wear itself out!";
         const newFishHealth = Math.round(fishHealth - fishAttackValue * 1);
+
+        if (newFishHealth < fishHealth) {
+            flashElement(fishHealthText, "red", 350);
+        }
+
         fishHealth = newFishHealth > 0 ? newFishHealth : 0;
 
         if (fishHealth <= 0) {
@@ -871,6 +899,7 @@ function brace() {
         if (fishHealth > 0) {
             bait -= Math.round(fishAttackValue * 0.25 * damageMultiplier);
             bait = Math.round(bait);
+            flashElement(baitText, "red", 350);
         }
     }
 
