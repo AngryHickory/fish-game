@@ -632,7 +632,7 @@ function buyHook() {
 
     const nextHook = hooks[nextHookIndex];
 
-    if (playerLevel < 5) {
+    if (playerLevel < 4) {
         text.innerText = `You need to reach Level 5 to buy the ${nextHook.name}. You are Level ${playerLevel}.`;
         return;
     }
@@ -694,7 +694,7 @@ function fishAbility(fish, isSeaFish) {
 }
 
 function calculateXpGain(caughtFishLevel, playerLevel) {
-    const baseXpPerLevel = 1.5;
+    const baseXpPerLevel = 2;
     let xpGain = caughtFishLevel * baseXpPerLevel;
     const levelDifference = caughtFishLevel - playerLevel;
 
