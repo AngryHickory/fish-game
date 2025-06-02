@@ -1,7 +1,7 @@
 // GLOBAL ENTRIES
-let xp = 1000;
-let gold = 10000;
-let bait = 2000;
+let xp = 0;
+let gold = 0;
+let bait = 200;
 let buyingBait = false;
 let buyingSpeed = 500;
 let increment = 20;
