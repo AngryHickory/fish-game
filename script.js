@@ -121,9 +121,9 @@ const locations = [
 },
 {
   name: "battle",
-  "button text": ["Reel", "Tug", "Brace", "Cut Line"],
-  "button functions": [reel, tug, brace, goFishing],
-  text: "You have a fish on the line! Use the Reel button to catch it. Brace can help you save bait. Tugging on the rod can wear the fish out faster, but be careful - it could break!"
+  "button text": ["Tug", "Reel", "Brace", "Cut Line"],
+  "button functions": [tug, reel, brace, goFishing],
+  text: "You have a fish on the line! Use the Reel button to catch it. Brace can help you save bait. Tugging on the rod can wear the fish out faster, but be careful - the rod could break or the fish could escape!"
 },
 {
   name: "fish caught",
@@ -148,9 +148,9 @@ locations.push({
 
 locations.push({
     name: "sea battle",
-    "button text": ["Reel", "Brace", "Tug", "Cut Line"],
-    "button functions": [reel, tug, brace, openSeas],
-    text: "You have a fish on the line! Use the Reel button to catch it. Brace can help you save bait. Tugging on the rod can wear the fish out faster, but be careful - it could break!"
+    "button text": ["Tug", "Reel", "Brace", "Cut Line"],
+    "button functions": [tug, reel, brace, openSeas],
+    text: "You have a fish on the line! Use the Reel button to catch it. Brace can help you save bait. Tugging on the rod can wear the fish out faster, but be careful - the rod could break or the fish could escape!"
 });
 
 locations.push({
@@ -306,7 +306,6 @@ function goStore() {
     const availableRods = rods.filter(rod => playerLevel >= rod.levelRequired);
     let nextRodToOffer = null; // Renamed for clarity
 
-    // --- CRITICAL CHANGE START ---
     // If the current rod is broken, the only option for purchase should be "Stick with Line"
     if (isRodBroken) {
         nextRodToOffer = rods.find(rod => rod.name === "Stick with Line");
@@ -324,14 +323,9 @@ function goStore() {
 
         // If no specific next rod (e.g., player has the last rod, or no rod initially but not broken)
         if (!nextRodToOffer) {
-            // This might happen if currentRod is null at start, or if player has the best rod
-            // In a new game, currentRod is set to "Stick with Line" by default, so this path is mostly for "no more upgrades"
-            // or if 'currentRod' is null for some reason *and* not broken.
-            nextRodToOffer = availableRods[0]; // Default to the first available rod they qualify for
+            nextRodToOffer = availableRods[0];
         }
     }
-    // --- CRITICAL CHANGE END ---
-
 
     // Update rod purchase button
     if (nextRodToOffer) {
@@ -1018,6 +1012,7 @@ function tug() {
         const totalTugDamage = Math.floor(baseTugDamage + (Math.random() * currentRod.power));
         fishHealth -= totalTugDamage;
         text.innerText += `\nYou land a powerful tug, dealing ${totalTugDamage} damage!`;
+        text.innerText += `\n\nCooldown: ${reelCooldown} turns.`;
         flashElement(fishHealthText, "red", 350);
 
         if (fishHealth <= 0) {
@@ -1039,7 +1034,6 @@ function tug() {
     } else {
         // Failed Tug: Fish takes minimal/no damage, or escapes
         let actionMessage = "Your tug fails! The fish resists. Be careful!";
-
         if (Math.random() < 0.0025 + (currentFishInBattle.level / 200)) {
             // ... (rod breaking logic - mostly unchanged, but ensure messages are set)
             let brokenRodName = currentRod.name;
@@ -1068,7 +1062,7 @@ function tug() {
             if (isSeaFish) { openSeas(); } else { goFishing(); } // Navigate to casting screen
             return; // Important: Exit the function here
         }
-        text.innerText = actionMessage; // If no break or escape, just set the failure message
+        text.innerText = actionMessage + `\n\nCooldown: ${reelCooldown} turns.`;
     }
 
     updateStatsDisplay();
