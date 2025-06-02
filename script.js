@@ -817,7 +817,8 @@ function reel() {
 
     // Normal reel cooldown and rod broken checks for proper rods
     if (reelCooldown > 0) {
-        text.innerText = "You can't reel yet! The rod needs to rest. Try bracing!";
+        text.innerText = "You can't reel yet! Try bracing!";
+        text.innerText += `\n\nCooldown: ${reelCooldown} turns.`;
         return;
     }
 
@@ -888,7 +889,7 @@ function reel() {
     }
 
     reelCooldown = Math.floor(Math.random() * 5) + 1;
-    text.innerText += `\n\nYour rod needs to rest. Cooldown: ${reelCooldown} turns.`;
+    text.innerText += `\n\nCooldown: ${reelCooldown} turns.`;
 
     if (fishHealCooldown > 0) {
         fishHealCooldown--;
@@ -982,7 +983,8 @@ function tug() {
     }
 
     if (reelCooldown > 0) {
-        text.innerText = `You can't tug yet! The rod needs to rest. Cooldown: ${reelCooldown} turns.`;
+        text.innerText = `You can't tug yet!`;
+        text.innerText += `\n\nCooldown: ${reelCooldown} turns.`;
         return;
     }
 
