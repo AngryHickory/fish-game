@@ -1130,7 +1130,7 @@ function tug() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 20 : 6;
+    const baseReward = isSeaFish ? 20 : 6.5;
     return Math.floor(level * baseReward * (1 + Math.log(level)));
 }
 
