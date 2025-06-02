@@ -1059,8 +1059,9 @@ function tug() {
                  return;
             }
         } else if (Math.random() < 0.05 + (currentFishInBattle.level / 100)) { // Chance fish escapes
-            // Set the final message including cooldown, then navigate
-            text.innerText = actionMessage + "\nThe fish got away!" + `\n\nYour rod needs to rest. Cooldown: ${reelCooldown} turns.`; // Add cooldown message
+            let escapeMessage = "The fish got away! It managed to slip the line. Better luck next time!";
+            confirm(escapeMessage);
+            
             if (isSeaFish) { openSeas(); } else { goFishing(); } // Navigate to casting screen
             return; // Important: Exit the function here
         }
