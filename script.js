@@ -103,7 +103,7 @@ const seaFish = [
 const locations = [
   {
     name: "town square",
-    "button text": ["Go to Store", "Go Fishing", "Open Seas", "Settings"],
+    "button text": ["Go to Store", "Go Fishing", "Open Seas", "Save/New Game"],
     "button functions": [goStore, goFishing, openSeas, goSettings],
     text: "You are in the town square. You see a sign that says \"Store\"."
   },
