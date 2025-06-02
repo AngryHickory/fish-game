@@ -914,7 +914,7 @@ function brace() {
 
     if (Math.random() <= 0.4) {
         text.innerText += " The " + currentFishInBattle.name + " begins to wear itself out!";
-        const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.2);
+        const newFishHealth = Math.round(fishHealth - fishAttackValue * 0.4);
 
         if (newFishHealth < fishHealth) {
             flashElement(fishHealthText, "red", 350);
