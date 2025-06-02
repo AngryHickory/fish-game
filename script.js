@@ -1,7 +1,7 @@
 // GLOBAL ENTRIES
-let xp = 0;
-let gold = 0;
-let bait = 200;
+let xp = 1000;
+let gold = 10000;
+let bait = 2000;
 let buyingBait = false;
 let buyingSpeed = 500;
 let increment = 20;
@@ -48,7 +48,8 @@ const rods = [
     { name: "Stick with Line", power: 4, levelRequired: 1, basePrice: 0 },
     { name: "Basic Rod", power: 10, levelRequired: 1, basePrice: 30 },
     { name: "Wooden Rod", power: 14, levelRequired: 4, basePrice: 150 },
-    { name: "Bamboo Rod", power: 18, levelRequired: 8, basePrice: 300 },
+    { name: "Bamboo Rod", power: 16, levelRequired: 6, basePrice: 150 },
+    { name: "Sea Rod", power: 18, levelRequired: 8, basePrice: 300 },
     { name: "Blue Rod", power: 24, levelRequired: 15, basePrice: 600 },
     { name: "Red Rod", power: 30, levelRequired: 20, basePrice: 900 },
     { name: "Green Rod", power: 38, levelRequired: 25, basePrice: 1200 },
@@ -64,6 +65,7 @@ const rods = [
 
 const hooks = [
     { name: "Basic Hook", level: 5, price: 0 },
+    { name: "Modified Hook", level: 7, price: 175 },
     { name: "Iron Hook", level: 10, price: 300 },
     { name: "Steel Hook", level: 20, price: 600 },
     { name: "Silver Hook", level: 30, price: 800 },
@@ -74,30 +76,46 @@ const hooks = [
 ];
 
 const fish = [
-  { name: "Bluegill", level: 2, health: 15 },
-  { name: "Bullhead Catfish", level: 4, health: 30 },
-  { name: "Pickerel", level: 8, health: 60 },
-  { name: "Perch", level: 12, health: 90 },
-  { name: "Smallmouth Bass", level: 14, health: 110 },
-  { name: "Rainbow Trout", level: 14, health: 110 },
-  { name: "Sockeye Salmon", level: 15, health: 130 },
-  { name: "Largemouth Bass", level: 17, health: 160 },
-  { name: "Muskie", level: 18, health: 170 },
-  { name: "Longnose Gar", level: 22, health: 220 },
-  { name: "Channel Catfish", level: 25, health: 250 },
-  { name: "Lake Sturgeon", level: 40, health: 400 },
+    { name: "Minnow", level: 1, health: 10 },
+    { name: "Bluegill", level: 2, health: 15 },
+    { name: "Bullhead Catfish", level: 3, health: 20 },
+    { name: "Peamouth Chub", level: 4, health: 30 },
+    { name: "Chain Pickerel", level: 6, health: 45 },
+    { name: "Common Carp", level: 7, health: 50 },
+    { name: "Pikeminnow", level: 8, health: 60 },
+    { name: "Perch", level: 11, health: 80 },
+    { name: "Striped Bass", level: 13, health: 110 },
+    { name: "Rainbow Trout", level: 14, health: 140 },
+    { name: "Sockeye Salmon", level: 15, health: 160 },
+    { name: "Largemouth Bass", level: 16, health: 170 },
+    { name: "Grass Carp", level: 17, health: 180 },
+    { name: "Muskie", level: 18, health: 200 },
+    { name: "Murray Cod", level: 20, health: 220 },
+    { name: "Longnose Gar", level: 22, health: 230 },
+    { name: "Channel Catfish", level: 25, health: 250 },
+    { name: "Lake Sturgeon", level: 35, health: 400 },
 ];
 
 const seaFish = [
-  { name: "Cod", level: 30, health: 500 },
-  { name: "Barracuda", level: 30, health: 575 },
-  { name: "Sailfish", level: 35, health: 650 },
-  { name: "Swordfish", level: 40, health: 800 },
-  { name: "Halibut", level: 50, health: 1000 },
-  { name: "Tuna", level: 55, health: 1200 },
-  { name: "Blue Marlin", level: 70, health: 2000 },
-  { name: "Great White Shark", level: 90, health: 2500 },
-  { name: "Megalodon", level: 100, health: 7500 }
+    { name: "Sea Bass", level: 10, health: 100 },
+    { name: "Haddock", level: 12, health: 140 },
+    { name: "Pollock", level: 15, health: 160 },
+    { name: "Red Grouper", level: 17, health: 190 },
+    { name: "King Snapper", level: 20, health: 220 },
+    { name: "Pacific Cod", level: 25, health: 360 },
+    { name: "Barracuda", level: 30, health: 575 },
+    { name: "Atlantic Cod", level: 32, health: 620 },
+    { name: "Kingfish", level: 35, health: 700 },
+    { name: "Sailfish", level: 38, health: 800 },
+    { name: "Swordfish", level: 40, health: 900 },
+    { name: "Swordfish", level: 45, health: 950 },
+    { name: "Halibut", level: 50, health: 1000 },
+    { name: "Tuna", level: 55, health: 1200 },
+    { name: "Tuna", level: 65, health: 1600 },
+    { name: "Blue Marlin", level: 70, health: 2000 },
+    { name: "Blue Marlin", level: 80, health: 2500 },
+    { name: "Great White Shark", level: 90, health: 3000 },
+    { name: "Great White Shark", level: 100, health: 7500 }
 ];
 
 const locations = [
@@ -663,26 +681,25 @@ function buyHook() {
     }
 
     const nextHook = hooks[nextHookIndex];
+    const hookPrice = nextHook.price;
 
-    if (playerLevel < 4) {
-        text.innerText = `You need to reach Level 5 to buy the ${nextHook.name}. You are Level ${playerLevel}.`;
+    const requiredPlayerLevel = Math.floor(nextHook.level / 2); 
+
+    if (playerLevel < requiredPlayerLevel) {
+        text.innerText = `You need to reach Level ${requiredPlayerLevel} to buy the ${nextHook.name}. You are Level ${playerLevel}.`;
         return;
     }
 
-    const hookPrice = nextHook.price;
-    locations[1]["button text"][2] = `Buy ${nextHook.name} (${hookPrice} Gold)`;
-    locations[1]["button functions"][2] = () => {
-        if (gold >= hookPrice) {
-            gold -= hookPrice;
-            currentHook = nextHook;
-            updateStatsDisplay();
-            text.innerText = `You bought a ${currentHook.name}! You can now catch fish up to level ${currentHook.level}.`;
-        } else {
-            text.innerText = `You need ${hookPrice} gold to buy the ${nextHook.name}. You have ${gold} gold.`;
-        }
-    };
+    if (gold >= hookPrice) {
+        gold -= hookPrice;
+        currentHook = nextHook;
+        updateStatsDisplay();
 
-    update(locations[1]);
+        text.innerText = `You bought a ${currentHook.name}! You can now catch fish up to level ${currentHook.level}.`;
+        goStore();
+    } else {
+        text.innerText = `You need ${hookPrice} gold to buy the ${nextHook.name}. You have ${gold} gold.`;
+    }
 }
 
 //FISHING/BATTLE RELATED FUNCTIONS
@@ -694,18 +711,48 @@ function getRandomFishName(isSeaFish) {
 }
 
 function generateFish(fishTemplate, isSeaFish = false) {
+    const playerLevel = getPlayerLevel();
     const xpScalingLevelBonus = Math.floor(xp / 90);
-    const levelVariation = Math.floor(Math.random() * 5) - 2;
-    let finalLevel = fishTemplate.level + xpScalingLevelBonus + levelVariation;
 
-    if (finalLevel < 1) {
-        finalLevel = 1;
+    // Calculate a 'base' level for the fish, potentially adjusted by XP.
+    // This is the starting point for the random level generation.
+    let generatedBaseLevel = fishTemplate.level + Math.floor(xpScalingLevelBonus / 2);
+
+    // Define the overall MIN and MAX level boundaries for fish based on player level.
+    // This creates a window of levels appropriate for the player's progress.
+    let minPlayerInfluencedLevel = Math.max(1, playerLevel - 5); // Fish can be a few levels below player
+    let maxPlayerInfluencedLevel = playerLevel + 10; // Fish can be a few levels above player
+
+    // Ensure the generatedBaseLevel falls within the player-influenced bounds.
+    generatedBaseLevel = Math.max(generatedBaseLevel, minPlayerInfluencedLevel);
+    generatedBaseLevel = Math.min(generatedBaseLevel, maxPlayerInfluencedLevel);
+
+    // Determine the final maximum level for the fish, applying the hook limit.
+    let finalMaxLevel;
+    if (currentHook && currentHook.name === "Legendary Hook") {
+        // Legendary Hook: no explicit cap, allows for very high levels.
+        // We'll let it scale further based on the generatedBaseLevel.
+        finalMaxLevel = generatedBaseLevel + 20; // Allows truly massive fish
+    } else {
+        // For non-Legendary Hooks, the hook level is a strict cap.
+        // The fish's level cannot exceed the current hook's level.
+        finalMaxLevel = Math.min(generatedBaseLevel + 5, currentHook.level); // Small random boost, then capped by hook
     }
 
-    if (currentHook && currentHook.name === "Legendary Hook") {
-  
-    } else if (currentHook && finalLevel > currentHook.level) {
-        finalLevel = currentHook.level;
+    // Determine the final minimum level for the fish.
+    // It should be at least the fish's base template level,
+    // and also within the player's influence.
+    let finalMinLevel = Math.max(fishTemplate.level, minPlayerInfluencedLevel);
+    
+    // Ensure finalMinLevel doesn't exceed finalMaxLevel
+    finalMinLevel = Math.min(finalMinLevel, finalMaxLevel);
+
+    // Generate the final level randomly within the determined range.
+    let finalLevel = Math.floor(Math.random() * (finalMaxLevel - finalMinLevel + 1)) + finalMinLevel;
+
+    // A final safeguard to ensure level is never below 1
+    if (finalLevel < 1) {
+        finalLevel = 1;
     }
 
     const healthPerLevelMultiplier = isSeaFish ? 50 : 20;
@@ -839,8 +886,8 @@ function reel() {
         text.innerText += ` You deal ${reelDamage} damage to the fish!`;
 
         if (fishAbility(currentFishInBattle, locations[currentLocationIndex].name === "sea battle") && fishHealCooldown === 0) {
-            const fishHealPercentage = 0.4;
-            const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75));
+            const fishHealPercentage = 0.28;
+            const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.3 + 0.75));
             text.innerText += " The fish recovered " + fishHealAmount + " health!";
             fishHealth += fishHealAmount;
             flashElement(fishHealthText, "green", 350);
@@ -1061,7 +1108,7 @@ function tug() {
         } else if (Math.random() < 0.05 + (currentFishInBattle.level / 100)) { // Chance fish escapes
             let escapeMessage = "The fish got away! It managed to slip the line. Better luck next time!";
             confirm(escapeMessage);
-            
+
             if (isSeaFish) { openSeas(); } else { goFishing(); } // Navigate to casting screen
             return; // Important: Exit the function here
         }
