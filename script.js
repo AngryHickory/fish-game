@@ -135,7 +135,7 @@ const locations = [
   name: "lose",
   "button text": ["New Game", "Load Game", "", ""],
   "button functions": [newGame, loadGame, null, null],
-  text: "Out of bait... GAME OVER"
+  text: "Out of bait... GAME OVER ☠️"
 }
 ];
 
