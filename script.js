@@ -45,7 +45,7 @@ if (isTouchDevice) {
 }
 
 const rods = [
-    { name: "Stick with Line", power: 2, levelRequired: 1, basePrice: 0 },
+    { name: "Stick with Line", power: 4, levelRequired: 1, basePrice: 0 },
     { name: "Basic Rod", power: 10, levelRequired: 1, basePrice: 30 },
     { name: "Wooden Rod", power: 14, levelRequired: 4, basePrice: 150 },
     { name: "Bamboo Rod", power: 18, levelRequired: 8, basePrice: 300 },
@@ -121,8 +121,8 @@ const locations = [
 },
 {
   name: "battle",
-  "button text": ["Reel", "Brace", "Cut Line", ""],
-  "button functions": [reel, brace, goFishing, null],
+  "button text": ["Reel", "Tug", "Brace", "Cut Line"],
+  "button functions": [reel, tug, brace, goFishing],
   text: "You have a fish on the line!"
 },
 {
@@ -148,8 +148,8 @@ locations.push({
 
 locations.push({
     name: "sea battle",
-    "button text": ["Reel", "Brace", "Cut Line", ""],
-    "button functions": [reel, brace, openSeas, null],
+    "button text": ["Reel", "Brace", "Tug", "Cut Line"],
+    "button functions": [reel, tug, brace, openSeas],
     text: "You have a fish on the line!"
 });
 
@@ -799,7 +799,7 @@ function reel() {
     }
 
     if (currentRod && currentRod.name === "Stick with Line") {
-        text.innerText = "You've only got a stick with line tied to it! You can only reel this fish in when it's completely exhausted. Try bracing!";
+        text.innerText = "You've only got a stick with line tied to it! You'll need to buy a rod in the store. For now, you can only reel this fish in when it's completely exhausted. Try bracing or tugging to reduce the fish's health!";
         return; // Prevent any reeling action/damage
     }
 
@@ -876,7 +876,7 @@ function reel() {
     }
 
     reelCooldown = Math.floor(Math.random() * 5) + 1;
-    text.innerText += `\n\nYour rod needs to rest. Reel cooldown: ${reelCooldown} turns.`;
+    text.innerText += `\n\nYour rod needs to rest. Cooldown: ${reelCooldown} turns.`;
 
     if (fishHealCooldown > 0) {
         fishHealCooldown--;
@@ -944,10 +944,117 @@ function brace() {
     // Decrease reel cooldown
     if (reelCooldown > 0) {
         reelCooldown--;
-        text.innerText += `\nReel cooldown: ${reelCooldown} turns remaining.`;
+        text.innerText += `\nCooldown: ${reelCooldown} turns remaining.`;
         if (reelCooldown === 0) {
-            text.innerText += "\nYou can reel again!";
+            text.innerText += "\nYou can reel and tug again!";
         }
+    }
+
+    updateStatsDisplay();
+    fishHealthText.innerText = fishHealth;
+
+    if (bait <= 0) {
+        lose();
+    }
+}
+
+function tug() {
+    if (fishHealth <= 0) {
+        text.innerText = "The fish is exhausted! Time to reel it in!";
+        return;
+    }
+
+    if (!currentRod || isRodBroken) {
+        text.innerText = `Your ${currentRod ? currentRod.name : 'rod'} is broken! You need to buy a new one at the store.`;
+        return;
+    }
+
+    if (reelCooldown > 0) { // Using reelCooldown for simplicity, or add a separate tugCooldown
+        text.innerText = "You can't tug yet! The rod needs to rest.";
+        text.innerText += `\nCooldown: ${reelCooldown} turns remaining.`;
+        return;
+    }
+
+    const playerLevel = getPlayerLevel();
+    const isSeaFish = locations[currentLocationIndex].name === "sea battle";
+
+    // Base damage and bait cost for tug
+    const baseTugDamage = currentRod.power * 4; // More damage than a reel
+    const baseBaitCost = isSeaFish ? 30 : 15; // Higher cost for sea fish
+    const rodPowerFactor = currentRod.power / 100; // Example: higher power reduces risk
+
+    // Chance of success (scales with rod power and player level)
+    const successChance = 0.5 + (rodPowerFactor * 0.2) + (playerLevel * 0.005); // Example scaling
+    const randomRoll = Math.random();
+
+    text.innerText = "You attempt a forceful tug on the line!";
+    bait -= baseBaitCost;
+    flashElement(baitText, "red", 350);
+
+    if (randomRoll < successChance) {
+        // Successful Tug: Deal damage
+        const totalTugDamage = Math.floor(baseTugDamage + (Math.random() * currentRod.power));
+        fishHealth -= totalTugDamage;
+        text.innerText += `\nYou land a powerful tug, dealing ${totalTugDamage} damage!`;
+        flashElement(fishHealthText, "red", 350);
+
+        // Check for fish exhaustion
+        if (fishHealth <= 0) {
+            fishHealth = 0;
+            text.innerText += " The fish is exhausted! You reel it in easily.";
+            catchFish();
+            return;
+        }
+
+        // Apply fish ability if applicable
+        if (fishAbility(currentFishInBattle, isSeaFish) && fishHealCooldown === 0) {
+            const fishHealPercentage = 0.4;
+            const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75));
+            text.innerText += " The fish recovered " + fishHealAmount + " health!";
+            fishHealth += fishHealAmount;
+            flashElement(fishHealthText, "green", 350);
+            fishHealCooldown = 5;
+        }
+
+    } else {
+        // Failed Tug: Fish takes minimal/no damage, or escapes
+        text.innerText += "\nYour tug fails! The fish resisted. Be careful!";
+
+        // Increased chance of rod breaking or fish escaping on failed tug
+        if (Math.random() < 0.0005 + (currentFishInBattle.level / 200)) { // Higher chance for stronger fish
+            // Rod breaking mechanic (can reuse your existing logic)
+            let brokenRodName = currentRod.name;
+            const currentIndex = rods.findIndex(rod => rod.name === currentRod.name);
+
+            if (currentIndex > 0) {
+                currentRod = rods[currentIndex - 1];
+                inventory[0] = currentRod.name;
+                isRodBroken = false;
+                text.innerText += ` Your ${brokenRodName} broke! You reverted to your ${currentRod.name}.`;
+            } else {
+                isRodBroken = true;
+                actionMessage += ` Your ${brokenRodName} broke! You have no functional rod left. Visit the store to buy a new one.`;
+                inventory[0] = "No Rod";
+            }
+            updateStatsDisplay();
+            text.innerText = actionMessage;
+            if (isRodBroken) { // If it broke to "no rod", end battle
+                 if (isSeaFish) { openSeas(); } else { goFishing(); } // Return to casting screen
+                 return;
+            }
+        } else if (Math.random() < 0.1 + (currentFishInBattle.level / 100)) { // Chance fish escapes
+            text.innerText = actionMessage + "\nThe fish got away!";
+            if (isSeaFish) { openSeas(); } else { goFishing(); } // Return to casting screen
+            return;
+        }
+    }
+
+    // Apply cooldown
+    reelCooldown = Math.floor(Math.random() * 3) + 2; // Tug might have a slightly longer base cooldown
+    text.innerText += `\n\nYour rod needs to rest. Cooldown: ${reelCooldown} turns.`;
+
+    if (fishHealCooldown > 0) {
+        fishHealCooldown--;
     }
 
     updateStatsDisplay();
