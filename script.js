@@ -447,7 +447,7 @@ function saveGame() {
         bestFishCaught: bestFishCaught
     };
     localStorage.setItem('fishingGameSave', JSON.stringify(gameData));
-    text.innerText = "Game saved! You can now exit the game.";
+    text.innerText = "Game saved!";
 }
 
 
@@ -1076,7 +1076,7 @@ function tug() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 7.5 : 6;
+    const baseReward = isSeaFish ? 10 : 6;
     return Math.floor(level * baseReward * (1 + Math.log(level)));
 }
 
