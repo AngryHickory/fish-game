@@ -1021,7 +1021,7 @@ function tug() {
         text.innerText += "\nYour tug fails! The fish resisted. Be careful!";
 
         // Increased chance of rod breaking or fish escaping on failed tug
-        if (Math.random() < 0.0005 + (currentFishInBattle.level / 200)) { // Higher chance for stronger fish
+        if (Math.random() < 0.025 + (currentFishInBattle.level / 200)) { // Higher chance for stronger fish
             // Rod breaking mechanic (can reuse your existing logic)
             let brokenRodName = currentRod.name;
             const currentIndex = rods.findIndex(rod => rod.name === currentRod.name);
@@ -1042,7 +1042,7 @@ function tug() {
                  if (isSeaFish) { openSeas(); } else { goFishing(); } // Return to casting screen
                  return;
             }
-        } else if (Math.random() < 0.1 + (currentFishInBattle.level / 100)) { // Chance fish escapes
+        } else if (Math.random() < 0.12 + (currentFishInBattle.level / 100)) { // Chance fish escapes
             text.innerText = actionMessage + "\nThe fish got away!";
             if (isSeaFish) { openSeas(); } else { goFishing(); } // Return to casting screen
             return;
