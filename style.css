@@ -68,9 +68,16 @@ body {
     justify-content: space-around;
     flex-wrap: wrap;
     gap: 10px 15px;
+    text-align: center;
 }
 
+#fishStats span {
+  margin-right: 10px;
+}
 
+#fishStats span:last-child {
+  margin-right: 0;
+}
 
 button {
   flex: 1;
