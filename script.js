@@ -781,7 +781,7 @@ function fishAbility(fish, isSeaFish) {
 }
 
 function calculateXpGain(caughtFishLevel, playerLevel) {
-    const baseXpPerLevel = 3;
+    const baseXpPerLevel = 4.5;
     let xpGain = caughtFishLevel * baseXpPerLevel;
     const levelDifference = caughtFishLevel - playerLevel;
 
@@ -1132,7 +1132,7 @@ function tug() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 20 : 6.5;
+    const baseReward = isSeaFish ? 20 : 7;
     return Math.floor(level * baseReward * (1 + Math.log(level)));
 }
 
