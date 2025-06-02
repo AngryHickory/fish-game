@@ -979,12 +979,12 @@ function tug() {
     const isSeaFish = locations[currentLocationIndex].name === "sea battle";
 
     // Base damage and bait cost for tug
-    const baseTugDamage = currentRod.power * 4; // More damage than a reel
-    const baseBaitCost = isSeaFish ? 30 : 15; // Higher cost for sea fish
+    const baseTugDamage = currentRod.power * 3; // More damage than a reel
+    const baseBaitCost = isSeaFish ? 20 : 15; // Higher cost for sea fish
     const rodPowerFactor = currentRod.power / 100; // Example: higher power reduces risk
 
     // Chance of success (scales with rod power and player level)
-    const successChance = 0.5 + (rodPowerFactor * 0.2) + (playerLevel * 0.005); // Example scaling
+    const successChance = 0.4 + (rodPowerFactor * 0.2) + (playerLevel * 0.005); // Example scaling
     const randomRoll = Math.random();
 
     text.innerText = "You attempt a forceful tug on the line!";
