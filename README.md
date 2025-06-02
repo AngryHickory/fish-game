@@ -1,5 +1,6 @@
 # fish-game
 A simple fishing RPG game.
+
 Features:
 - three player moves - Reel, Brace, Tug
 - holdable buy bait button

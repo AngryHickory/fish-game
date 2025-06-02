@@ -123,7 +123,7 @@ const locations = [
   name: "battle",
   "button text": ["Reel", "Tug", "Brace", "Cut Line"],
   "button functions": [reel, tug, brace, goFishing],
-  text: "You have a fish on the line!"
+  text: "You have a fish on the line! Use the Reel button to catch it. Brace can help you save bait. Tugging on the rod can wear the fish out faster, but be careful - it could break!"
 },
 {
   name: "fish caught",
@@ -150,7 +150,7 @@ locations.push({
     name: "sea battle",
     "button text": ["Reel", "Brace", "Tug", "Cut Line"],
     "button functions": [reel, tug, brace, openSeas],
-    text: "You have a fish on the line!"
+    text: "You have a fish on the line! Use the Reel button to catch it. Brace can help you save bait. Tugging on the rod can wear the fish out faster, but be careful - it could break!"
 });
 
 locations.push({
@@ -304,32 +304,47 @@ function goTown() {
 function goStore() {
     const playerLevel = getPlayerLevel();
     const availableRods = rods.filter(rod => playerLevel >= rod.levelRequired);
-    let nextRod = null;
+    let nextRodToOffer = null; // Renamed for clarity
 
-    // Determine the next rod to buy
-    if (currentRod) {
-        const currentRodIndex = rods.findIndex(r => r.name === currentRod.name);
-        if (currentRodIndex !== -1 && currentRodIndex < rods.length - 1) {
-            nextRod = rods[currentRodIndex + 1]; // Get the next rod in the list
+    // --- CRITICAL CHANGE START ---
+    // If the current rod is broken, the only option for purchase should be "Stick with Line"
+    if (isRodBroken) {
+        nextRodToOffer = rods.find(rod => rod.name === "Stick with Line");
+        if (!nextRodToOffer) { // Fallback, though Stick with Line should always exist
+            nextRodToOffer = rods[0];
+        }
+    } else {
+        // If the rod is NOT broken, proceed with the normal logic to find the next upgrade
+        if (currentRod) {
+            const currentRodIndex = rods.findIndex(r => r.name === currentRod.name);
+            if (currentRodIndex !== -1 && currentRodIndex < rods.length - 1) {
+                nextRodToOffer = rods[currentRodIndex + 1]; // Get the next rod in the list
+            }
+        }
+
+        // If no specific next rod (e.g., player has the last rod, or no rod initially but not broken)
+        if (!nextRodToOffer) {
+            // This might happen if currentRod is null at start, or if player has the best rod
+            // In a new game, currentRod is set to "Stick with Line" by default, so this path is mostly for "no more upgrades"
+            // or if 'currentRod' is null for some reason *and* not broken.
+            nextRodToOffer = availableRods[0]; // Default to the first available rod they qualify for
         }
     }
+    // --- CRITICAL CHANGE END ---
 
-    // If no next rod available, offer the first available rod
-    if (!nextRod) {
-        nextRod = availableRods[0]; // Default to the first available rod
-    }
 
     // Update rod purchase button
-    if (nextRod) {
-        const rodPrice = calculateRodPrice(nextRod);
-        locations[1]["button text"][1] = `Buy ${nextRod.name} (${rodPrice} Gold)`;
-        locations[1]["button functions"][1] = () => buyRod(nextRod);
+    if (nextRodToOffer) {
+        const rodPrice = calculateRodPrice(nextRodToOffer);
+        locations[1]["button text"][1] = `Buy ${nextRodToOffer.name} (${rodPrice} Gold)`;
+        locations[1]["button functions"][1] = () => buyRod(nextRodToOffer);
     } else {
+        // This case should ideally mean all rods are bought or no rods available (unlikely)
         locations[1]["button text"][1] = "No more rods available";
         locations[1]["button functions"][1] = null;
     }
 
-    // Handle hook button text
+    // Handle hook button text (this part seems fine as is)
     const nextHookIndex = hooks.findIndex(hook => hook.level > currentHook.level);
     if (nextHookIndex !== -1) {
         const nextHook = hooks[nextHookIndex];
@@ -610,7 +625,10 @@ function buyRod(rodToBuy = null) {
     if (!targetRod) {
         const currentRodIndex = currentRod ? rods.findIndex(r => r.name === currentRod.name) : -1;
         if (currentRodIndex === -1 || isRodBroken) {
-            targetRod = rods.find(rod => rod.name === "Stick with Line") || rods[0]; // Allow repurchase of broken rod
+            targetRod = rods.find(rod => rod.name === "Stick with Line"); // Always allow repurchase of Stick with Line
+            if (!targetRod) {
+                targetRod = rods[0]; // Fallback to the first rod if Stick with Line somehow isn't found
+            }
         } else {
             targetRod = rods[currentRodIndex + 1]; // Get the next rod in the list
         }
@@ -799,7 +817,7 @@ function reel() {
     }
 
     if (currentRod && currentRod.name === "Stick with Line") {
-        text.innerText = "You've only got a stick with line tied to it! You'll need to buy a rod in the store. For now, you can only reel this fish in when it's completely exhausted. Try bracing or tugging to reduce the fish's health!";
+        text.innerText = "You've only got a stick with line tied to it! You'll need to buy a rod in the store to use Reel. For now, you can only reel this fish in when it's completely exhausted. Try bracing to reduce the fish's health!";
         return; // Prevent any reeling action/damage
     }
 
@@ -969,27 +987,31 @@ function tug() {
         return;
     }
 
-    if (reelCooldown > 0) { // Using reelCooldown for simplicity, or add a separate tugCooldown
-        text.innerText = "You can't tug yet! The rod needs to rest.";
-        text.innerText += `\nCooldown: ${reelCooldown} turns remaining.`;
+    if (reelCooldown > 0) {
+        text.innerText = `You can't tug yet! The rod needs to rest. Cooldown: ${reelCooldown} turns.`;
         return;
     }
 
     const playerLevel = getPlayerLevel();
     const isSeaFish = locations[currentLocationIndex].name === "sea battle";
 
-    // Base damage and bait cost for tug
-    const baseTugDamage = currentRod.power * 3; // More damage than a reel
-    const baseBaitCost = isSeaFish ? 20 : 15; // Higher cost for sea fish
-    const rodPowerFactor = currentRod.power / 100; // Example: higher power reduces risk
+    const baseTugDamage = currentRod.power * 3;
+    const baseBaitCost = isSeaFish ? 20 : 15;
+    const rodPowerFactor = currentRod.power / 100;
 
-    // Chance of success (scales with rod power and player level)
-    const successChance = 0.4 + (rodPowerFactor * 0.2) + (playerLevel * 0.005); // Example scaling
+    const successChance = 0.4 + (rodPowerFactor * 0.2) + (playerLevel * 0.005);
     const randomRoll = Math.random();
 
-    text.innerText = "You attempt a forceful tug on the line!";
+    text.innerText = "You attempt a forceful tug on the line!"; // Initial message for the action
     bait -= baseBaitCost;
     flashElement(baitText, "red", 350);
+
+    // Apply cooldown and update fishHealCooldown *before* any potential return due to escape/break
+    reelCooldown = Math.floor(Math.random() * 3) + 2; // Moved up
+    if (fishHealCooldown > 0) {
+        fishHealCooldown--; 
+    }
+
 
     if (randomRoll < successChance) {
         // Successful Tug: Deal damage
@@ -998,15 +1020,13 @@ function tug() {
         text.innerText += `\nYou land a powerful tug, dealing ${totalTugDamage} damage!`;
         flashElement(fishHealthText, "red", 350);
 
-        // Check for fish exhaustion
         if (fishHealth <= 0) {
             fishHealth = 0;
-            text.innerText += " The fish is exhausted! You reel it in easily.";
+            text.innerText = "The fish is exhausted! You reel it in easily.";
             catchFish();
             return;
         }
 
-        // Apply fish ability if applicable
         if (fishAbility(currentFishInBattle, isSeaFish) && fishHealCooldown === 0) {
             const fishHealPercentage = 0.4;
             const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75));
@@ -1018,11 +1038,10 @@ function tug() {
 
     } else {
         // Failed Tug: Fish takes minimal/no damage, or escapes
-        text.innerText += "\nYour tug fails! The fish resisted. Be careful using tug!";
+        let actionMessage = "Your tug fails! The fish resists. Be careful!";
 
-        // Increased chance of rod breaking or fish escaping on failed tug
-        if (Math.random() < 0.025 + (currentFishInBattle.level / 200)) { // Higher chance for stronger fish
-            // Rod breaking mechanic (can reuse your existing logic)
+        if (Math.random() < 0.0025 + (currentFishInBattle.level / 200)) {
+            // ... (rod breaking logic - mostly unchanged, but ensure messages are set)
             let brokenRodName = currentRod.name;
             const currentIndex = rods.findIndex(rod => rod.name === currentRod.name);
 
@@ -1030,35 +1049,30 @@ function tug() {
                 currentRod = rods[currentIndex - 1];
                 inventory[0] = currentRod.name;
                 isRodBroken = false;
-                text.innerText += ` Your ${brokenRodName} broke! You reverted to your ${currentRod.name}.`;
+                actionMessage += `\nYour ${brokenRodName} broke! You reverted to your ${currentRod.name}.`;
             } else {
                 isRodBroken = true;
-                actionMessage += ` Your ${brokenRodName} broke! You have no functional rod left. Visit the store to buy a new one.`;
+                actionMessage += `\nYour ${brokenRodName} broke! You have no functional rod left. Visit the store to buy a new one.`;
                 inventory[0] = "No Rod";
             }
             updateStatsDisplay();
-            text.innerText = actionMessage;
-            if (isRodBroken) { // If it broke to "no rod", end battle
-                 if (isSeaFish) { openSeas(); } else { goFishing(); } // Return to casting screen
+            // Now, set the text and then navigate AFTER cooldowns are applied
+            text.innerText = actionMessage + `\n\nYour rod needs to rest. Tug cooldown: ${reelCooldown} turns.`; // Add cooldown message
+            if (isRodBroken) {
+                 if (isSeaFish) { openSeas(); } else { goFishing(); }
                  return;
             }
-        } else if (Math.random() < 0.12 + (currentFishInBattle.level / 100)) { // Chance fish escapes
-            text.innerText = actionMessage + "\nThe fish got away!";
-            if (isSeaFish) { openSeas(); } else { goFishing(); } // Return to casting screen
-            return;
+        } else if (Math.random() < 0.05 + (currentFishInBattle.level / 100)) { // Chance fish escapes
+            // Set the final message including cooldown, then navigate
+            text.innerText = actionMessage + "\nThe fish got away!" + `\n\nYour rod needs to rest. Cooldown: ${reelCooldown} turns.`; // Add cooldown message
+            if (isSeaFish) { openSeas(); } else { goFishing(); } // Navigate to casting screen
+            return; // Important: Exit the function here
         }
-    }
-
-    // Apply cooldown
-    reelCooldown = Math.floor(Math.random() * 3) + 2; // Tug might have a slightly longer base cooldown
-    text.innerText += `\n\nYour rod needs to rest. Cooldown: ${reelCooldown} turns.`;
-
-    if (fishHealCooldown > 0) {
-        fishHealCooldown--;
+        text.innerText = actionMessage; // If no break or escape, just set the failure message
     }
 
     updateStatsDisplay();
-    fishHealthText.innerText = fishHealth;
+    fishHealthText.innerText = fishHealth; // Update health display (even if 0 for exhaustion)
 
     if (bait <= 0) {
         lose();
