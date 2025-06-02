@@ -13,7 +13,7 @@ let currentFishInBattle = null;
 let fishHealth;
 let fishHealCooldown = 0;
 let reelCooldown = 0;
-let inventory = ["Stick with Line"];
+let inventory = ["Stick with line"];
 let currentHook = { name: "Basic Hook", level: 5 };
 let bestFishCaught = [];
 let isFlashing = false;
@@ -45,7 +45,7 @@ if (isTouchDevice) {
 }
 
 const rods = [
-    { name: "Stick with Line", power: 4, levelRequired: 1, basePrice: 0 },
+    { name: "Stick with line", power: 4, levelRequired: 1, basePrice: 0 },
     { name: "Beginner Rod", power: 9, levelRequired: 1, basePrice: 30 },
     { name: "Basic Rod", power: 11, levelRequired: 1, basePrice: 80 },
     { name: "Wooden Rod", power: 14, levelRequired: 4, basePrice: 150 },
@@ -330,10 +330,10 @@ function goStore() {
     const availableRods = rods.filter(rod => playerLevel >= rod.levelRequired);
     let nextRodToOffer = null; // Renamed for clarity
 
-    // If the current rod is broken, the only option for purchase should be "Stick with Line"
+    // If the current rod is broken, the only option for purchase should be "Stick with line"
     if (isRodBroken) {
-        nextRodToOffer = rods.find(rod => rod.name === "Stick with Line");
-        if (!nextRodToOffer) { // Fallback, though Stick with Line should always exist
+        nextRodToOffer = rods.find(rod => rod.name === "Stick with line");
+        if (!nextRodToOffer) { // Fallback, though Stick with line should always exist
             nextRodToOffer = rods[0];
         }
     } else {
@@ -495,7 +495,7 @@ function loadGame() {
         xp = gameData.xp !== undefined ? gameData.xp : 0;
         gold = gameData.gold !== undefined ? gameData.gold : 0;
         bait = gameData.bait !== undefined ? gameData.bait : 200;
-        inventory = gameData.inventory !== undefined ? gameData.inventory : ["Stick with Line"];
+        inventory = gameData.inventory !== undefined ? gameData.inventory : ["Stick with line"];
         isRodBroken = gameData.isRodBroken !== undefined ? gameData.isRodBroken : false;
         fishHealCooldown = gameData.fishHealCooldown !== undefined ? gameData.fishHealCooldown : 0;
         reelCooldown = gameData.reelCooldown !== undefined ? gameData.reelCooldown : 0;
@@ -510,9 +510,9 @@ function loadGame() {
         // Find the specific rod object from the 'rods' array
         currentRod = rods.find(rod => rod.name === loadedRodName) || null;
         if (!currentRod) {
-            currentRod = rods.find(rod => rod.name === "Stick with Line");
-            if (!inventory.includes("Stick with Line")) {
-                inventory[0] = "Stick with Line";
+            currentRod = rods.find(rod => rod.name === "Stick with line");
+            if (!inventory.includes("Stick with line")) {
+                inventory[0] = "Stick with line";
             }
         }
 
@@ -573,7 +573,7 @@ function restart() {
   bait = 200;
   gold = 0;
   currentRod = null;
-  inventory = ["Stick with Line"];
+  inventory = ["Stick with line"];
   updateStatsDisplay();
   goTown();
 }
@@ -643,9 +643,9 @@ function buyRod(rodToBuy = null) {
     if (!targetRod) {
         const currentRodIndex = currentRod ? rods.findIndex(r => r.name === currentRod.name) : -1;
         if (currentRodIndex === -1 || isRodBroken) {
-            targetRod = rods.find(rod => rod.name === "Stick with Line"); // Always allow repurchase of Stick with Line
+            targetRod = rods.find(rod => rod.name === "Stick with line"); // Always allow repurchase of Stick with line
             if (!targetRod) {
-                targetRod = rods[0]; // Fallback to the first rod if Stick with Line somehow isn't found
+                targetRod = rods[0]; // Fallback to the first rod if Stick with line somehow isn't found
             }
         } else {
             targetRod = rods[currentRodIndex + 1]; // Get the next rod in the list
@@ -779,7 +779,7 @@ function fishAbility(fish, isSeaFish) {
 }
 
 function calculateXpGain(caughtFishLevel, playerLevel) {
-    const baseXpPerLevel = 2;
+    const baseXpPerLevel = 3;
     let xpGain = caughtFishLevel * baseXpPerLevel;
     const levelDifference = caughtFishLevel - playerLevel;
 
@@ -816,7 +816,7 @@ function castRod() {
     }
     
     if (!currentRod) { // This condition should ideally never be met if currentRod is always initialized
-        text.innerText = "You need a rod to cast! If you don't have a 'Stick with Line', something went wrong!";
+        text.innerText = "You need a rod to cast! If you don't have a 'Stick with line', something went wrong!";
         return;
     }
     if (isRodBroken) {
@@ -863,7 +863,7 @@ function reel() {
         return;
     }
 
-    if (currentRod && currentRod.name === "Stick with Line") {
+    if (currentRod && currentRod.name === "Stick with line") {
         text.innerText = "You've only got a stick with line tied to it! You'll need to buy a rod in the store to use Reel. For now, you can only reel this fish in when it's completely exhausted. Try bracing to reduce the fish's health!";
         return; // Prevent any reeling action/damage
     }
@@ -967,7 +967,7 @@ function brace() {
     }
 
     if (!currentRod) { // This check should ideally never be met if currentRod is always initialized
-        text.innerText = "You don't have a rod to brace with! If you don't have a 'Stick with Line', something went wrong!";
+        text.innerText = "You don't have a rod to brace with! If you don't have a 'Stick with line', something went wrong!";
         return;
     }
     if (isRodBroken) {
@@ -1175,7 +1175,7 @@ const gameLoaded = loadGame();
 
 if (!gameLoaded) {
     // If no game was loaded, initialize the first rod and show start screen
-    currentRod = rods.find(rod => rod.name === "Stick with Line");
-    inventory = ["Stick with Line"];
+    currentRod = rods.find(rod => rod.name === "Stick with line");
+    inventory = ["Stick with line"];
     showStartScreen();
 }
