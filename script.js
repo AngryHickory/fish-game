@@ -1018,7 +1018,7 @@ function tug() {
 
     } else {
         // Failed Tug: Fish takes minimal/no damage, or escapes
-        text.innerText += "\nYour tug fails! The fish resisted. Be careful!";
+        text.innerText += "\nYour tug fails! The fish resisted. Be careful using tug!";
 
         // Increased chance of rod breaking or fish escaping on failed tug
         if (Math.random() < 0.025 + (currentFishInBattle.level / 200)) { // Higher chance for stronger fish

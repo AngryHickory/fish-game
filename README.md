@@ -1,9 +1,10 @@
 # fish-game
 A simple fishing RPG game.
 Features:
-- two player moves
+- three player moves - Reel, Brace, Tug
 - holdable buy bait button
 - hook item
+- hooks and rods are progression locked
 - fish level cap based on player's level 
 - display inventory
 - display player level
@@ -25,5 +26,3 @@ To do:
 - special attacks for fish?
 - add elite and legendary fishing line - random drop from fish
 - boss battles? - Chance for elite fish to eat regular fish < chance for legendary fish to eat elite fish
-- new attack? 
-- lock hooks based on level like rods
