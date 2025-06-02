@@ -71,10 +71,12 @@ const rods = [
 
 const hooks = [
     { name: "Basic Hook", level: 5, price: 0 },
-    { name: "Modified Hook", level: 7, price: 175 },
-    { name: "Iron Hook", level: 10, price: 300 },
+    { name: "Modified Hook", level: 8, price: 175 },
+    { name: "Bronze Hook", level: 12, price: 300 },
+    { name: "Iron Hook", level: 16, price: 400 },
     { name: "Steel Hook", level: 20, price: 600 },
-    { name: "Silver Hook", level: 30, price: 800 },
+    { name: "Titanium Hook", level: 25, price: 800 },
+    { name: "Silver Hook", level: 30, price: 1000 },
     { name: "Gold Hook", level: 40, price: 1200 },
     { name: "Diamond Hook", level: 50, price: 1500 },
     { name: "Master Hook", level: 70, price: 1800 },
