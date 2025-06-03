@@ -4,7 +4,7 @@ if (isTouchDevice) {
     document.body.classList.add('touch-device');
 }
 
-let xp = 1000;
+let xp = 0;
 let gold = 0;
 let bait = 200;
 let buyingBait = false;
@@ -25,6 +25,7 @@ let isFlashing = false;
 let isMusicPlaying = false;
 let currentLocationIndex = 0;
 let isRaining = false;
+let fishBiteTimerId = null;
 
 const button1 = document.querySelector("#button1");
 const button2 = document.querySelector("#button2");
@@ -307,46 +308,55 @@ function update(location) {
     button3.onclick = location["button functions"][2];
     button4.onclick = location["button functions"][3];
 
+    // Default all buttons to hidden, then show if they have text or a function.
+    // This logic correctly hides button2 and button4 IF their text/function is null/empty,
+    // *unless* button4's special display logic overrides it.
     button1.style.display = (button1.innerText || button1.onclick) ? "block" : "none";
     button2.style.display = (button2.innerText || button2.onclick) ? "block" : "none";
     button3.style.display = (button3.innerText || button3.onclick) ? "block" : "none";
-    button4.style.display = "none";
 
+    // IMPORTANT: Handle button4 display based on location
+    // We explicitly list the locations where button4 SHOULD be visible.
+    // "goFishing" and "open seas" are removed from this list.
+    if (location.name === "store" || location.name === "town square" ||
+        location.name === "fish caught" || location.name === "settings" ||
+        location.name === "battle" || location.name === "sea battle") {
+        button4.style.display = "block"; // Show button4 for these specific locations
+    } else {
+        button4.style.display = "none"; // Hide button4 for all other locations
+    }
+
+    // Special handling for the store's rapid-buy button1
     if (location.name === "store") {
         button1.onmousedown = startBuying;
         button1.onmouseup = stopBuying;
         button1.onmouseleave = stopBuying;
         button1.ontouchstart = (event) => {
-            event.preventDefault(); // Prevent default touch behavior
-            startBuying(); // Start buying process
+            event.preventDefault();
+            startBuying();
         };
         button1.ontouchend = stopBuying;
         button1.ontouchcancel = stopBuying;
         button1.onclick = null; // Clear normal click handler for rapid buy
-
-        // In the store, button4 should always be visible to go to Town Square
-        button4.style.display = "block";
-    } else if (location.name === "town square") {
-        // In the town square, button4 (Save/New Game) should always be visible
-        button4.style.display = "block";
     }
-   
+
+    // --- CONSOLIDATED TEXT BUILDING LOGIC ---
     let finalDisplayText = location.text;
 
+    // Add Weather Message if applicable
     if (location.name === "goFishing" || location.name === "open seas") {
         if (isRaining) {
-            finalDisplayText += `\n\n It's raining! Fish are more active!`;
-            console.log("It's raining (displaying)");
-        } else {
-            console.log("It's not raining (not displaying)");
+            finalDisplayText += " It's raining! Fish are more active!";
         }
     }
 
+    // Add Inventory Display Logic if applicable
     if (location.name !== "fish caught" && (location.name === "town square" || location.name === "store")) {
         finalDisplayText += `\n\nYour current rod: ${currentRod ? currentRod.name : 'None'}`;
         finalDisplayText += `\nYour hook: ${currentHook.name} (Max Fish Level: ${currentHook.level}${currentHook.name === "Legendary Hook" ? " - All Fish" : ""})`;
     }
 
+    // Set the text for the main display area
     text.innerText = finalDisplayText;
 
     currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
@@ -908,6 +918,11 @@ function castRod() {
         return;
     }
 
+    if (fishBiteTimerId !== null) {
+        clearTimeout(fishBiteTimerId);
+        fishBiteTimerId = null;
+    }
+
     // Display waiting message
     text.innerText = "Casting rod... Waiting for a fish to bite...";
 
@@ -920,7 +935,22 @@ function castRod() {
     }
 
     // Simulate waiting for a fish to bite
-    setTimeout(() => {
+    fishBiteTimerId = setTimeout(() => {
+
+        const currentActiveLocationName = locations[currentLocationIndex].name;
+        const playerHasLeftFishingArea = !(
+            currentActiveLocationName === "goFishing" ||
+            currentActiveLocationName === "open seas"
+        );
+
+        if (playerHasLeftFishingArea) {
+            fishBiteTimerId = null;
+            console.log("Fish bite timer fired, but player had already left the fishing area. Battle prevented.");
+            return;
+        }
+
+        fishBiteTimerId = null;
+
         const fishArray = (currentLocation === "open seas") ? seaFish : fish;
 
         const isRareFish = Math.random() < 0.075; // Chance for rare fish
