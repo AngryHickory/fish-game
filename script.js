@@ -763,7 +763,7 @@ function generateFish(fishTemplate, isSeaFish = false) {
         finalLevel = 1;
     }
 
-    const healthPerLevelMultiplier = isSeaFish ? 50 : 20;
+    const healthPerLevelMultiplier = isSeaFish ? 35 : 20;
     const finalHealth = finalLevel * healthPerLevelMultiplier;
 
     return {
@@ -773,9 +773,25 @@ function generateFish(fishTemplate, isSeaFish = false) {
     };
 }
 
+function getFishResistance(fish, isSeaFish) {
+    let resistance = fish.level; // Base resistance is the fish's level
+
+    if (isSeaFish) {
+        // Sea fish are generally tougher to tug, so they get a resistance bonus
+        resistance *= 1.5; 
+    }
+
+    // Add some random variation to the resistance
+    resistance = Math.floor(resistance * (Math.random() * 0.5 + 0.75));
+    
+    // Ensure there's always a minimum resistance, so even tiny fish aren't trivial.
+    return Math.max(5, resistance); 
+}
+
+
 function fishAbility(fish, isSeaFish) {
     if (isSeaFish) {
-        return Math.random() < 0.12;
+        return Math.random() < 0.25;
     }
     return false;
 }
@@ -889,17 +905,21 @@ function reel() {
     const playerLevelDamageBonus = Math.floor(playerLevel * 0.5);
     const reelDamage = currentRod.power + playerLevelDamageBonus + Math.floor(Math.random() * 10);
 
+    // Flag to track if the fish used its heal ability in this turn
+    let didFishHealThisTurn = false; 
+
     if (isFishHit()) {
         fishHealth -= reelDamage;
-        text.innerText += ` You deal ${reelDamage} damage to the fish!`;
+        text.innerText += `\n You deal ${reelDamage} damage to the fish!`;
 
+        // Fish Heal Ability Check
         if (fishAbility(currentFishInBattle, locations[currentLocationIndex].name === "sea battle") && fishHealCooldown === 0) {
-            const fishHealPercentage = 0.28;
-            const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.3 + 0.75));
-            text.innerText += " The fish recovered " + fishHealAmount + " health!";
+            const fishHealPercentage = 0.10;
+            const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75));
+            text.innerText += `\n The fish recovered " + fishHealAmount + " health!`;
             fishHealth += fishHealAmount;
-            flashElement(fishHealthText, "green", 350);
-            fishHealCooldown = 5;
+            fishHealCooldown = 3; // Set cooldown after healing
+            didFishHealThisTurn = true; // Mark that fish healed
         }
 
         if (fishHealth <= 0) {
@@ -909,41 +929,45 @@ function reel() {
             catchFish();
             return;
         } else {
-            text.innerText += " You almost reel it in, but the fish slips away at the last second!";
+            text.innerText += `\n You almost reel it in, but the fish slips away at the last second!`;
         }
 
-        flashElement(fishHealthText, "red", 350);
+        // Conditionally flash the fish health based on what happened
+        if (didFishHealThisTurn) {
+            flashElement(fishHealthText, "green", 1200); // Show green if healed (longer duration to ensure visibility)
+        } else {
+            flashElement(fishHealthText, "red", 350); // Otherwise, show red for damage
+        }
 
         bait -= getFishAttackValue(currentFishInBattle.level);
         bait = Math.round(bait);
-        flashElement(fishHealthText, "red", 350);
+        flashElement(baitText, "red", 350); // This flash is for bait, so it's separate
 
-    } else {
-        text.innerText += " The fish is getting away!";
-        if (Math.random() <= 0.005) {
+    } else { // Fish gets away
+        text.innerText += `\n Your reel's not working! The fish is getting away!`;
+        if (Math.random() <= 0.005) { // 0.5% chance to break rod
             let brokenRodName = currentRod.name;
 
             const currentIndex = rods.findIndex(rod => rod.name === currentRod.name);
 
-            if (currentIndex > 0) {
+            if (currentIndex > 0) { // If not the first rod, revert to previous
                 currentRod = rods[currentIndex - 1]; 
 
-                inventory[0] = currentRod.name;
+                inventory[0] = currentRod.name; // Update inventory with the reverted rod
                 
-                isRodBroken = false;
+                isRodBroken = false; // Rod is not broken
                 text.innerText += ` Your ${brokenRodName} broke! You reverted to your ${currentRod.name}.`;
-            } else {
+            } else { // If it's the first rod, it breaks completely
                 isRodBroken = true;
                 text.innerText += ` Your ${brokenRodName} broke! You have no functional rod left. Visit the store to buy a new one.`;
-                inventory[0] = "No Rod";
-
+                inventory[0] = "No Rod"; // Update inventory to reflect no rod
             }
             updateStatsDisplay();
             return;
         }
     }
 
-    reelCooldown = Math.floor(Math.random() * 5) + 1;
+    reelCooldown = Math.floor(Math.random() * 5) + 1; // Random cooldown between 1 and 5 turns
     text.innerText += `\n\nCooldown: ${reelCooldown} turns.`;
 
     if (fishHealCooldown > 0) {
@@ -951,10 +975,10 @@ function reel() {
     }
 
     updateStatsDisplay();
-    fishHealthText.innerText = fishHealth;
+    fishHealthText.innerText = fishHealth; // Update fish health display
 
     if (bait <= 0) {
-        lose();
+        lose(); // Lose if bait runs out
     }
 }
 
@@ -1050,10 +1074,19 @@ function tug() {
     const baseBaitCost = isSeaFish ? 20 : 15;
     const rodPowerFactor = currentRod.power / 100;
 
-    const successChance = 0.4 + (rodPowerFactor * 0.2) + (playerLevel * 0.005);
+    // SUCCESS CHANCE CALCULATION
+    let successChance = 0.50 + (rodPowerFactor * 0.2) + (playerLevel * 0.005);
+    const fishResistance = getFishResistance(currentFishInBattle, isSeaFish);
+    successChance -= (fishResistance / 100); // Subtract resistance as a decimal percentage
+
+    // Ensure success chance doesn't go below 0% or above 100%
+    successChance = Math.max(0.01, successChance); // Minimum 1% chance
+    successChance = Math.min(0.95, successChance); // Maximum 95% chance (always a small chance of failure)
+
+
     const randomRoll = Math.random();
 
-    text.innerText = "You attempt a forceful tug on the line!"; // Initial message for the action
+    text.innerText = `You attempt a forceful tug on the line! (${Math.round(successChance * 100)}% chance)`; // Display chance
     bait -= baseBaitCost;
     flashElement(baitText, "red", 350);
 
@@ -1080,12 +1113,12 @@ function tug() {
         }
 
         if (fishAbility(currentFishInBattle, isSeaFish) && fishHealCooldown === 0) {
-            const fishHealPercentage = 0.4;
+            const fishHealPercentage = 0.10;
             const fishHealAmount = Math.floor(currentFishInBattle.health * fishHealPercentage * (Math.random() * 0.5 + 0.75));
             text.innerText += " The fish recovered " + fishHealAmount + " health!";
             fishHealth += fishHealAmount;
-            flashElement(fishHealthText, "green", 350);
-            fishHealCooldown = 5;
+            flashElement(fishHealthText, "green", 1200);
+            fishHealCooldown = 3;
         }
 
     } else {
@@ -1132,7 +1165,7 @@ function tug() {
 }
 
 function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 20 : 7;
+    const baseReward = isSeaFish ? 17.5 : 7;
     return Math.floor(level * baseReward * (1 + Math.log(level)));
 }
 
