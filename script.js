@@ -24,7 +24,7 @@ let bestFishCaught = [];
 let isFlashing = false;
 let isMusicPlaying = false;
 let currentLocationIndex = 0;
-let isRaining = false;
+let isRaining = true;
 let fishBiteTimerId = null;
 
 const button1 = document.querySelector("#button1");
@@ -318,8 +318,7 @@ function update(location) {
     // IMPORTANT: Handle button4 display based on location
     // We explicitly list the locations where button4 SHOULD be visible.
     // "goFishing" and "open seas" are removed from this list.
-    if (location.name === "store" || location.name === "town square" ||
-        location.name === "fish caught" || location.name === "settings" ||
+    if (location.name === "store" || location.name === "town square" || location.name === "settings" ||
         location.name === "battle" || location.name === "sea battle") {
         button4.style.display = "block"; // Show button4 for these specific locations
     } else {
@@ -346,7 +345,7 @@ function update(location) {
     // Add Weather Message if applicable
     if (location.name === "goFishing" || location.name === "open seas") {
         if (isRaining) {
-            finalDisplayText += " It's raining! Fish are more active!";
+            finalDisplayText += `\n\n It's raining! Fish are more active!`;
         }
     }
 
@@ -1285,10 +1284,14 @@ function tug() {
                  return;
             }
         } else if (Math.random() < 0.05 + (currentFishInBattle.level / 100)) { // Chance fish escapes
-            let escapeMessage = "The fish got away! It managed to slip the line. Better luck next time!";
-            confirm(escapeMessage);
+            const dynamicEscapeLocation = {
+                name: "fish escaped", // Refers to the new location you added
+                "button text": ["Try Again", "Town Square", "", ""], // Primary action and Town Square
+                "button functions": [goFishing, goTown, null, null],
+                text: "The fish got away! It managed to slip the line. Better luck next time!" // This is the static message from the location
+            };
 
-            if (isSeaFish) { openSeas(); } else { goFishing(); } // Navigate to casting screen
+            update(dynamicEscapeLocation);
             return; // Important: Exit the function here
         }
         text.innerText = actionMessage + `\n\nCooldown: ${reelCooldown} turns.`;
@@ -1303,7 +1306,7 @@ function tug() {
 }
 
 function calculateGoldReward(level, isSeaFish, isRare) {
-    const baseReward = isSeaFish ? 17.5 : 6; // Base reward depending on the location
+    const baseReward = isSeaFish ? 17.5 : 6.5; // Base reward depending on the location
     const rarityMultiplier = isRare ? 1.5 : 1; // Extra reward for rare fish
 
     // Calculate total reward
@@ -1339,9 +1342,15 @@ function catchFish() {
     if (newPlayerLevel > oldPlayerLevel) {
         catchMessage += `\n\n🎉 LEVEL UP! You are now Level ${newPlayerLevel}! 🎉`;
     }
-    text.innerText = catchMessage;
+    const dynamicFishCaughtLocation = {
+        name: "fish caught", // Keep the name so 'update' function's 'button4' logic works correctly
+        "button text": locations[4]["button text"],
+        "button functions": locations[4]["button functions"],
+        text: catchMessage // THIS is where your dynamic message goes
+    };
 
-    update(locations[4]);
+    // Now, pass this dynamically created location object to the update function
+    update(dynamicFishCaughtLocation);
 }
 
 // Set initial stats display before attempting to load (will be overwritten if loadGame succeeds)
