@@ -279,7 +279,6 @@ function toggleMusic() {
         gameMusic.pause();
     } else {
         gameMusic.play().catch(error => {
-            console.log("Error playing music:", error);
         });
     }
     isMusicPlaying = !isMusicPlaying;
@@ -436,7 +435,6 @@ function openSeas() {
 
 function startMusic() {
     gameMusic.play().catch(error => {
-        console.log("Error playing music:", error);
     });
 }
 
@@ -878,7 +876,6 @@ function seaBattle() {
 
 function castRod() {
     const currentLocation = locations[currentLocationIndex].name;
-    console.log("Current Location:", currentLocation); // Log current location
 
     const fishArray = (currentLocation === "open seas") ? seaFish : fish;
 
@@ -887,19 +884,16 @@ function castRod() {
         return;
     }
 
-    const isRareFish = Math.random() < 0.075; // 10% chance for rare fish
-    console.log("Is Rare Fish:", isRareFish); // Log rarity decision
+    const isRareFish = Math.random() < 0.075; // Chance for rare fish
 
     let selectedFishTemplate;
     if (isRareFish) {
         const rareFishArray = currentLocation === "open seas" ? rareSeaFish : rareFish;
-        console.log("Rare Fish Array Length:", rareFishArray.length); // Log array length
 
         if (rareFishArray.length > 0) {
             const randomIndex = Math.floor(Math.random() * rareFishArray.length);
             selectedFishTemplate = rareFishArray[randomIndex];
             selectedFishTemplate.isRare = true; // Set isRare to true
-            console.log("Selected Rare Fish:", selectedFishTemplate); // Log selected fish
         } else {
             console.error("No rare fish available in the array.");
         }
@@ -907,12 +901,10 @@ function castRod() {
         const randomIndex = Math.floor(Math.random() * fishArray.length);
         selectedFishTemplate = fishArray[randomIndex];
         selectedFishTemplate.isRare = false; // Set isRare to false
-        console.log("Selected Common Fish:", selectedFishTemplate); // Log selected fish
     }
 
     // Generate the fish and ensure the isRare property is included
     currentFishInBattle = generateFish(selectedFishTemplate, currentLocation === "open seas");
-    console.log("Current Fish in Battle:", currentFishInBattle); // Check the fish object here
 
     // Update UI and start battle based on the current location
     if (currentLocation === "open seas") {
@@ -1251,10 +1243,8 @@ function calculateGoldReward(level, isSeaFish, isRare) {
 
 function catchFish() {
     const caughtFish = currentFishInBattle;
-    console.log("Caught Fish:", caughtFish);
     const isSeaFish = locations[currentLocationIndex].name === "sea battle";
     const isRare = caughtFish.isRare; // Check if the caught fish is rare
-    console.log("Is Rare:", isRare);
 
     const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish, isRare); // Pass rarity
     gold += goldEarned;
