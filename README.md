@@ -29,3 +29,8 @@ To do:
 - add elite and legendary fishing line - random drop from fish
 - boss battles? - Chance for elite fish to eat regular fish < chance for legendary fish to eat elite fish
 - "totem" item that gives a benefit (more rare spawns, no fish escape, save bait, bonus damage,)
+- Story?
+- Day/Night cycles
+- weather - hide fish stats?
+- Fish dive when reel or tug used too much
+- change confirm prompts to locations in game
