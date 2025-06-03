@@ -77,6 +77,10 @@ body {
     color: #123450;
 }
 
+.fish-name {
+    color: #1c58fa;
+}
+
 #fishStats {
     display: none;
     border: none;

@@ -104,6 +104,27 @@ const fish = [
     { name: "Lake Sturgeon", level: 35, health: 400 },
 ];
 
+const rareFish = [
+    { name: "Rare Minnow", level: 1, health: 12 },
+    { name: "Rare Bluegill", level: 2, health: 18 },
+    { name: "Rare Bullhead Catfish", level: 3, health: 25 },
+    { name: "Rare Peamouth Chub", level: 4, health: 36 },
+    { name: "Rare Chain Pickerel", level: 6, health: 52 },
+    { name: "Rare Common Carp", level: 7, health: 60 },
+    { name: "Rare Pikeminnow", level: 8, health: 70 },
+    { name: "Rare Perch", level: 11, health: 100 },
+    { name: "Rare Striped Bass", level: 13, health: 130 },
+    { name: "Rare Rainbow Trout", level: 14, health: 170 },
+    { name: "Rare Sockeye Salmon", level: 15, health: 190 },
+    { name: "Rare Largemouth Bass", level: 16, health: 200 },
+    { name: "Rare Grass Carp", level: 17, health: 220 },
+    { name: "Rare Muskie", level: 18, health: 260 },
+    { name: "Rare Murray Cod", level: 20, health: 280 },
+    { name: "Rare Longnose Gar", level: 22, health: 300 },
+    { name: "Rare Channel Catfish", level: 25, health: 350 },
+    { name: "Rare Lake Sturgeon", level: 35, health: 450 },
+];
+
 const seaFish = [
     { name: "Sea Bass", level: 10, health: 100 },
     { name: "Haddock", level: 12, health: 140 },
@@ -124,6 +145,28 @@ const seaFish = [
     { name: "Blue Marlin", level: 80, health: 2500 },
     { name: "Great White Shark", level: 90, health: 3000 },
     { name: "Great White Shark", level: 100, health: 7500 }
+];
+
+const rareSeaFish = [
+    { name: "Rare Sea Bass", level: 10, health: 120 },
+    { name: "Rare Haddock", level: 12, health: 170 },
+    { name: "Rare Pollock", level: 15, health: 190 },
+    { name: "Rare Red Grouper", level: 17, health: 250 },
+    { name: "Rare King Snapper", level: 20, health: 280 },
+    { name: "Rare Pacific Cod", level: 25, health: 420 },
+    { name: "Rare Barracuda", level: 30, health: 620 },
+    { name: "Rare Atlantic Cod", level: 32, health: 680 },
+    { name: "Rare Kingfish", level: 35, health: 780 },
+    { name: "Rare Sailfish", level: 38, health: 900 },
+    { name: "Rare Swordfish", level: 40, health: 980 },
+    { name: "Rare Swordfish", level: 45, health: 1040 },
+    { name: "Rare Halibut", level: 50, health: 1100 },
+    { name: "Rare Tuna", level: 55, health: 1300 },
+    { name: "Rare Tuna", level: 65, health: 1700 },
+    { name: "Rare Blue Marlin", level: 70, health: 2200 },
+    { name: "Rare Blue Marlin", level: 80, health: 2800 },
+    { name: "Rare Great White Shark", level: 90, health: 3600 },
+    { name: "Rare Great White Shark", level: 100, health: 9000 }
 ];
 
 const locations = [
@@ -769,7 +812,8 @@ function generateFish(fishTemplate, isSeaFish = false) {
     return {
         name: fishTemplate.name,
         level: finalLevel,
-        health: finalHealth
+        health: finalHealth,
+        isRare: fishTemplate.isRare
     };
 }
 
@@ -818,34 +862,57 @@ function calculateXpGain(caughtFishLevel, playerLevel) {
 function seaBattle() {
     fishHealth = currentFishInBattle.health;
     fishStats.style.display = "block";
-    fishName.innerText = currentFishInBattle.name;
+
+    const fishNameElement = document.getElementById("fishName");
+    fishNameElement.innerText = currentFishInBattle.name;
+    if (currentFishInBattle.isRare) {
+        fishNameElement.classList.add("fish-name"); // Add the class for rare fish
+    } else {
+        fishNameElement.classList.remove("fish-name"); // Remove the class for common fish
+    }
+
     fishLevelText.innerText = currentFishInBattle.level;
-    fishHealthText.innerText = currentFishInBattle.health; 
+    fishHealthText.innerText = fishHealth; 
     reelCooldown = 0;
 }
 
 function castRod() {
     const currentLocation = locations[currentLocationIndex].name;
+    console.log("Current Location:", currentLocation); // Log current location
+
     const fishArray = (currentLocation === "open seas") ? seaFish : fish;
 
     if (bait <= 0) {
         text.innerText = "You are out of bait! Visit the store to buy more.";
         return;
     }
-    
-    if (!currentRod) { // This condition should ideally never be met if currentRod is always initialized
-        text.innerText = "You need a rod to cast! If you don't have a 'Stick with line', something went wrong!";
-        return;
-    }
-    if (isRodBroken) {
-        text.innerText = `Your ${currentRod.name} is broken! You need to buy a new one at the store.`;
-        return;
+
+    const isRareFish = Math.random() < 0.1; // 10% chance for rare fish
+    console.log("Is Rare Fish:", isRareFish); // Log rarity decision
+
+    let selectedFishTemplate;
+    if (isRareFish) {
+        const rareFishArray = currentLocation === "open seas" ? rareSeaFish : rareFish;
+        console.log("Rare Fish Array Length:", rareFishArray.length); // Log array length
+
+        if (rareFishArray.length > 0) {
+            const randomIndex = Math.floor(Math.random() * rareFishArray.length);
+            selectedFishTemplate = rareFishArray[randomIndex];
+            selectedFishTemplate.isRare = true; // Set isRare to true
+            console.log("Selected Rare Fish:", selectedFishTemplate); // Log selected fish
+        } else {
+            console.error("No rare fish available in the array.");
+        }
+    } else {
+        const randomIndex = Math.floor(Math.random() * fishArray.length);
+        selectedFishTemplate = fishArray[randomIndex];
+        selectedFishTemplate.isRare = false; // Set isRare to false
+        console.log("Selected Common Fish:", selectedFishTemplate); // Log selected fish
     }
 
-    const randomIndex = Math.floor(Math.random() * fishArray.length);
-    const selectedFishTemplate = fishArray[randomIndex];
-
+    // Generate the fish and ensure the isRare property is included
     currentFishInBattle = generateFish(selectedFishTemplate, currentLocation === "open seas");
+    console.log("Current Fish in Battle:", currentFishInBattle); // Check the fish object here
 
     // Update UI and start battle based on the current location
     if (currentLocation === "open seas") {
@@ -860,8 +927,18 @@ function castRod() {
 function goFish() {
     fishHealth = currentFishInBattle.health; 
     fishStats.style.display = "block";
-    fishName.innerText = currentFishInBattle.name;
-    fishHealthText.innerText = fishHealth;
+    
+    const fishNameElement = document.getElementById("fishName");
+    fishNameElement.innerText = currentFishInBattle.name;
+
+    // Apply color based on rarity
+    if (currentFishInBattle.isRare) {
+        fishNameElement.classList.add("fish-name"); // Add class for rare fish
+    } else {
+        fishNameElement.classList.remove("fish-name"); // Remove class for common fish
+    }
+
+    fishHealthText.innerText = fishHealth; 
     fishLevelText.innerText = currentFishInBattle.level;
     reelCooldown = 0;
 }
@@ -1164,16 +1241,22 @@ function tug() {
     }
 }
 
-function calculateGoldReward(level, isSeaFish) {
-    const baseReward = isSeaFish ? 17.5 : 7;
-    return Math.floor(level * baseReward * (1 + Math.log(level)));
+function calculateGoldReward(level, isSeaFish, isRare) {
+    const baseReward = isSeaFish ? 17.5 : 7; // Base reward depending on the location
+    const rarityMultiplier = isRare ? 1.5 : 1; // Extra reward for rare fish
+
+    // Calculate total reward
+    return Math.floor(level * baseReward * rarityMultiplier * (1 + Math.log(level)));
 }
 
 function catchFish() {
     const caughtFish = currentFishInBattle;
+    console.log("Caught Fish:", caughtFish);
     const isSeaFish = locations[currentLocationIndex].name === "sea battle";
+    const isRare = caughtFish.isRare; // Check if the caught fish is rare
+    console.log("Is Rare:", isRare);
 
-    const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish);
+    const goldEarned = calculateGoldReward(caughtFish.level, isSeaFish, isRare); // Pass rarity
     gold += goldEarned;
 
     const oldPlayerLevel = getPlayerLevel(); // Get player level BEFORE adding XP
@@ -1193,7 +1276,7 @@ function catchFish() {
 
     updateStatsDisplay();
 
-    let catchMessage = `You caught the fish! You gained ${goldEarned} gold and ${xpEarned} XP!`; // Changed to xpEarned for accuracy
+    let catchMessage = `You caught the fish! You gained ${goldEarned} gold and ${xpEarned} XP!`;
     if (newPlayerLevel > oldPlayerLevel) {
         catchMessage += `\n\n🎉 LEVEL UP! You are now Level ${newPlayerLevel}! 🎉`;
     }
