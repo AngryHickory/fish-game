@@ -887,7 +887,7 @@ function castRod() {
         return;
     }
 
-    const isRareFish = Math.random() < 0.1; // 10% chance for rare fish
+    const isRareFish = Math.random() < 0.075; // 10% chance for rare fish
     console.log("Is Rare Fish:", isRareFish); // Log rarity decision
 
     let selectedFishTemplate;
