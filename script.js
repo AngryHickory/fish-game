@@ -1,4 +1,10 @@
-let xp = 0;
+let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+
+if (isTouchDevice) {
+    document.body.classList.add('touch-device');
+}
+
+let xp = 1000;
 let gold = 0;
 let bait = 200;
 let buyingBait = false;
@@ -18,12 +24,14 @@ let bestFishCaught = [];
 let isFlashing = false;
 let isMusicPlaying = false;
 let currentLocationIndex = 0;
+let isRaining = false;
 
 const button1 = document.querySelector("#button1");
 const button2 = document.querySelector("#button2");
 const button3 = document.querySelector("#button3");
 const button4 = document.querySelector("#button4");
 const text = document.querySelector("#text");
+console.log(text);
 const xpText = document.querySelector("#xpText");
 const baitText = document.querySelector("#baitText");
 const goldText = document.querySelector("#goldText");
@@ -35,9 +43,6 @@ const playerLevelText = document.querySelector("#playerLevelText");
 const xpToNextLevelText = document.querySelector("#xpToNextLevelText");
 const gameMusic = document.getElementById('gameMusic');
 const toggleMusicButton = document.querySelector("#toggleMusicButton");
-
-// Google Chrome fix for sticky hover
-let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
 
 if (isTouchDevice) {
     document.body.classList.add('touch-device');
@@ -265,7 +270,6 @@ function showStartScreen() {
     fishStats.style.display = "none"; // Hide fish stats on the start screen
     toggleMusicButton.onclick = toggleMusic;
     toggleMusicButton.innerText = "Toggle Music";
-    startMusic();
 }
 
 // A new function to handle the transition from the start screen to town
@@ -301,48 +305,49 @@ function update(location) {
     button1.onclick = location["button functions"][0];
     button2.onclick = location["button functions"][1];
     button3.onclick = location["button functions"][2];
-    button4.onclick = location["button functions"][3]; // This will be overridden for store's button4
+    button4.onclick = location["button functions"][3];
 
-    // Default all buttons to hidden, then show if they have text or a function.
-    // This is more robust than assuming 'block' and then hiding.
     button1.style.display = (button1.innerText || button1.onclick) ? "block" : "none";
     button2.style.display = (button2.innerText || button2.onclick) ? "block" : "none";
     button3.style.display = (button3.innerText || button3.onclick) ? "block" : "none";
-    button4.style.display = (button4.innerText || button4.onclick) ? "block" : "none"; // Default for button4, overridden below
+    button4.style.display = "none";
 
     if (location.name === "store") {
         button1.onmousedown = startBuying;
         button1.onmouseup = stopBuying;
         button1.onmouseleave = stopBuying;
         button1.ontouchstart = (event) => {
-        event.preventDefault(); // Prevent default touch behavior
-        startBuying(); // Start buying process
-    };
+            event.preventDefault(); // Prevent default touch behavior
+            startBuying(); // Start buying process
+        };
         button1.ontouchend = stopBuying;
         button1.ontouchcancel = stopBuying;
-        button1.onclick = null; 
+        button1.onclick = null; // Clear normal click handler for rapid buy
 
-        button4.style.display = "block"; 
+        // In the store, button4 should always be visible to go to Town Square
+        button4.style.display = "block";
     } else if (location.name === "town square") {
+        // In the town square, button4 (Save/New Game) should always be visible
         button4.style.display = "block";
     }
+   
+    let finalDisplayText = location.text;
 
-    // --- Inventory Display Logic ---
-    if (location.name !== "fish caught") {
-        let newText = location.text; // Start with the base text for the location
-
-        if (location.name === "town square" || location.name === "store") {
-            // Append inventory details
-            newText += `\n\nYour current rod: ${currentRod ? currentRod.name : 'None'}`;
-            newText += `\nYour hook: ${currentHook.name} (Max Fish Level: ${currentHook.level}${currentHook.name === "Legendary Hook" ? " - All Fish" : ""})`;
-            
-            // You can also add more general inventory items if you have them,
-            // but for now, rod and hook are the key "inventory" items.
-            // If 'inventory' array contains more than just the rod name, you might list them:
-            // newText += `\nInventory: ${inventory.join(", ")}`;
+    if (location.name === "goFishing" || location.name === "open seas") {
+        if (isRaining) {
+            finalDisplayText += `\n\n It's raining! Fish are more active!`;
+            console.log("It's raining (displaying)");
+        } else {
+            console.log("It's not raining (not displaying)");
         }
-        text.innerText = newText; // Set the final text
     }
+
+    if (location.name !== "fish caught" && (location.name === "town square" || location.name === "store")) {
+        finalDisplayText += `\n\nYour current rod: ${currentRod ? currentRod.name : 'None'}`;
+        finalDisplayText += `\nYour hook: ${currentHook.name} (Max Fish Level: ${currentHook.level}${currentHook.name === "Legendary Hook" ? " - All Fish" : ""})`;
+    }
+
+    text.innerText = finalDisplayText;
 
     currentLocationIndex = locations.findIndex(loc => loc.name === location.name);
 }
@@ -498,6 +503,28 @@ function getXPToNextLevel() {
     return xpNeededForNextLevel - xp;
 }
 
+//Function to manage weather cycle
+function startWeatherCycle() {
+    // Function to trigger rain every 20-30 minutes
+    setInterval(() => {
+        isRaining = !isRaining; // Toggle rain state
+
+        // Log for debugging (you can remove this later)
+        if (isRaining) {
+            console.log("Weather event: It started raining!");
+        } else {
+            console.log("Weather event: The rain has stopped.");
+        }
+
+        // Only update the display if the player is in a fishing-related location
+        const currentLocationName = locations[currentLocationIndex].name;
+        if (currentLocationName === "goFishing" || currentLocationName === "open seas") {
+            // Re-call update for the current location to refresh the text with the new weather
+            update(locations[currentLocationIndex]);
+        }
+    }, Math.floor(Math.random() * (1800000 - 300000 + 1)) + 1200000); // 5-30 minutes
+}
+
 // Function to save game
 function saveGame() {
     const gameData = {
@@ -559,7 +586,7 @@ function loadGame() {
         }
 
         updateStatsDisplay();
-        startMusic()
+        startWeatherCycle();
 
         text.innerText = "Game loaded! Your previous adventure awaits.";
         goTown();
@@ -884,8 +911,13 @@ function castRod() {
     // Display waiting message
     text.innerText = "Casting rod... Waiting for a fish to bite...";
 
-    // Generate a random wait time between 2 seconds (2000 ms) and 20 seconds (20000 ms)
-    const waitTime = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000;
+    // Generate a random wait time for fish to bite
+    let waitTime = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000;
+
+    // Shorten the timer if it's raining
+    if (isRaining) {
+        waitTime = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000;
+    }
 
     // Simulate waiting for a fish to bite
     setTimeout(() => {
@@ -1284,6 +1316,9 @@ function catchFish() {
 
 // Set initial stats display before attempting to load (will be overwritten if loadGame succeeds)
 updateStatsDisplay();
+
+//Start weather cycle
+startWeatherCycle();
 
 // Attempt to load a game. The loadGame() function returns true if a game was loaded.
 const gameLoaded = loadGame();

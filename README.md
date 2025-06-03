@@ -19,6 +19,8 @@ Features:
 - Make buy bait button holdable
 - background music
 - rare fish
+- cast timer
+- weather cycle with intermittent rain - rain lowers cast timer
 
 To do: 
 - More attributes for rods?
@@ -31,7 +33,6 @@ To do:
 - "totem" item that gives a benefit (more rare spawns, no fish escape, save bait, bonus damage,)
 - Story?
 - Day/Night cycles
-- weather - hide fish stats?
+- heavy rain - hide fish stats?
 - Fish dive when reel or tug used too much
 - change confirm prompts to locations in game
-- cast timer?
