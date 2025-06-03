@@ -18,6 +18,7 @@ Features:
 - Save function
 - Make buy bait button holdable
 - background music
+- rare fish
 
 To do: 
 - More attributes for rods?
