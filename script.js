@@ -1,4 +1,3 @@
-// GLOBAL ENTRIES
 let xp = 0;
 let gold = 0;
 let bait = 200;
@@ -17,7 +16,7 @@ let inventory = ["Stick with line"];
 let currentHook = { name: "Basic Hook", level: 5 };
 let bestFishCaught = [];
 let isFlashing = false;
-let isMusicPlaying = true;
+let isMusicPlaying = false;
 let currentLocationIndex = 0;
 
 const button1 = document.querySelector("#button1");
@@ -877,43 +876,51 @@ function seaBattle() {
 function castRod() {
     const currentLocation = locations[currentLocationIndex].name;
 
-    const fishArray = (currentLocation === "open seas") ? seaFish : fish;
-
     if (bait <= 0) {
         text.innerText = "You are out of bait! Visit the store to buy more.";
         return;
     }
 
-    const isRareFish = Math.random() < 0.075; // Chance for rare fish
+    // Display waiting message
+    text.innerText = "Casting rod... Waiting for a fish to bite...";
 
-    let selectedFishTemplate;
-    if (isRareFish) {
-        const rareFishArray = currentLocation === "open seas" ? rareSeaFish : rareFish;
+    // Generate a random wait time between 2 seconds (2000 ms) and 20 seconds (20000 ms)
+    const waitTime = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000;
 
-        if (rareFishArray.length > 0) {
-            const randomIndex = Math.floor(Math.random() * rareFishArray.length);
-            selectedFishTemplate = rareFishArray[randomIndex];
-            selectedFishTemplate.isRare = true; // Set isRare to true
+    // Simulate waiting for a fish to bite
+    setTimeout(() => {
+        const fishArray = (currentLocation === "open seas") ? seaFish : fish;
+
+        const isRareFish = Math.random() < 0.075; // Chance for rare fish
+        let selectedFishTemplate;
+
+        if (isRareFish) {
+            const rareFishArray = currentLocation === "open seas" ? rareSeaFish : rareFish;
+            if (rareFishArray.length > 0) {
+                const randomIndex = Math.floor(Math.random() * rareFishArray.length);
+                selectedFishTemplate = rareFishArray[randomIndex];
+                selectedFishTemplate.isRare = true; // Set isRare to true
+            } else {
+                console.error("No rare fish available in the array.");
+            }
         } else {
-            console.error("No rare fish available in the array.");
+            const randomIndex = Math.floor(Math.random() * fishArray.length);
+            selectedFishTemplate = fishArray[randomIndex];
+            selectedFishTemplate.isRare = false; // Set isRare to false
         }
-    } else {
-        const randomIndex = Math.floor(Math.random() * fishArray.length);
-        selectedFishTemplate = fishArray[randomIndex];
-        selectedFishTemplate.isRare = false; // Set isRare to false
-    }
 
-    // Generate the fish and ensure the isRare property is included
-    currentFishInBattle = generateFish(selectedFishTemplate, currentLocation === "open seas");
+        // Generate the fish and ensure the isRare property is included
+        currentFishInBattle = generateFish(selectedFishTemplate, currentLocation === "open seas");
 
-    // Update UI and start battle based on the current location
-    if (currentLocation === "open seas") {
-        update(locations[7]);
-        seaBattle(); 
-    } else { 
-        update(locations[3]); 
-        goFish();
-    }
+        // Update UI and start battle based on the current location
+        if (currentLocation === "open seas") {
+            update(locations[7]);
+            seaBattle();
+        } else {
+            update(locations[3]);
+            goFish();
+        }
+    }, waitTime); // End of setTimeout
 }
 
 function goFish() {
@@ -1234,7 +1241,7 @@ function tug() {
 }
 
 function calculateGoldReward(level, isSeaFish, isRare) {
-    const baseReward = isSeaFish ? 17.5 : 7; // Base reward depending on the location
+    const baseReward = isSeaFish ? 17.5 : 6; // Base reward depending on the location
     const rarityMultiplier = isRare ? 1.5 : 1; // Extra reward for rare fish
 
     // Calculate total reward

@@ -34,3 +34,4 @@ To do:
 - weather - hide fish stats?
 - Fish dive when reel or tug used too much
 - change confirm prompts to locations in game
+- cast timer?
