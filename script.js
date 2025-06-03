@@ -998,7 +998,7 @@ function reel() {
             catchFish();
             return;
         } else {
-            text.innerText += `\n You almost reel it in, but the fish slips away at the last second!`;
+            text.innerText += `\n The fish is losing ground. Keep going!`;
         }
 
         // Conditionally flash the fish health based on what happened

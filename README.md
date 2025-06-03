@@ -28,3 +28,4 @@ To do:
 - special attacks for fish?
 - add elite and legendary fishing line - random drop from fish
 - boss battles? - Chance for elite fish to eat regular fish < chance for legendary fish to eat elite fish
+- "totem" item that gives a benefit (more rare spawns, no fish escape, save bait, bonus damage,)
