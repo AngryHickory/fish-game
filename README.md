@@ -36,3 +36,4 @@ To do:
 - heavy rain - hide fish stats?
 - Fish dive when reel or tug used too much
 - change confirm prompts to locations in game
+- Make rare fish appear above regular in caught fish list

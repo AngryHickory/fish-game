@@ -32,7 +32,6 @@ const button2 = document.querySelector("#button2");
 const button3 = document.querySelector("#button3");
 const button4 = document.querySelector("#button4");
 const text = document.querySelector("#text");
-console.log(text);
 const xpText = document.querySelector("#xpText");
 const baitText = document.querySelector("#baitText");
 const goldText = document.querySelector("#goldText");
@@ -370,15 +369,14 @@ function goTown() {
     const originalOpenSeasFunction = townSquareLocation["button functions"][2];
 
     // Check player level for Open Seas access
-    if (playerLevel < 5) {
+    if (playerLevel < 10) {
         townSquareLocation["button functions"][2] = () => {
-            text.innerText = "You need to reach Level 5 to venture into the Open Seas!";
+            text.innerText = "You need to reach Level 10 to venture into the Open Seas!";
         };
     } else {
         townSquareLocation["button text"][2] = originalOpenSeasText;
         townSquareLocation["button functions"][2] = originalOpenSeasFunction;
     }
-
     update(townSquareLocation);
 }
 
@@ -878,6 +876,9 @@ function calculateXpGain(caughtFishLevel, playerLevel) {
     let xpGain = caughtFishLevel * baseXpPerLevel;
     const levelDifference = caughtFishLevel - playerLevel;
 
+    const rarityMultiplier = isRare ? 1.2 : 1; // Bonus for rare fish
+    xpGain *= rarityMultiplier;
+
     if (levelDifference < -5) {
         xpGain *= 0.2;
     } else if (levelDifference < -2) {
@@ -944,7 +945,7 @@ function castRod() {
 
         if (playerHasLeftFishingArea) {
             fishBiteTimerId = null;
-            console.log("Fish bite timer fired, but player had already left the fishing area. Battle prevented.");
+            console.log("Player left the fishing area. Battle prevented.");
             return;
         }
 
@@ -1207,7 +1208,7 @@ function tug() {
     const playerLevel = getPlayerLevel();
     const isSeaFish = locations[currentLocationIndex].name === "sea battle";
 
-    const baseTugDamage = currentRod.power * 3;
+    const baseTugDamage = currentRod.power * 3.5;
     const baseBaitCost = isSeaFish ? 20 : 15;
     const rodPowerFactor = currentRod.power / 100;
 
