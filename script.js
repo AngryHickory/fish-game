@@ -871,7 +871,7 @@ function fishAbility(fish, isSeaFish) {
     return false;
 }
 
-function calculateXpGain(caughtFishLevel, playerLevel) {
+function calculateXpGain(caughtFishLevel, playerLevel, isRare) {
     const baseXpPerLevel = 4.5;
     let xpGain = caughtFishLevel * baseXpPerLevel;
     const levelDifference = caughtFishLevel - playerLevel;
