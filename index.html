@@ -8,6 +8,9 @@
 </head>
 <body>
     <div id="game">
+        <div id="fishAnimationContainer">
+            <canvas id="fishCanvas"></canvas>
+        </div>
         <div id="stats">
             <span class="stat">Level: <strong><span id="playerLevelText">0</span></strong></span>
             <span class="stat">XP: <strong><span id="xpText">0</span></strong></span>
@@ -34,6 +37,9 @@
         <button id="toggleMusicButton">Toggle Music</button>
         <audio id="gameMusic" loop><source src="music/music1.mp3" type="audio/mpeg"></audio>
     </div>
+
+
+    <script src="fishAnimation.js"></script>
     <script src="./script.js"></script>
 </body>
 </html>

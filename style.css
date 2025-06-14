@@ -158,3 +158,24 @@ button:active {
 #toggleMusicButton:hover {
     background-color: #C4E26A;
 }
+
+#fishAnimationContainer {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+}
+
+canvas {
+    height: 100px;
+    width: 100%;
+    border: none; 
+    padding: 5px; 
+    margin-bottom: 5px;
+    border-radius: 4px;
+    background-color: #1da2d8;
+    max-width: 900px;
+    box-sizing: border-box;
+}
