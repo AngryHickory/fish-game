@@ -1,8 +1,9 @@
-body {
+html, body {
     background-color: #29c9dc;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
     min-height: 70vh; 
     margin: 0;
     padding: 0;
@@ -35,6 +36,9 @@ body {
     display: flex;
     flex-direction: column;
     max-width: 500px;
+    height: 100%;
+    max-height: 95vh;
+    overflow-y: auto;
     width: 90%;
     background: linear-gradient(to bottom, #177e8a, #1898a8);
     border-radius: 20px;
@@ -78,7 +82,7 @@ body {
 }
 
 .fish-name {
-    color: #1c58fa;
+    color: #1a4fe0;
 }
 
 #fishStats {
