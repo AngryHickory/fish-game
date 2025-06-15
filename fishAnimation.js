@@ -24,6 +24,7 @@ function getRandomFishColor() {
         'hsl(210, 30%, 70%)',
         'hsl(0, 0.00%, 21.20%)',
         'hsl(180, 50%, 60%)',
+        'hsl(0, 0.00%, 74.50%)',
         'hsl(216, 60.50%, 33.70%)'   
     ];
     return colors[Math.floor(Math.random() * colors.length)];
@@ -112,7 +113,7 @@ function swim() {
         if (fish.direction === 1) { // If swimming right
             // Start fading when the nose is within fadeThreshold from the right edge
             if (fish.x > canvas.width - fadeThreshold) {
-                fish.opacity -= 0.02; // Decrease opacity for fade-out effect
+                fish.opacity -= 0.001; // Decrease opacity for fade-out effect 
                 if (fish.opacity <= 0) {
                     // Reset fish properties when fully faded out and off-screen
                     fish.direction = Math.random() < 0.5 ? 1 : -1; // Randomly flip direction
@@ -135,7 +136,7 @@ function swim() {
         } else { // If swimming left (fish.direction === -1)
             // Start fading when the nose is within fadeThreshold from the left edge
             if (fish.x < fadeThreshold) {
-                fish.opacity -= 0.02; // Decrease opacity for fade-out effect
+                fish.opacity -= 0.001; // Decrease opacity for fade-out effect
                 if (fish.opacity <= 0) {
                     // Reset fish properties when fully faded out and off-screen
                     fish.direction = Math.random() < 0.5 ? 1 : -1; // Randomly flip direction

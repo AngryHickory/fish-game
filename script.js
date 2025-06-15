@@ -516,13 +516,6 @@ function startWeatherCycle() {
     setInterval(() => {
         isRaining = !isRaining; // Toggle rain state
 
-        // Log for debugging (you can remove this later)
-        if (isRaining) {
-            console.log("Weather event: It started raining!");
-        } else {
-            console.log("Weather event: The rain has stopped.");
-        }
-
         // Only update the display if the player is in a fishing-related location
         const currentLocationName = locations[currentLocationIndex].name;
         if (currentLocationName === "goFishing" || currentLocationName === "open seas") {
