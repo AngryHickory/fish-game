@@ -44,10 +44,6 @@ const xpToNextLevelText = document.querySelector("#xpToNextLevelText");
 const gameMusic = document.getElementById('gameMusic');
 const toggleMusicButton = document.querySelector("#toggleMusicButton");
 
-if (isTouchDevice) {
-    document.body.classList.add('touch-device');
-}
-
 const rods = [
     { name: "Stick with line", power: 4, levelRequired: 1, basePrice: 0 },
     { name: "Beginner Rod", power: 9, levelRequired: 1, basePrice: 30 },
@@ -109,24 +105,24 @@ const fish = [
 ];
 
 const rareFish = [
-    { name: "Rare Minnow", level: 1, health: 12 },
-    { name: "Rare Bluegill", level: 2, health: 18 },
-    { name: "Rare Bullhead Catfish", level: 3, health: 25 },
-    { name: "Rare Peamouth Chub", level: 4, health: 36 },
-    { name: "Rare Chain Pickerel", level: 6, health: 52 },
-    { name: "Rare Common Carp", level: 7, health: 60 },
-    { name: "Rare Pikeminnow", level: 8, health: 70 },
-    { name: "Rare Perch", level: 11, health: 100 },
-    { name: "Rare Striped Bass", level: 13, health: 130 },
-    { name: "Rare Rainbow Trout", level: 14, health: 170 },
-    { name: "Rare Sockeye Salmon", level: 15, health: 190 },
-    { name: "Rare Largemouth Bass", level: 16, health: 200 },
-    { name: "Rare Grass Carp", level: 17, health: 220 },
-    { name: "Rare Muskie", level: 18, health: 260 },
-    { name: "Rare Murray Cod", level: 20, health: 280 },
-    { name: "Rare Longnose Gar", level: 22, health: 300 },
-    { name: "Rare Channel Catfish", level: 25, health: 350 },
-    { name: "Rare Lake Sturgeon", level: 35, health: 450 },
+    { name: "Rare Minnow", level: 1, health: 12, isRare: true },
+    { name: "Rare Bluegill", level: 2, health: 18, isRare: true },
+    { name: "Rare Bullhead Catfish", level: 3, health: 25, isRare: true },
+    { name: "Rare Peamouth Chub", level: 4, health: 36, isRare: true },
+    { name: "Rare Chain Pickerel", level: 6, health: 52, isRare: true },
+    { name: "Rare Common Carp", level: 7, health: 60, isRare: true },
+    { name: "Rare Pikeminnow", level: 8, health: 70, isRare: true },
+    { name: "Rare Perch", level: 11, health: 100, isRare: true },
+    { name: "Rare Striped Bass", level: 13, health: 130, isRare: true },
+    { name: "Rare Rainbow Trout", level: 14, health: 170, isRare: true },
+    { name: "Rare Sockeye Salmon", level: 15, health: 190, isRare: true },
+    { name: "Rare Largemouth Bass", level: 16, health: 200, isRare: true },
+    { name: "Rare Grass Carp", level: 17, health: 220, isRare: true },
+    { name: "Rare Muskie", level: 18, health: 260, isRare: true },
+    { name: "Rare Murray Cod", level: 20, health: 280, isRare: true },
+    { name: "Rare Longnose Gar", level: 22, health: 300, isRare: true },
+    { name: "Rare Channel Catfish", level: 25, health: 350, isRare: true },
+    { name: "Rare Lake Sturgeon", level: 35, health: 450, isRare: true },
 ];
 
 const seaFish = [
@@ -152,25 +148,25 @@ const seaFish = [
 ];
 
 const rareSeaFish = [
-    { name: "Rare Sea Bass", level: 10, health: 120 },
-    { name: "Rare Haddock", level: 12, health: 170 },
-    { name: "Rare Pollock", level: 15, health: 190 },
-    { name: "Rare Red Grouper", level: 17, health: 250 },
-    { name: "Rare King Snapper", level: 20, health: 280 },
-    { name: "Rare Pacific Cod", level: 25, health: 420 },
-    { name: "Rare Barracuda", level: 30, health: 620 },
-    { name: "Rare Atlantic Cod", level: 32, health: 680 },
-    { name: "Rare Kingfish", level: 35, health: 780 },
-    { name: "Rare Sailfish", level: 38, health: 900 },
-    { name: "Rare Swordfish", level: 40, health: 980 },
-    { name: "Rare Swordfish", level: 45, health: 1040 },
-    { name: "Rare Halibut", level: 50, health: 1100 },
-    { name: "Rare Tuna", level: 55, health: 1300 },
-    { name: "Rare Tuna", level: 65, health: 1700 },
-    { name: "Rare Blue Marlin", level: 70, health: 2200 },
-    { name: "Rare Blue Marlin", level: 80, health: 2800 },
-    { name: "Rare Great White Shark", level: 90, health: 3600 },
-    { name: "Rare Great White Shark", level: 100, health: 9000 }
+    { name: "Rare Sea Bass", level: 10, health: 120, isRare: true },
+    { name: "Rare Haddock", level: 12, health: 170, isRare: true },
+    { name: "Rare Pollock", level: 15, health: 190, isRare: true },
+    { name: "Rare Red Grouper", level: 17, health: 250, isRare: true },
+    { name: "Rare King Snapper", level: 20, health: 280, isRare: true },
+    { name: "Rare Pacific Cod", level: 25, health: 420, isRare: true },
+    { name: "Rare Barracuda", level: 30, health: 620, isRare: true },
+    { name: "Rare Atlantic Cod", level: 32, health: 680, isRare: true },
+    { name: "Rare Kingfish", level: 35, health: 780, isRare: true },
+    { name: "Rare Sailfish", level: 38, health: 900, isRare: true },
+    { name: "Rare Swordfish", level: 40, health: 980, isRare: true },
+    { name: "Rare Swordfish", level: 45, health: 1040, isRare: true },
+    { name: "Rare Halibut", level: 50, health: 1100, isRare: true },
+    { name: "Rare Tuna", level: 55, health: 1300, isRare: true },
+    { name: "Rare Tuna", level: 65, health: 1700, isRare: true },
+    { name: "Rare Blue Marlin", level: 70, health: 2200, isRare: true },
+    { name: "Rare Blue Marlin", level: 80, health: 2800, isRare: true },
+    { name: "Rare Great White Shark", level: 90, health: 3600, isRare: true },
+    { name: "Rare Great White Shark", level: 100, health: 9000, isRare: true }
 ];
 
 const locations = [
@@ -601,7 +597,7 @@ function addBestFish(newFishRecord) {
     bestFishCaught.push(newFishRecord);
 
     // Sort the array by level in descending order (highest level first)
-    bestFishCaught.sort((a, b) => b.level - a.level);
+    bestFishCaught.sort((a, b) => b.xp - a.xp);
 
     // If the array has more than 10 entries, remove the last ones
     if (bestFishCaught.length > 10) {
@@ -869,9 +865,9 @@ function calculateXpGain(caughtFishLevel, playerLevel, isRare) {
     let xpGain = caughtFishLevel * baseXpPerLevel;
     const levelDifference = caughtFishLevel - playerLevel;
 
-    const rarityMultiplier = isRare ? 1.2 : 1; // Bonus for rare fish
+    const rarityMultiplier = isRare ? 2 : 1; // Bonus for rare fish
     xpGain *= rarityMultiplier;
-
+    console.log(`Caught Fish Level: ${caughtFishLevel}, Player Level: ${playerLevel}, Is Rare: ${isRare}`);
     if (levelDifference < -5) {
         xpGain *= 0.2;
     } else if (levelDifference < -2) {
@@ -1316,7 +1312,7 @@ function catchFish() {
     gold += goldEarned;
 
     const oldPlayerLevel = getPlayerLevel(); // Get player level BEFORE adding XP
-    const xpEarned = calculateXpGain(caughtFish.level, oldPlayerLevel);
+    const xpEarned = calculateXpGain(caughtFish.level, oldPlayerLevel, caughtFish.isRare);
     xp += xpEarned;
 
     const newPlayerLevel = getPlayerLevel(); // Get player level AFTER adding XP

@@ -21,19 +21,18 @@ Features:
 - rare fish
 - cast timer
 - weather cycle with intermittent rain - rain lowers cast timer
+- Animation
 
 To do: 
-- More attributes for rods?
-- More attributes for fish?
 - Secret location?
 - multi fish battles?
 - special attacks for fish?
 - add elite and legendary fishing line - random drop from fish
 - boss battles? - Chance for elite fish to eat regular fish < chance for legendary fish to eat elite fish
-- "totem" item that gives a benefit (more rare spawns, no fish escape, save bait, bonus damage,)
+- battle items - dynamite, heal, no fish heal, no cooldown, no fish escape 
 - Story?
 - Day/Night cycles
 - heavy rain - hide fish stats?
-- Fish dive when reel or tug used too much
-- change confirm prompts to locations in game
+- Fish dive when reel or tug used too much?
 - Make rare fish appear above regular in caught fish list
+- Increase rare fish XP
